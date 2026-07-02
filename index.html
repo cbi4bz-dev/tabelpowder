@@ -2,65 +2,79 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Табель цеха порошковой покраски</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f4f8; padding: 16px; }
-        .container { max-width: 1440px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 20px 24px 24px; }
-        h1 { font-size: 26px; color: #1a2332; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            background: #f0f4f8; 
+            padding: 12px; 
+            padding-bottom: 80px;
+        }
+        .container { 
+            max-width: 1440px; 
+            margin: 0 auto; 
+            background: white; 
+            border-radius: 16px; 
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08); 
+            padding: 16px; 
+        }
+        h1 { font-size: 22px; color: #1a2332; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
+        /* ===== ДАШБОРД ===== */
         .dashboard {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 12px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
             background: #f7faff;
             border-radius: 12px;
-            padding: 16px 20px;
+            padding: 12px;
             border: 1px solid #e8edf4;
         }
         .dash-item { text-align: center; }
-        .dash-item .label { font-size: 12px; color: #7a8aa0; text-transform: uppercase; letter-spacing: 0.5px; }
-        .dash-item .value { font-size: 20px; font-weight: 700; color: #1a2332; }
+        .dash-item .label { font-size: 10px; color: #7a8aa0; text-transform: uppercase; letter-spacing: 0.5px; }
+        .dash-item .value { font-size: 18px; font-weight: 700; color: #1a2332; }
         .dash-item .value.green { color: #1e7b4c; }
         .dash-item .value.orange { color: #d97706; }
         .dash-item .value.red { color: #b13e4b; }
         .dash-item .value.blue { color: #1a3b6e; }
 
+        /* ===== ХЕДЕР ===== */
         .header {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 16px;
-            padding-bottom: 14px;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
             border-bottom: 2px solid #e8edf4;
         }
-        .header-left {
+        .header-top {
             display: flex;
-            align-items: center;
-            gap: 14px;
             flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
         }
-        .header-left input[type="month"] {
+        .header-top input[type="month"] {
             padding: 8px 12px;
             border: 1px solid #d0d7e3;
             border-radius: 8px;
             font-size: 14px;
             background: white;
+            flex: 1;
+            min-width: 140px;
         }
         .graphic-selector {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             background: #eef3fa;
-            padding: 4px 12px 4px 16px;
+            padding: 4px 10px 4px 14px;
             border-radius: 20px;
         }
         .graphic-selector select {
-            padding: 6px 8px;
+            padding: 4px 6px;
             border: none;
             background: transparent;
             font-weight: 500;
@@ -68,6 +82,12 @@
             color: #1a2332;
             outline: none;
             cursor: pointer;
+        }
+        .header-bottom {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
         }
         .cloud-status {
             font-size: 11px;
@@ -88,41 +108,35 @@
             border: 1px solid #fcd34d;
         }
 
+        /* ===== МОБИЛЬНЫЙ ТУЛБАР ===== */
         .toolbar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px 12px;
-            margin-bottom: 16px;
-            padding: 12px 16px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-bottom: 12px;
+            padding: 8px;
             background: #fafcff;
             border-radius: 12px;
             border: 1px solid #e8edf4;
         }
-        .btn-group {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-wrap: wrap;
-            padding: 0 8px;
-            border-right: 1px solid #e8edf4;
-        }
-        .btn-group:last-child { border-right: none; }
-        .btn-group-label { font-size: 10px; font-weight: 600; color: #7a8aa0; text-transform: uppercase; letter-spacing: 0.3px; margin-right: 4px; }
         .btn {
-            padding: 7px 16px;
+            padding: 10px 6px;
             border: none;
             border-radius: 8px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
             background: #e8edf4;
             color: #1a2332;
-            white-space: nowrap;
-            display: inline-flex;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 5px;
+            gap: 2px;
         }
+        .btn .icon { font-size: 18px; }
+        .btn .label { font-size: 10px; }
         .btn:hover { opacity: 0.85; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .btn:active { transform: translateY(0); }
         .btn-primary { background: #1a3b6e; color: white; }
@@ -132,46 +146,118 @@
         .btn-print { background: #6c5b7b; color: white; }
         .btn-excel { background: #1d6f42; color: white; }
         .btn-warning { background: #d97706; color: white; }
-        .btn-outline:hover { background: #f0f5fe; }
+        .btn-purple { background: #7c3aed; color: white; }
+        .btn-cloud { background: #0891b2; color: white; }
+        .btn-history { background: #4f46e5; color: white; }
 
+        /* ===== ТАБЛИЦА (МОБИЛЬНАЯ) ===== */
         .table-wrap { overflow-x: auto; margin-top: 8px; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 900px; }
-        th { background: #f7f9fc; color: #1a2332; font-weight: 600; padding: 10px 4px; border-bottom: 2px solid #dce3ed; text-align: center; position: sticky; top: 0; z-index: 10; font-size: 13px; }
-        td { padding: 6px 3px; border-bottom: 1px solid #e8edf4; text-align: center; vertical-align: middle; }
-        .emp-name { min-width: 150px; text-align: left; padding-left: 10px; font-weight: 500; font-size: 14px; }
-        .emp-name input { border: none; background: transparent; font-weight: 500; font-size: 14px; width: 100%; padding: 4px 0; border-bottom: 1px dashed #d0d7e3; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 700px; }
+        th { background: #f7f9fc; color: #1a2332; font-weight: 600; padding: 8px 3px; border-bottom: 2px solid #dce3ed; text-align: center; position: sticky; top: 0; z-index: 10; font-size: 12px; }
+        td { padding: 4px 2px; border-bottom: 1px solid #e8edf4; text-align: center; vertical-align: middle; }
+        .emp-name { min-width: 120px; text-align: left; padding-left: 6px; font-weight: 500; font-size: 13px; }
+        .emp-name input { border: none; background: transparent; font-weight: 500; font-size: 13px; width: 100%; padding: 4px 0; border-bottom: 1px dashed #d0d7e3; }
         .emp-name input:focus { outline: none; border-bottom: 2px solid #1a3b6e; }
-        .salary-input { width: 80px; padding: 6px 4px; border: 1px solid #d0d7e3; border-radius: 6px; text-align: center; font-size: 14px; }
+        .salary-input { width: 70px; padding: 4px 4px; border: 1px solid #d0d7e3; border-radius: 6px; text-align: center; font-size: 13px; }
         .salary-input:focus { outline: 2px solid #1a3b6e; border-color: transparent; }
-        .day-input { width: 48px; padding: 8px 0; text-align: center; border: 1px solid #dce3ed; border-radius: 6px; font-size: 14px; font-weight: 500; background: white; }
-        .day-input:focus { outline: 2px solid #1a3b6e; border-color: transparent; background: #f7faff; }
-        .day-input.work-day { background: #e8f5e9; border-color: #a5d6a7; }
-        .day-input.day-off { background: #f5f5f5; color: #999; border-color: #e0e0e0; }
-        .total-cell { font-weight: 600; background: #f7f9fc; color: #1a2332; min-width: 50px; font-size: 14px; }
-        .salary-cell { font-weight: 600; color: #1e7b4c; background: #f0f7f0; min-width: 90px; font-size: 14px; }
+
+        .day-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 2px 0;
+            min-width: 60px;
+        }
+        .day-cell .day-input {
+            width: 40px;
+            padding: 4px 0;
+            text-align: center;
+            border: 1px solid #dce3ed;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            background: white;
+        }
+        .day-cell .day-input:focus { outline: 2px solid #1a3b6e; border-color: transparent; background: #f7faff; }
+        .day-cell .day-input.work-day { background: #e8f5e9; border-color: #a5d6a7; }
+        .day-cell .day-input.day-off { background: #f5f5f5; color: #999; border-color: #e0e0e0; }
+        .day-cell .day-input.sick { background: #fef3c7; border-color: #fcd34d; }
+        .day-cell .day-input.vacation { background: #dbeafe; border-color: #93c5fd; }
+
+        .day-cell .day-type {
+            display: flex;
+            gap: 2px;
+            font-size: 9px;
+        }
+        .day-cell .day-type select {
+            font-size: 8px;
+            padding: 1px 2px;
+            border: 1px solid #dce3ed;
+            border-radius: 3px;
+            background: white;
+            width: 50px;
+        }
+
+        .total-cell { font-weight: 600; background: #f7f9fc; color: #1a2332; min-width: 40px; font-size: 13px; }
+        .salary-cell { font-weight: 600; color: #1e7b4c; background: #f0f7f0; min-width: 80px; font-size: 13px; }
         .stats-row { background: #f7f9fc; border-top: 2px solid #dce3ed; font-weight: 600; }
-        .stats-row td { padding: 10px 3px; font-size: 14px; }
-        .stats-label { text-align: right; padding-right: 14px; color: #1a3b6e; font-size: 14px; }
-        .remove-btn { background: none; border: none; color: #b0b8c8; cursor: pointer; font-size: 16px; padding: 0 4px; }
+        .stats-row td { padding: 8px 2px; font-size: 13px; }
+        .stats-label { text-align: right; padding-right: 10px; color: #1a3b6e; font-size: 13px; }
+        .remove-btn { background: none; border: none; color: #b0b8c8; cursor: pointer; font-size: 14px; padding: 0 4px; }
         .remove-btn:hover { color: #b13e4b; }
 
+        /* ===== ИНФО-БАР ===== */
         .info-bar {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px 24px;
-            margin-top: 16px;
-            padding: 14px 20px;
+            gap: 8px 16px;
+            margin-top: 12px;
+            padding: 10px 14px;
             background: #f7f9fc;
             border-radius: 12px;
-            font-size: 14px;
+            font-size: 12px;
             color: #1a2332;
             align-items: center;
         }
         .info-bar strong { color: #1a3b6e; }
-        .info-bar .norm-calc { color: #666; font-size: 12px; }
-        .info-bar .highlight { background: #e8f0fe; padding: 4px 14px; border-radius: 12px; }
+        .info-bar .norm-calc { color: #666; font-size: 11px; }
 
-        /* ===== ПЕЧАТНАЯ ФОРМА ===== */
+        /* ===== МОДАЛЬНЫЕ ОКНА ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; color: #1a2332; }
+        .modal-close { float: right; background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
+        .modal-close:hover { color: #333; }
+
+        .history-item {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e8edf4;
+            font-size: 13px;
+        }
+        .history-item .time { color: #666; font-size: 11px; }
+        .history-item .action { font-weight: 600; color: #1a3b6e; }
+        .history-item .details { color: #555; font-size: 12px; }
+
+        /* ===== ПЕЧАТЬ ===== */
         .print-container {
             display: none;
             padding: 40px;
@@ -218,52 +304,14 @@
             padding-left: 12px;
             font-size: 14px;
         }
-        .print-container .print-day {
-            font-size: 13px;
-            font-weight: 700;
-        }
-        .print-container .print-hour-cell {
-            font-size: 14px;
-            line-height: 1.6;
-            min-height: 48px;
-            font-weight: 500;
-        }
-        .print-container .print-total {
-            font-weight: 700;
-            font-size: 14px;
-        }
-        .print-container .print-stats {
-            font-weight: 700;
-            background: #f5f5f5;
-        }
-        .print-container .print-stats td {
-            font-size: 13px;
-            padding: 12px 3px;
-            height: 48px;
-            min-height: 48px;
-        }
-        .print-container .print-footer {
-            margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 16px;
-        }
-        .print-container .print-note {
-            margin-top: 8px;
-            font-size: 12px;
-            color: #444;
-            text-align: center;
-            border-top: 1px dashed #999;
-            padding-top: 8px;
-        }
-        .print-container .print-time-row {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            line-height: 1.4;
-        }
+        .print-container .print-day { font-size: 13px; font-weight: 700; }
+        .print-container .print-hour-cell { font-size: 14px; line-height: 1.6; min-height: 48px; font-weight: 500; }
+        .print-container .print-total { font-weight: 700; font-size: 14px; }
+        .print-container .print-stats { font-weight: 700; background: #f5f5f5; }
+        .print-container .print-stats td { font-size: 13px; padding: 12px 3px; height: 48px; min-height: 48px; }
+        .print-container .print-footer { margin-top: 20px; display: flex; justify-content: space-between; font-size: 16px; }
+        .print-container .print-note { margin-top: 8px; font-size: 12px; color: #444; text-align: center; border-top: 1px dashed #999; padding-top: 8px; }
+        .print-container .print-time-row { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; line-height: 1.4; }
 
         @media print {
             @page { size: landscape; margin: 12mm; }
@@ -278,11 +326,7 @@
                 padding: 15px 20px;
             }
             .print-container table { font-size: 11px; }
-            .print-container th, .print-container td { 
-                padding: 8px 2px; 
-                height: 36px;
-                min-height: 36px;
-            }
+            .print-container th, .print-container td { padding: 8px 2px; height: 36px; min-height: 36px; }
             .print-container .print-hour-cell { font-size: 11px; min-height: 36px; }
             .print-container .print-emp-name { font-size: 11px; }
             .print-container .print-title { font-size: 20px; }
@@ -291,43 +335,86 @@
             .print-container .print-footer { font-size: 13px; }
         }
 
+        @media (max-width: 600px) {
+            .container { padding: 10px; border-radius: 12px; }
+            .dashboard { grid-template-columns: repeat(3, 1fr); padding: 8px; gap: 4px; }
+            .dash-item .value { font-size: 16px; }
+            .dash-item .label { font-size: 9px; }
+            .table-wrap { margin: 0 -10px; border-radius: 0; }
+            table { font-size: 11px; min-width: 600px; }
+            .day-cell .day-input { width: 32px; font-size: 10px; }
+            .day-cell .day-type select { font-size: 7px; width: 40px; }
+            .emp-name { font-size: 11px; min-width: 80px; }
+            .salary-input { width: 55px; font-size: 11px; }
+            .total-cell { font-size: 11px; }
+            .salary-cell { font-size: 11px; min-width: 60px; }
+            .toolbar { grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 6px; }
+            .btn { padding: 8px 4px; font-size: 10px; }
+            .btn .icon { font-size: 16px; }
+            .info-bar { font-size: 10px; padding: 8px 10px; }
+            .modal { padding: 16px; margin: 10px; }
+        }
+
         .toast {
             position: fixed;
             bottom: 20px;
-            right: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             background: #1a2332;
             color: white;
-            padding: 12px 24px;
+            padding: 10px 20px;
             border-radius: 12px;
-            font-size: 14px;
+            font-size: 13px;
             z-index: 999;
             box-shadow: 0 4px 20px rgba(0,0,0,0.2);
             animation: fadeIn 0.3s ease;
+            max-width: 90%;
+            text-align: center;
         }
         .toast.success { background: #1e7b4c; }
         .toast.error { background: #b13e4b; }
         .toast.warning { background: #d97706; }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
     </style>
 </head>
 <body>
-<div class="container" id="app">
-    <h1>🧑‍🏭 Табель цеха порошковой покраски</h1>
+    <div class="container" id="app">
+    <h1>🧑‍🏭 Табель цеха</h1>
 
+    <!-- ДАШБОРД -->
     <div class="dashboard">
-        <div class="dash-item"><div class="label">👥 Сотрудников</div><div class="value blue">{{ employees.length }}</div></div>
-        <div class="dash-item"><div class="label">⏱️ Всего часов</div><div class="value green">{{ totalMonthHours }}</div></div>
-        <div class="dash-item"><div class="label">💰 Общая зарплата</div><div class="value green">{{ formatSalary(totalMonthSalary) }} ₽</div></div>
-        <div class="dash-item"><div class="label">📅 Норма {{ selectedGraphic }}</div><div class="value blue">{{ normHours }}ч</div></div>
-        <div class="dash-item"><div class="label">📊 Переработка</div><div class="value" :class="overtime > 0 ? 'orange' : 'green'">{{ overtime > 0 ? '+' + overtime : overtime }}</div></div>
-        <div class="dash-item"><div class="label">📉 Недоработка</div><div class="value" :class="shortfall > 0 ? 'red' : 'green'">{{ shortfall > 0 ? '-' + shortfall : shortfall }}</div></div>
+        <div class="dash-item">
+            <div class="label">👥 Сотрудников</div>
+            <div class="value blue">{{ employees.length }}</div>
+        </div>
+        <div class="dash-item">
+            <div class="label">⏱️ Всего часов</div>
+            <div class="value green">{{ totalMonthHours }}</div>
+        </div>
+        <div class="dash-item">
+            <div class="label">💰 Зарплата</div>
+            <div class="value green">{{ formatSalary(totalMonthSalary) }} ₽</div>
+        </div>
+        <div class="dash-item">
+            <div class="label">📅 Норма</div>
+            <div class="value blue">{{ normHours }}ч</div>
+        </div>
+        <div class="dash-item">
+            <div class="label">📊 Переработка</div>
+            <div class="value" :class="overtime > 0 ? 'orange' : 'green'">{{ overtime > 0 ? '+' + overtime : overtime }}</div>
+        </div>
+        <div class="dash-item">
+            <div class="label">📉 Недоработка</div>
+            <div class="value" :class="shortfall > 0 ? 'red' : 'green'">{{ shortfall > 0 ? '-' + shortfall : shortfall }}</div>
+        </div>
     </div>
 
+    <!-- ХЕДЕР -->
     <div class="header">
-        <div class="header-left">
+        <div class="header-top">
             <input type="month" v-model="currentMonth" @change="onMonthChange" />
             <div class="graphic-selector">
                 <span>График:</span>
@@ -336,42 +423,59 @@
                     <option value="2/2">2/2</option>
                 </select>
             </div>
-            <span style="background:#eef3fa;padding:4px 14px;border-radius:20px;font-size:13px;">Норма: {{ normHours }}ч</span>
+        </div>
+        <div class="header-bottom">
+            <span style="background:#eef3fa;padding:4px 12px;border-radius:20px;font-size:12px;">Норма: {{ normHours }}ч</span>
             <span class="cloud-status" :class="syncStatusClass">{{ syncStatusText }}</span>
+            <button class="btn btn-history" style="padding:4px 12px;font-size:11px;" @click="showHistory">📜 История</button>
         </div>
     </div>
 
+    <!-- ТУЛБАР (МОБИЛЬНЫЙ) -->
     <div class="toolbar">
-        <div class="btn-group">
-            <span class="btn-group-label">📋 Данные</span>
-            <button class="btn btn-success" @click="saveToCloud">☁️ Сохранить</button>
-            <button class="btn btn-outline" @click="loadFromCloud">☁️ Загрузить</button>
-            <button class="btn btn-danger" @click="deleteMonth">🗑️ Удалить</button>
-        </div>
-        <div class="btn-group">
-            <span class="btn-group-label">👥 Сотрудники</span>
-            <button class="btn btn-primary" @click="addEmployee">➕ Добавить</button>
-        </div>
-        <div class="btn-group">
-            <span class="btn-group-label">📊 Табель</span>
-            <button class="btn btn-warning" @click="fillByGraphic">📋 Заполнить</button>
-            <button class="btn btn-outline" @click="resetMonth">🔄 Сбросить</button>
-        </div>
-        <div class="btn-group">
-            <span class="btn-group-label">🖨️ Отчеты</span>
-            <button class="btn btn-print" @click="printTable">🖨️ Печать</button>
-            <button class="btn btn-excel" @click="exportExcel">📊 Excel</button>
-        </div>
+        <button class="btn btn-success" @click="saveToCloud">
+            <span class="icon">☁️</span>
+            <span class="label">Сохранить</span>
+        </button>
+        <button class="btn btn-primary" @click="addEmployee">
+            <span class="icon">➕</span>
+            <span class="label">Добавить</span>
+        </button>
+        <button class="btn btn-warning" @click="fillByGraphic">
+            <span class="icon">📋</span>
+            <span class="label">Заполнить</span>
+        </button>
+        <button class="btn btn-print" @click="printTable">
+            <span class="icon">🖨️</span>
+            <span class="label">Печать</span>
+        </button>
+        <button class="btn btn-excel" @click="exportExcel">
+            <span class="icon">📊</span>
+            <span class="label">Excel</span>
+        </button>
+        <button class="btn btn-outline" @click="resetMonth">
+            <span class="icon">🔄</span>
+            <span class="label">Сброс</span>
+        </button>
+        <button class="btn btn-danger" @click="deleteMonth">
+            <span class="icon">🗑️</span>
+            <span class="label">Удалить</span>
+        </button>
+        <button class="btn btn-cloud" @click="loadFromCloud">
+            <span class="icon">📥</span>
+            <span class="label">Загрузить</span>
+        </button>
     </div>
 
+    <!-- ТАБЛИЦА -->
     <div class="table-wrap">
         <table>
             <thead>
                 <tr>
-                    <th style="min-width:120px;">Сотрудник</th>
-                    <th style="min-width:70px;">Оклад (5/2)</th>
-                    <th v-for="(day, i) in days" :key="day" style="min-width:50px;">
-                        {{ day }}<br><span style="font-weight:400;font-size:9px;color:#888;">{{ weekDays[dayOfWeek[i]] }}</span>
+                    <th style="min-width:100px;">Сотрудник</th>
+                    <th style="min-width:60px;">Оклад</th>
+                    <th v-for="(day, i) in days" :key="day" style="min-width:65px;">
+                        {{ day }}<br><span style="font-weight:400;font-size:8px;color:#888;">{{ weekDays[dayOfWeek[i]] }}</span>
                     </th>
                     <th>Итого</th>
                     <th>Зарплата</th>
@@ -383,13 +487,23 @@
                         <input v-model="emp.name" placeholder="Имя" />
                         <button class="remove-btn" @click="removeEmployee(idx)">✕</button>
                     </td>
-                    <td><input type="number" class="salary-input" v-model.number="emp.salaryBase" step="1000" /></td>
+                    <td><input type="number" class="salary-input" v-model.number="emp.salaryBase" step="1000" @change="autoSave" /></td>
                     <td v-for="(day, dayIdx) in days" :key="dayIdx">
-                        <input type="number" class="day-input" 
-                               :class="getDayClass(dayIdx)"
-                               v-model.number="emp.hours[dayIdx]" 
-                               min="0" max="12" step="0.5"
-                               placeholder="0" @change="autoSave" />
+                        <div class="day-cell">
+                            <input type="number" class="day-input" 
+                                   :class="getDayClass(dayIdx, emp)"
+                                   v-model.number="emp.hours[dayIdx]" 
+                                   min="0" max="12" step="0.5"
+                                   placeholder="0" @change="autoSave" />
+                            <div class="day-type">
+                                <select v-model="emp.dayType[dayIdx]" @change="autoSave">
+                                    <option value="work">Работа</option>
+                                    <option value="sick">Больничный</option>
+                                    <option value="vacation">Отпуск</option>
+                                    <option value="dayoff">Выходной</option>
+                                </select>
+                            </div>
+                        </div>
                     </td>
                     <td class="total-cell">{{ totalHours(emp.hours) }}</td>
                     <td class="salary-cell">{{ formatSalary(calcSalary(emp)) }}</td>
@@ -404,18 +518,34 @@
         </table>
     </div>
 
+    <!-- ИНФО-БАР -->
     <div class="info-bar">
         <span><strong>График:</strong> {{ selectedGraphic }}</span>
         <span><strong>Норма 5/2:</strong> {{ norm52 }}ч</span>
         <span><strong>Норма {{ selectedGraphic }}:</strong> {{ normHours }}ч</span>
         <span class="norm-calc">{{ normCalcText }}</span>
         <span class="highlight"><strong>Ставка:</strong> оклад / {{ normHours }}ч</span>
-        <span><strong>Переработка:</strong> {{ overtime > 0 ? '+' + overtime : overtime }}ч</span>
-        <span><strong>Недоработка:</strong> {{ shortfall > 0 ? '-' + shortfall : shortfall }}ч</span>
-        <span style="color:#888;font-size:12px;margin-left:auto;">✏️ Часы вводятся вручную (0-12, шаг 0.5)</span>
+        <span style="color:#888;font-size:11px;margin-left:auto;">✏️ Часы 0-12, шаг 0.5</span>
     </div>
 
-    <!-- ===== ПЕЧАТНАЯ ФОРМА (БЛАНК ДЛЯ СОТРУДНИКОВ) ===== -->
+    <!-- ИСТОРИЯ (МОДАЛЬНОЕ ОКНО) -->
+    <div class="modal-overlay" :class="{active: historyModalVisible}" @click.self="closeHistory">
+        <div class="modal">
+            <button class="modal-close" @click="closeHistory">✕</button>
+            <div class="modal-title">📜 История изменений</div>
+            <div v-if="historyLoading">Загрузка...</div>
+            <div v-else-if="historyList.length === 0">История пуста</div>
+            <div v-else>
+                <div v-for="item in historyList" :key="item.timestamp" class="history-item">
+                    <div><span class="action">{{ item.action === 'save' ? '💾 Сохранение' : '✏️ Редактирование' }}</span></div>
+                    <div class="details">{{ item.data.month }} · {{ item.data.graphic }} · {{ item.data.employees }} сотрудников</div>
+                    <div class="time">{{ formatDate(item.timestamp) }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ПЕЧАТНАЯ ФОРМА -->
     <div class="print-container" id="printContainer">
         <div class="print-title">📋 ТАБЕЛЬ УЧЕТА РАБОЧЕГО ВРЕМЕНИ</div>
         <div class="print-subtitle">
@@ -461,25 +591,25 @@
         </div>
     </div>
 
+    <!-- TOAST -->
     <div v-if="toast.show" class="toast" :class="toast.type" v-html="toast.message"></div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
 <script>
     (function() {
         // ============================================================
-        // ССЫЛКА НА ФУНКЦИЮ
+        // ССЫЛКА НА ФУНКЦИЮ (твоя)
         // ============================================================
         const API_URL = 'https://functions.yandexcloud.net/d4e18nbmmgli5kcghqrs';
         // ============================================================
 
-        const STORAGE_KEY = 'powder_coating_timesheet_v4';
+        const STORAGE_KEY = 'powder_coating_timesheet_v5';
 
         const DEFAULT_EMPLOYEES = [
-            { name: 'Алексей Смирнов', salaryBase: 90000, hours: [] },
-            { name: 'Мария Петрова', salaryBase: 85000, hours: [] },
-            { name: 'Иван Козлов', salaryBase: 92000, hours: [] },
-            { name: 'Елена Васильева', salaryBase: 88000, hours: [] }
+            { name: 'Алексей Смирнов', salaryBase: 90000, hours: [], dayType: [] },
+            { name: 'Мария Петрова', salaryBase: 85000, hours: [], dayType: [] },
+            { name: 'Иван Козлов', salaryBase: 92000, hours: [], dayType: [] },
+            { name: 'Елена Васильева', salaryBase: 88000, hours: [], dayType: [] }
         ];
 
         const WEEKDAYS = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
@@ -514,13 +644,12 @@
             return `${year}-${String(monthNum).padStart(2, '0')}`;
         }
 
+        // ===== API =====
         async function callApi(method, data) {
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ method, data })
                 });
                 if (!response.ok) {
@@ -531,6 +660,25 @@
                 console.error('API ошибка:', e);
                 throw e;
             }
+        }
+
+        // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
+        function getDayTypeClass(dayType) {
+            const map = {
+                'work': 'work-day',
+                'sick': 'sick',
+                'vacation': 'vacation',
+                'dayoff': 'day-off'
+            };
+            return map[dayType] || 'work-day';
+        }
+
+        function formatDate(timestamp) {
+            const d = new Date(timestamp);
+            return d.toLocaleString('ru-RU', {
+                day: '2-digit', month: '2-digit', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
         }
 
         new Vue({
@@ -547,7 +695,10 @@
                 toast: { show: false, message: '', type: 'success' },
                 toastTimeout: null,
                 syncStatus: 'idle',
-                autoSaveTimeout: null
+                autoSaveTimeout: null,
+                historyModalVisible: false,
+                historyList: [],
+                historyLoading: false
             },
             computed: {
                 currentMonthName() {
@@ -569,18 +720,24 @@
                 },
                 totalMonthHours() {
                     let total = 0;
-                    this.employees.forEach(emp => { total += this.totalHours(emp.hours); });
+                    this.employees.forEach(emp => {
+                        total += this.totalHours(emp.hours);
+                    });
                     return total;
                 },
                 totalMonthSalary() {
                     let total = 0;
-                    this.employees.forEach(emp => { total += this.calcSalary(emp); });
+                    this.employees.forEach(emp => {
+                        total += this.calcSalary(emp);
+                    });
                     return total;
                 },
                 dayStats() {
                     const stats = Array(this.days.length).fill(0);
                     this.employees.forEach(emp => {
-                        emp.hours.forEach((h, idx) => { if (h) stats[idx] += h; });
+                        emp.hours.forEach((h, idx) => {
+                            if (h && emp.dayType && emp.dayType[idx] === 'work') stats[idx] += h;
+                        });
                     });
                     return stats;
                 },
@@ -623,17 +780,41 @@
                     return Math.round((total * base) / this.normHours);
                 },
                 formatSalary(val) { return val.toLocaleString('ru-RU'); },
-                getDayClass(dayIdx) {
+                getDayClass(dayIdx, emp) {
                     const dow = this.dayOfWeek[dayIdx];
                     const isWeekend = dow === 0 || dow === 6;
                     const dayInCycle = dayIdx % (this.selectedGraphic === '3/3' ? 6 : 4);
                     const workDays = this.selectedGraphic === '3/3' ? 3 : 2;
                     const isWorkDay = dayInCycle < workDays;
+                    
+                    if (emp && emp.dayType && emp.dayType[dayIdx]) {
+                        return getDayTypeClass(emp.dayType[dayIdx]);
+                    }
                     if (isWeekend) return 'day-off';
                     if (isWorkDay) return 'work-day';
                     return 'day-off';
                 },
+                formatDate(timestamp) {
+                    return formatDate(timestamp);
+                },
 
+                // ===== ИСТОРИЯ =====
+                async showHistory() {
+                    this.historyModalVisible = true;
+                    this.historyLoading = true;
+                    try {
+                        const history = await callApi('getHistory');
+                        this.historyList = history || [];
+                    } catch (e) {
+                        this.showToast('❌ Ошибка загрузки истории', 'error');
+                    }
+                    this.historyLoading = false;
+                },
+                closeHistory() {
+                    this.historyModalVisible = false;
+                },
+
+                // ===== АВТОСОХРАНЕНИЕ =====
                 autoSave() {
                     if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
                     this.autoSaveTimeout = setTimeout(() => {
@@ -641,6 +822,7 @@
                     }, 2000);
                 },
 
+                // ===== ОБЛАКО =====
                 async saveToCloud() {
                     try {
                         this.syncStatus = 'loading';
@@ -666,7 +848,13 @@
                         this.syncStatus = 'loading';
                         const data = await callApi('get');
                         if (data && data.employees) {
-                            this.employees = data.employees;
+                            // Инициализируем dayType для новых сотрудников
+                            this.employees = data.employees.map(emp => {
+                                if (!emp.dayType) {
+                                    emp.dayType = Array(this.days.length).fill('work');
+                                }
+                                return emp;
+                            });
                             if (data.norm) this.normHours = data.norm;
                             if (data.norm52) this.norm52 = data.norm52;
                             if (data.graphic) this.selectedGraphic = data.graphic;
@@ -683,12 +871,14 @@
                     }
                 },
 
+                // ===== СОТРУДНИКИ =====
                 addEmployee() {
                     const daysCount = this.days.length;
                     this.employees.push({
                         name: 'Новый сотрудник',
                         salaryBase: 90000,
-                        hours: Array(daysCount).fill(0)
+                        hours: Array(daysCount).fill(0),
+                        dayType: Array(daysCount).fill('work')
                     });
                     this.autoSave();
                 },
@@ -702,10 +892,13 @@
                         this.autoSave();
                     }
                 },
+
+                // ===== ТАБЕЛЬ =====
                 resetMonth() {
                     if (confirm('Сбросить все часы на 0?')) {
                         this.employees.forEach(emp => {
                             emp.hours = Array(this.days.length).fill(0);
+                            emp.dayType = Array(this.days.length).fill('work');
                         });
                         this.autoSave();
                         this.showToast('🔄 Часы сброшены', 'success');
@@ -722,8 +915,10 @@
                                 const isWeekend = dow === 0 || dow === 6;
                                 if (isWork && !isWeekend) {
                                     emp.hours[i] = 11;
+                                    emp.dayType[i] = 'work';
                                 } else {
                                     emp.hours[i] = 0;
+                                    emp.dayType[i] = 'dayoff';
                                 }
                             }
                         });
@@ -737,6 +932,7 @@
                         this.employees = JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES));
                         this.employees.forEach(emp => {
                             emp.hours = Array(daysCount).fill(0);
+                            emp.dayType = Array(daysCount).fill('work');
                         });
                         this.norm52 = calculateNorm52(daysCount);
                         this.normHours = calculateNormShift(daysCount, this.selectedGraphic);
@@ -744,10 +940,13 @@
                         this.showToast('🗑️ Данные удалены!', 'success');
                     }
                 },
+
+                // ===== ПЕЧАТЬ =====
                 printTable() { 
-                    // Принудительно показываем печатную форму
                     window.print(); 
                 },
+
+                // ===== EXCEL =====
                 exportExcel() {
                     try {
                         let html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
@@ -781,11 +980,15 @@
                         this.showToast('❌ Ошибка экспорта: ' + e.message, 'error');
                     }
                 },
+
+                // ===== TOAST =====
                 showToast(message, type = 'success') {
                     if (this.toastTimeout) clearTimeout(this.toastTimeout);
                     this.toast = { show: true, message, type };
                     this.toastTimeout = setTimeout(() => { this.toast.show = false; }, 3000);
                 },
+
+                // ===== ЗАГРУЗКА ДАННЫХ =====
                 loadMonthData(month, graphic) {
                     try {
                         const monthKey = getMonthKey(month, graphic);
@@ -793,7 +996,12 @@
                         if (raw) {
                             const data = JSON.parse(raw);
                             if (data.employees && Array.isArray(data.employees) && data.employees.length > 0) {
-                                this.employees = data.employees;
+                                this.employees = data.employees.map(emp => {
+                                    if (!emp.dayType) {
+                                        emp.dayType = Array(this.days.length).fill('work');
+                                    }
+                                    return emp;
+                                });
                                 if (data.norm) this.normHours = data.norm;
                                 if (data.norm52) this.norm52 = data.norm52;
                                 if (data.graphic) this.selectedGraphic = data.graphic;
@@ -810,7 +1018,8 @@
                                 this.employees = prevData.employees.map(emp => ({
                                     name: emp.name,
                                     salaryBase: emp.salaryBase || 90000,
-                                    hours: Array(daysCount).fill(0)
+                                    hours: Array(daysCount).fill(0),
+                                    dayType: Array(daysCount).fill('work')
                                 }));
                                 this.norm52 = calculateNorm52(daysCount);
                                 this.normHours = calculateNormShift(daysCount, this.selectedGraphic);
@@ -821,6 +1030,7 @@
                         this.employees = JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES));
                         this.employees.forEach(emp => {
                             emp.hours = Array(daysCount).fill(0);
+                            emp.dayType = Array(daysCount).fill('work');
                         });
                         this.norm52 = calculateNorm52(daysCount);
                         this.normHours = calculateNormShift(daysCount, this.selectedGraphic);
@@ -830,6 +1040,7 @@
                         return false;
                     }
                 },
+
                 async updateDays(monthValue) {
                     if (!monthValue) return;
                     const parts = monthValue.split('-');
@@ -843,6 +1054,7 @@
                     this.loadMonthData(monthValue, this.selectedGraphic);
                     await this.loadFromCloud();
                 },
+
                 onMonthChange() {
                     this.updateDays(this.currentMonth);
                 },
@@ -853,6 +1065,7 @@
                     this.loadFromCloud();
                 }
             },
+
             async mounted() {
                 const now = new Date();
                 const year = now.getFullYear();
