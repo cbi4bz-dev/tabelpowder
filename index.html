@@ -5,493 +5,595 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Табель цеха порошковой покраски</title>
     <style>
-       * { box-sizing: border-box; margin: 0; padding: 0; }
-body { 
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-    background: #f0f4f8; 
-    padding: 16px; 
-    min-height: 100vh;
-}
-.container { 
-    max-width: 1440px; 
-    margin: 0 auto; 
-    background: white; 
-    border-radius: 16px; 
-    box-shadow: 0 2px 12px rgba(0,0,0,0.08); 
-    padding: 20px 24px; 
-}
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            background: #f0f4f8; 
+            padding: 16px; 
+            min-height: 100vh;
+        }
+        .container { 
+            max-width: 1440px; 
+            margin: 0 auto; 
+            background: white; 
+            border-radius: 16px; 
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08); 
+            padding: 20px 24px; 
+        }
 
-h1 { font-size: 26px; color: #1a2332; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        h1 { font-size: 26px; color: #1a2332; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 
-/* ===== ДАШБОРД ===== */
-.dashboard {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 12px;
-    margin-bottom: 20px;
-    background: #f7faff;
-    border-radius: 12px;
-    padding: 16px 20px;
-    border: 1px solid #e8edf4;
-}
-.dash-item { text-align: center; }
-.dash-item .label { font-size: 11px; color: #7a8aa0; text-transform: uppercase; letter-spacing: 0.5px; }
-.dash-item .value { font-size: 18px; font-weight: 700; color: #1a2332; }
-.dash-item .value.green { color: #1e7b4c; }
-.dash-item .value.orange { color: #d97706; }
-.dash-item .value.red { color: #b13e4b; }
-.dash-item .value.blue { color: #1a3b6e; }
+        /* ===== ДАШБОРД ===== */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+            background: #f7faff;
+            border-radius: 12px;
+            padding: 16px 20px;
+            border: 1px solid #e8edf4;
+        }
+        .dash-item { text-align: center; }
+        .dash-item .label { font-size: 11px; color: #7a8aa0; text-transform: uppercase; letter-spacing: 0.5px; }
+        .dash-item .value { font-size: 18px; font-weight: 700; color: #1a2332; }
+        .dash-item .value.green { color: #1e7b4c; }
+        .dash-item .value.orange { color: #d97706; }
+        .dash-item .value.red { color: #b13e4b; }
+        .dash-item .value.blue { color: #1a3b6e; }
 
-/* ===== ХЕДЕР ===== */
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 16px;
-    padding-bottom: 14px;
-    border-bottom: 2px solid #e8edf4;
-}
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    flex-wrap: wrap;
-}
-.header-left input[type="month"] {
-    padding: 8px 12px;
-    border: 1px solid #d0d7e3;
-    border-radius: 8px;
-    font-size: 14px;
-    background: white;
-}
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-.graphic-selector {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: #eef3fa;
-    padding: 4px 12px 4px 16px;
-    border-radius: 20px;
-}
-.graphic-selector select {
-    padding: 6px 8px;
-    border: none;
-    background: transparent;
-    font-weight: 500;
-    font-size: 13px;
-    color: #1a2332;
-    outline: none;
-    cursor: pointer;
-}
-.cloud-status {
-    font-size: 12px;
-    padding: 4px 14px;
-    border-radius: 12px;
-    background: #d1fae5;
-    color: #065f46;
-    border: 1px solid #6ee7b7;
-    white-space: nowrap;
-}
-.cloud-status.error {
-    background: #fee2e2;
-    color: #991b1b;
-    border: 1px solid #fca5a5;
-}
-.cloud-status.loading {
-    background: #fef3c7;
-    color: #92400e;
-    border: 1px solid #fcd34d;
-}
+        /* ===== ХЕДЕР ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 14px;
+            border-bottom: 2px solid #e8edf4;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .header-left input[type="month"] {
+            padding: 8px 12px;
+            border: 1px solid #d0d7e3;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .graphic-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #eef3fa;
+            padding: 4px 12px 4px 16px;
+            border-radius: 20px;
+        }
+        .graphic-selector select {
+            padding: 6px 8px;
+            border: none;
+            background: transparent;
+            font-weight: 500;
+            font-size: 13px;
+            color: #1a2332;
+            outline: none;
+            cursor: pointer;
+        }
+        .cloud-status {
+            font-size: 12px;
+            padding: 4px 14px;
+            border-radius: 12px;
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+            white-space: nowrap;
+        }
+        .cloud-status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+        .cloud-status.loading {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fcd34d;
+        }
 
-/* ===== ТУЛБАР (ДЕСКТОП) ===== */
-.toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 12px;
-    margin-bottom: 16px;
-    padding: 12px 16px;
-    background: #fafcff;
-    border-radius: 12px;
-    border: 1px solid #e8edf4;
-}
-.btn-group {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-    padding: 0 8px;
-    border-right: 1px solid #e8edf4;
-}
-.btn-group:last-child { border-right: none; }
-.btn-group-label { font-size: 10px; font-weight: 600; color: #7a8aa0; text-transform: uppercase; letter-spacing: 0.3px; margin-right: 4px; }
+        /* ===== ТУЛБАР ===== */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            background: #fafcff;
+            border-radius: 12px;
+            border: 1px solid #e8edf4;
+        }
+        .btn-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            padding: 0 8px;
+            border-right: 1px solid #e8edf4;
+        }
+        .btn-group:last-child { border-right: none; }
+        .btn-group-label { font-size: 10px; font-weight: 600; color: #7a8aa0; text-transform: uppercase; letter-spacing: 0.3px; margin-right: 4px; }
 
-.btn {
-    padding: 7px 16px;
-    border: none;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    background: #e8edf4;
-    color: #1a2332;
-    white-space: nowrap;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-}
-.btn:hover { opacity: 0.85; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-.btn:active { transform: translateY(0); }
-.btn .icon { font-size: 16px; }
-.btn .label { font-size: 13px; }
-.btn-primary { background: #1a3b6e; color: white; }
-.btn-success { background: #1e7b4c; color: white; }
-.btn-danger { background: #b13e4b; color: white; }
-.btn-outline { background: transparent; border: 1px solid #d0d7e3; }
-.btn-print { background: #6c5b7b; color: white; }
-.btn-excel { background: #1d6f42; color: white; }
-.btn-warning { background: #d97706; color: white; }
-.btn-purple { background: #7c3aed; color: white; }
-.btn-cloud { background: #0891b2; color: white; }
-.btn-history { background: #4f46e5; color: white; }
-.btn-outline:hover { background: #f0f5fe; }
+        .btn {
+            padding: 7px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #e8edf4;
+            color: #1a2332;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn:hover { opacity: 0.85; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .btn:active { transform: translateY(0); }
+        .btn .icon { font-size: 16px; }
+        .btn .label { font-size: 13px; }
+        .btn-primary { background: #1a3b6e; color: white; }
+        .btn-success { background: #1e7b4c; color: white; }
+        .btn-danger { background: #b13e4b; color: white; }
+        .btn-outline { background: transparent; border: 1px solid #d0d7e3; }
+        .btn-print { background: #6c5b7b; color: white; }
+        .btn-excel { background: #1d6f42; color: white; }
+        .btn-warning { background: #d97706; color: white; }
+        .btn-purple { background: #7c3aed; color: white; }
+        .btn-cloud { background: #0891b2; color: white; }
+        .btn-history { background: #4f46e5; color: white; }
+        .btn-outline:hover { background: #f0f5fe; }
 
-/* ===== ТАБЛИЦА ===== */
-.table-wrap { overflow-x: auto; margin-top: 8px; }
-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 900px; }
-th { background: #f7f9fc; color: #1a2332; font-weight: 600; padding: 10px 4px; border-bottom: 2px solid #dce3ed; text-align: center; position: sticky; top: 0; z-index: 10; font-size: 12px; }
-td { padding: 6px 3px; border-bottom: 1px solid #e8edf4; text-align: center; vertical-align: middle; }
+        /* ===== БЫСТРЫЕ КНОПКИ ТИПОВ ДНЕЙ ===== */
+        .day-type-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border: 1px solid #e8edf4;
+            align-items: center;
+        }
+        .day-type-actions .label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #7a8aa0;
+            margin-right: 4px;
+        }
+        .day-type-actions .btn {
+            padding: 5px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+        .btn-type-work { background: #e8f5e9; color: #1e7b4c; border: 1px solid #a5d6a7; }
+        .btn-type-work:hover { background: #c8e6c9; }
+        .btn-type-sick { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+        .btn-type-sick:hover { background: #fde68a; }
+        .btn-type-vacation { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+        .btn-type-vacation:hover { background: #bfdbfe; }
+        .btn-type-dayoff { background: #f3f4f6; color: #4b5563; border: 1px solid #d1d5db; }
+        .btn-type-dayoff:hover { background: #e5e7eb; }
+        .btn-type-reset { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
+        .btn-type-reset:hover { background: #fee2e2; }
 
-.emp-name { min-width: 140px; text-align: left; padding-left: 10px; font-weight: 500; font-size: 13px; }
-.emp-name input { border: none; background: transparent; font-weight: 500; font-size: 13px; width: 100%; padding: 4px 0; border-bottom: 1px dashed #d0d7e3; }
-.emp-name input:focus { outline: none; border-bottom: 2px solid #1a3b6e; }
+        /* ===== ТАБЛИЦА ===== */
+        .table-wrap { overflow-x: auto; margin-top: 8px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 900px; }
+        th { background: #f7f9fc; color: #1a2332; font-weight: 600; padding: 10px 4px; border-bottom: 2px solid #dce3ed; text-align: center; position: sticky; top: 0; z-index: 10; font-size: 12px; }
+        td { padding: 6px 3px; border-bottom: 1px solid #e8edf4; text-align: center; vertical-align: middle; }
 
-.salary-input { width: 75px; padding: 6px 4px; border: 1px solid #d0d7e3; border-radius: 6px; text-align: center; font-size: 13px; }
-.salary-input:focus { outline: 2px solid #1a3b6e; border-color: transparent; }
+        .emp-name { min-width: 140px; text-align: left; padding-left: 10px; font-weight: 500; font-size: 13px; }
+        .emp-name input { border: none; background: transparent; font-weight: 500; font-size: 13px; width: 100%; padding: 4px 0; border-bottom: 1px dashed #d0d7e3; }
+        .emp-name input:focus { outline: none; border-bottom: 2px solid #1a3b6e; }
 
-.day-cell {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    padding: 2px 0;
-    min-width: 65px;
-}
-.day-cell .day-input {
-    width: 44px;
-    padding: 6px 0;
-    text-align: center;
-    border: 1px solid #dce3ed;
-    border-radius: 4px;
-    font-size: 13px;
-    font-weight: 500;
-    background: white;
-}
-.day-cell .day-input:focus { outline: 2px solid #1a3b6e; border-color: transparent; background: #f7faff; }
-.day-cell .day-input.work-day { background: #e8f5e9; border-color: #a5d6a7; }
-.day-cell .day-input.day-off { background: #f5f5f5; color: #999; border-color: #e0e0e0; }
-.day-cell .day-input.sick { background: #fef3c7; border-color: #fcd34d; }
-.day-cell .day-input.vacation { background: #dbeafe; border-color: #93c5fd; }
+        .salary-input { width: 75px; padding: 6px 4px; border: 1px solid #d0d7e3; border-radius: 6px; text-align: center; font-size: 13px; }
+        .salary-input:focus { outline: 2px solid #1a3b6e; border-color: transparent; }
 
-.day-cell .day-type select {
-    font-size: 9px;
-    padding: 1px 4px;
-    border: 1px solid #dce3ed;
-    border-radius: 3px;
-    background: white;
-    width: 55px;
-    cursor: pointer;
-}
+        .day-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 2px 0;
+            min-width: 65px;
+        }
+        .day-cell .day-input {
+            width: 44px;
+            padding: 6px 0;
+            text-align: center;
+            border: 1px solid #dce3ed;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+            background: white;
+            cursor: pointer;
+        }
+        .day-cell .day-input:focus { outline: 2px solid #1a3b6e; border-color: transparent; background: #f7faff; }
+        .day-cell .day-input.work-day { background: #e8f5e9; border-color: #a5d6a7; }
+        .day-cell .day-input.day-off { background: #f5f5f5; color: #999; border-color: #e0e0e0; }
+        .day-cell .day-input.sick { background: #fef3c7; border-color: #fcd34d; }
+        .day-cell .day-input.vacation { background: #dbeafe; border-color: #93c5fd; }
 
-.total-cell { font-weight: 600; background: #f7f9fc; color: #1a2332; min-width: 45px; font-size: 13px; }
-.salary-cell { font-weight: 600; color: #1e7b4c; background: #f0f7f0; min-width: 85px; font-size: 13px; }
+        .day-cell .day-type-icon {
+            font-size: 14px;
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: background 0.2s;
+            user-select: none;
+        }
+        .day-cell .day-type-icon:hover {
+            background: #e8edf4;
+        }
+        .day-cell .day-type-icon.work { color: #1e7b4c; }
+        .day-cell .day-type-icon.sick { color: #d97706; }
+        .day-cell .day-type-icon.vacation { color: #1e40af; }
+        .day-cell .day-type-icon.dayoff { color: #6b7280; }
 
-.stats-row { background: #f7f9fc; border-top: 2px solid #dce3ed; font-weight: 600; }
-.stats-row td { padding: 10px 3px; font-size: 13px; }
-.stats-label { text-align: right; padding-right: 14px; color: #1a3b6e; font-size: 13px; }
+        .total-cell { font-weight: 600; background: #f7f9fc; color: #1a2332; min-width: 45px; font-size: 13px; }
+        .salary-cell { font-weight: 600; color: #1e7b4c; background: #f0f7f0; min-width: 85px; font-size: 13px; }
 
-.remove-btn { background: none; border: none; color: #b0b8c8; cursor: pointer; font-size: 16px; padding: 0 4px; }
-.remove-btn:hover { color: #b13e4b; }
+        .stats-row { background: #f7f9fc; border-top: 2px solid #dce3ed; font-weight: 600; }
+        .stats-row td { padding: 10px 3px; font-size: 13px; }
+        .stats-label { text-align: right; padding-right: 14px; color: #1a3b6e; font-size: 13px; }
 
-/* ===== ИНФО-БАР ===== */
-.info-bar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px 24px;
-    margin-top: 16px;
-    padding: 14px 20px;
-    background: #f7f9fc;
-    border-radius: 12px;
-    font-size: 13px;
-    color: #1a2332;
-    align-items: center;
-}
-.info-bar strong { color: #1a3b6e; }
-.info-bar .norm-calc { color: #666; font-size: 12px; }
-.info-bar .highlight { background: #e8f0fe; padding: 4px 14px; border-radius: 12px; }
+        .remove-btn { background: none; border: none; color: #b0b8c8; cursor: pointer; font-size: 16px; padding: 0 4px; }
+        .remove-btn:hover { color: #b13e4b; }
 
-/* ===== МОДАЛЬНОЕ ОКНО ===== */
-.modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-}
-.modal-overlay.active { display: flex; }
-.modal {
-    background: white;
-    border-radius: 16px;
-    padding: 24px;
-    max-width: 500px;
-    width: 100%;
-    max-height: 80vh;
-    overflow-y: auto;
-}
-.modal-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; color: #1a2332; }
-.modal-close { float: right; background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
-.modal-close:hover { color: #333; }
-.history-item { padding: 10px 12px; border-bottom: 1px solid #e8edf4; font-size: 13px; }
-.history-item .time { color: #666; font-size: 11px; }
-.history-item .action { font-weight: 600; color: #1a3b6e; }
-.history-item .details { color: #555; font-size: 12px; }
+        /* ===== ИНФО-БАР ===== */
+        .info-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 24px;
+            margin-top: 16px;
+            padding: 14px 20px;
+            background: #f7f9fc;
+            border-radius: 12px;
+            font-size: 13px;
+            color: #1a2332;
+            align-items: center;
+        }
+        .info-bar strong { color: #1a3b6e; }
+        .info-bar .norm-calc { color: #666; font-size: 12px; }
+        .info-bar .highlight { background: #e8f0fe; padding: 4px 14px; border-radius: 12px; }
 
-/* ===== ПЕЧАТЬ ===== */
-.print-container {
-    display: none;
-    padding: 40px;
-    background: white;
-    font-family: 'Times New Roman', Times, serif;
-}
-.print-container table {
-    font-size: 13px;
-    border-collapse: collapse;
-    width: 100%;
-    table-layout: fixed;
-}
-.print-container th, .print-container td {
-    border: 2px solid #000;
-    padding: 12px 3px;
-    text-align: center;
-    vertical-align: middle;
-    height: 48px;
-    min-height: 48px;
-}
-.print-container th {
-    background: #f5f5f5;
-    font-weight: 700;
-    font-size: 13px;
-    height: 40px;
-    min-height: 40px;
-}
-.print-container .print-title {
-    text-align: center;
-    font-size: 26px;
-    font-weight: 700;
-    margin-bottom: 12px;
-    letter-spacing: 4px;
-}
-.print-container .print-subtitle {
-    text-align: center;
-    font-size: 18px;
-    margin-bottom: 16px;
-    font-weight: 500;
-}
-.print-container .print-emp-name {
-    font-weight: 700;
-    text-align: left;
-    padding-left: 12px;
-    font-size: 14px;
-}
-.print-container .print-day { font-size: 13px; font-weight: 700; }
-.print-container .print-hour-cell { font-size: 14px; line-height: 1.6; min-height: 48px; font-weight: 500; }
-.print-container .print-total { font-weight: 700; font-size: 14px; }
-.print-container .print-stats { font-weight: 700; background: #f5f5f5; }
-.print-container .print-stats td { font-size: 13px; padding: 12px 3px; height: 48px; min-height: 48px; }
-.print-container .print-footer { margin-top: 20px; display: flex; justify-content: space-between; font-size: 16px; }
-.print-container .print-note { margin-top: 8px; font-size: 12px; color: #444; text-align: center; border-top: 1px dashed #999; padding-top: 8px; }
-.print-container .print-time-row { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; line-height: 1.4; }
+        /* ===== МОДАЛЬНОЕ ОКНО ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; color: #1a2332; }
+        .modal-close { float: right; background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
+        .modal-close:hover { color: #333; }
+        .history-item { padding: 10px 12px; border-bottom: 1px solid #e8edf4; font-size: 13px; }
+        .history-item .time { color: #666; font-size: 11px; }
+        .history-item .action { font-weight: 600; color: #1a3b6e; }
+        .history-item .details { color: #555; font-size: 12px; }
 
-@media print {
-    @page { size: landscape; margin: 12mm; }
-    body * { visibility: hidden; }
-    .print-container, .print-container * { visibility: visible; }
-    .print-container {
-        display: block !important;
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        padding: 15px 20px;
-    }
-    .print-container table { font-size: 11px; }
-    .print-container th, .print-container td { padding: 8px 2px; height: 36px; min-height: 36px; }
-    .print-container .print-hour-cell { font-size: 11px; min-height: 36px; }
-    .print-container .print-emp-name { font-size: 11px; }
-    .print-container .print-title { font-size: 20px; }
-    .print-container .print-subtitle { font-size: 14px; }
-    .print-container .print-stats td { height: 36px; min-height: 36px; padding: 8px 2px; }
-    .print-container .print-footer { font-size: 13px; }
-}
+        /* ===== МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ ===== */
+        .edit-modal .modal {
+            max-width: 420px;
+        }
+        .edit-modal .modal-title {
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+        .edit-modal .field-group {
+            margin-bottom: 14px;
+        }
+        .edit-modal .field-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a2332;
+            margin-bottom: 4px;
+        }
+        .edit-modal .field-group input[type="number"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d0d7e3;
+            border-radius: 8px;
+            font-size: 16px;
+            text-align: center;
+        }
+        .edit-modal .field-group input[type="number"]:focus {
+            outline: 2px solid #1a3b6e;
+            border-color: transparent;
+        }
+        .edit-modal .type-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .edit-modal .type-buttons .btn {
+            padding: 10px;
+            font-size: 14px;
+            justify-content: center;
+            border-radius: 8px;
+            border: 2px solid transparent;
+        }
+        .edit-modal .type-buttons .btn.active {
+            border-color: #1a3b6e;
+            box-shadow: 0 0 0 2px rgba(26, 59, 110, 0.2);
+        }
+        .edit-modal .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+            justify-content: flex-end;
+        }
+        .edit-modal .modal-actions .btn {
+            padding: 10px 24px;
+            font-size: 14px;
+        }
 
-/* ===== TOAST ===== */
-.toast {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #1a2332;
-    color: white;
-    padding: 12px 24px;
-    border-radius: 12px;
-    font-size: 14px;
-    z-index: 999;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-    animation: fadeIn 0.3s ease;
-    max-width: 90%;
-    text-align: center;
-}
-.toast.success { background: #1e7b4c; }
-.toast.error { background: #b13e4b; }
-.toast.warning { background: #d97706; }
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
-    to { opacity: 1; transform: translateX(-50%) translateY(0); }
-}
+        /* ===== ПЕЧАТЬ ===== */
+        .print-container {
+            display: none;
+            padding: 40px;
+            background: white;
+            font-family: 'Times New Roman', Times, serif;
+        }
+        .print-container table {
+            font-size: 13px;
+            border-collapse: collapse;
+            width: 100%;
+            table-layout: fixed;
+        }
+        .print-container th, .print-container td {
+            border: 2px solid #000;
+            padding: 12px 3px;
+            text-align: center;
+            vertical-align: middle;
+            height: 48px;
+            min-height: 48px;
+        }
+        .print-container th {
+            background: #f5f5f5;
+            font-weight: 700;
+            font-size: 13px;
+            height: 40px;
+            min-height: 40px;
+        }
+        .print-container .print-title {
+            text-align: center;
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: 4px;
+        }
+        .print-container .print-subtitle {
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        .print-container .print-emp-name {
+            font-weight: 700;
+            text-align: left;
+            padding-left: 12px;
+            font-size: 14px;
+        }
+        .print-container .print-day { font-size: 13px; font-weight: 700; }
+        .print-container .print-hour-cell { font-size: 14px; line-height: 1.6; min-height: 48px; font-weight: 500; }
+        .print-container .print-total { font-weight: 700; font-size: 14px; }
+        .print-container .print-stats { font-weight: 700; background: #f5f5f5; }
+        .print-container .print-stats td { font-size: 13px; padding: 12px 3px; height: 48px; min-height: 48px; }
+        .print-container .print-footer { margin-top: 20px; display: flex; justify-content: space-between; font-size: 16px; }
+        .print-container .print-note { margin-top: 8px; font-size: 12px; color: #444; text-align: center; border-top: 1px dashed #999; padding-top: 8px; }
+        .print-container .print-time-row { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; line-height: 1.4; }
 
-/* ===== МОБИЛЬНАЯ АДАПТАЦИЯ ===== */
-@media (max-width: 1024px) {
-    .dashboard {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-        padding: 12px 16px;
-    }
-    .dash-item .value { font-size: 16px; }
-}
+        @media print {
+            @page { size: landscape; margin: 12mm; }
+            body * { visibility: hidden; }
+            .print-container, .print-container * { visibility: visible; }
+            .print-container {
+                display: block !important;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 15px 20px;
+            }
+            .print-container table { font-size: 11px; }
+            .print-container th, .print-container td { padding: 8px 2px; height: 36px; min-height: 36px; }
+            .print-container .print-hour-cell { font-size: 11px; min-height: 36px; }
+            .print-container .print-emp-name { font-size: 11px; }
+            .print-container .print-title { font-size: 20px; }
+            .print-container .print-subtitle { font-size: 14px; }
+            .print-container .print-stats td { height: 36px; min-height: 36px; padding: 8px 2px; }
+            .print-container .print-footer { font-size: 13px; }
+        }
 
-@media (max-width: 768px) {
-    body { padding: 8px; }
-    .container { padding: 12px; border-radius: 12px; }
-    h1 { font-size: 20px; }
-    
-    .dashboard {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 6px;
-        padding: 10px;
-        margin-bottom: 12px;
-    }
-    .dash-item .value { font-size: 15px; }
-    .dash-item .label { font-size: 9px; }
-    
-    .header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 8px;
-        margin-bottom: 12px;
-        padding-bottom: 10px;
-    }
-    .header-left {
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-    .header-left input[type="month"] {
-        flex: 1;
-        min-width: 120px;
-        font-size: 13px;
-        padding: 6px 10px;
-    }
-    .header-right {
-        flex-wrap: wrap;
-        gap: 6px;
-    }
-    .graphic-selector { padding: 2px 8px 2px 12px; }
-    .graphic-selector select { font-size: 12px; padding: 4px 6px; }
-    .cloud-status { font-size: 10px; padding: 3px 10px; }
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a2332;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            z-index: 999;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            animation: fadeIn 0.3s ease;
+            max-width: 90%;
+            text-align: center;
+        }
+        .toast.success { background: #1e7b4c; }
+        .toast.error { background: #b13e4b; }
+        .toast.warning { background: #d97706; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
 
-    /* Мобильный тулбар */
-    .toolbar {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 6px;
-        padding: 8px;
-        margin-bottom: 12px;
-    }
-    .btn-group { display: none; }
-    .btn {
-        padding: 10px 6px;
-        font-size: 11px;
-        flex-direction: column;
-        align-items: center;
-        gap: 2px;
-        border-radius: 8px;
-    }
-    .btn .icon { font-size: 18px; }
-    .btn .label { font-size: 10px; }
-    
-    /* Таблица */
-    .table-wrap { margin: 0 -6px; border-radius: 0; }
-    table { font-size: 11px; min-width: 700px; }
-    th { font-size: 10px; padding: 6px 2px; }
-    td { padding: 4px 2px; }
-    .emp-name { font-size: 11px; min-width: 80px; padding-left: 6px; }
-    .emp-name input { font-size: 11px; }
-    .salary-input { width: 55px; font-size: 11px; padding: 4px 2px; }
-    .day-cell { min-width: 55px; }
-    .day-cell .day-input { width: 36px; font-size: 11px; padding: 4px 0; }
-    .day-cell .day-type select { font-size: 8px; width: 45px; padding: 0 2px; }
-    .total-cell { font-size: 11px; min-width: 35px; }
-    .salary-cell { font-size: 11px; min-width: 60px; }
-    .stats-row td { font-size: 11px; padding: 6px 2px; }
-    .stats-label { font-size: 11px; padding-right: 8px; }
-    
-    .info-bar {
-        font-size: 11px;
-        padding: 10px 12px;
-        gap: 6px 12px;
-        flex-direction: column;
-        align-items: stretch;
-    }
-    .info-bar .norm-calc { font-size: 10px; }
-    
-    .modal { padding: 16px; margin: 10px; }
-    .modal-title { font-size: 17px; }
-    .history-item { font-size: 12px; padding: 8px 10px; }
-}
+        /* ===== МОБИЛЬНАЯ АДАПТАЦИЯ ===== */
+        @media (max-width: 1024px) {
+            .dashboard { grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px 16px; }
+            .dash-item .value { font-size: 16px; }
+        }
 
-@media (max-width: 480px) {
-    .dashboard {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 4px;
-        padding: 8px;
-    }
-    .dash-item .value { font-size: 14px; }
-    .dash-item .label { font-size: 8px; }
-    .toolbar {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 4px;
-        padding: 6px;
-    }
-    .btn { padding: 8px 4px; font-size: 10px; }
-    .btn .icon { font-size: 16px; }
-    .btn .label { font-size: 9px; }
-    table { font-size: 10px; min-width: 600px; }
-    .day-cell .day-input { width: 30px; font-size: 10px; }
-    .day-cell .day-type select { font-size: 7px; width: 38px; }
-}
+        @media (max-width: 768px) {
+            body { padding: 8px; }
+            .container { padding: 12px; border-radius: 12px; }
+            h1 { font-size: 20px; }
+            
+            .dashboard {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+                padding: 10px;
+                margin-bottom: 12px;
+            }
+            .dash-item .value { font-size: 15px; }
+            .dash-item .label { font-size: 9px; }
+            
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+                margin-bottom: 12px;
+                padding-bottom: 10px;
+            }
+            .header-left { flex-wrap: wrap; gap: 8px; }
+            .header-left input[type="month"] { flex: 1; min-width: 120px; font-size: 13px; padding: 6px 10px; }
+            .header-right { flex-wrap: wrap; gap: 6px; }
+            .graphic-selector { padding: 2px 8px 2px 12px; }
+            .graphic-selector select { font-size: 12px; padding: 4px 6px; }
+            .cloud-status { font-size: 10px; padding: 3px 10px; }
+
+            .toolbar {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 6px;
+                padding: 8px;
+                margin-bottom: 12px;
+            }
+            .btn-group { display: none; }
+            .btn {
+                padding: 10px 6px;
+                font-size: 11px;
+                flex-direction: column;
+                align-items: center;
+                gap: 2px;
+                border-radius: 8px;
+            }
+            .btn .icon { font-size: 18px; }
+            .btn .label { font-size: 10px; }
+            
+            .day-type-actions {
+                padding: 6px 10px;
+                gap: 4px;
+            }
+            .day-type-actions .label {
+                font-size: 10px;
+                width: 100%;
+            }
+            .day-type-actions .btn {
+                font-size: 10px;
+                padding: 4px 10px;
+            }
+            
+            .table-wrap { margin: 0 -6px; border-radius: 0; }
+            table { font-size: 11px; min-width: 700px; }
+            th { font-size: 10px; padding: 6px 2px; }
+            td { padding: 4px 2px; }
+            .emp-name { font-size: 11px; min-width: 80px; padding-left: 6px; }
+            .emp-name input { font-size: 11px; }
+            .salary-input { width: 55px; font-size: 11px; padding: 4px 2px; }
+            .day-cell { min-width: 55px; }
+            .day-cell .day-input { width: 36px; font-size: 11px; padding: 4px 0; }
+            .day-cell .day-type-icon { font-size: 12px; }
+            .total-cell { font-size: 11px; min-width: 35px; }
+            .salary-cell { font-size: 11px; min-width: 60px; }
+            .stats-row td { font-size: 11px; padding: 6px 2px; }
+            .stats-label { font-size: 11px; padding-right: 8px; }
+            
+            .info-bar {
+                font-size: 11px;
+                padding: 10px 12px;
+                gap: 6px 12px;
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .info-bar .norm-calc { font-size: 10px; }
+            
+            .modal { padding: 16px; margin: 10px; }
+            .modal-title { font-size: 17px; }
+            .history-item { font-size: 12px; padding: 8px 10px; }
+            
+            .edit-modal .type-buttons {
+                grid-template-columns: 1fr 1fr;
+            }
+            .edit-modal .modal-actions .btn {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dashboard {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 4px;
+                padding: 8px;
+            }
+            .dash-item .value { font-size: 14px; }
+            .dash-item .label { font-size: 8px; }
+            .toolbar {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 4px;
+                padding: 6px;
+            }
+            .btn { padding: 8px 4px; font-size: 10px; }
+            .btn .icon { font-size: 16px; }
+            .btn .label { font-size: 9px; }
+            table { font-size: 10px; min-width: 600px; }
+            .day-cell .day-input { width: 30px; font-size: 10px; }
+            .day-cell .day-type-icon { font-size: 10px; }
+        }
     </style>
 </head>
 <body>
-    <div class="container" id="app">
+<div class="container" id="app">
     <h1>🧑‍🏭 Табель цеха</h1>
 
     <!-- ДАШБОРД -->
@@ -524,7 +626,7 @@ td { padding: 6px 3px; border-bottom: 1px solid #e8edf4; text-align: center; ver
 
     <!-- ХЕДЕР -->
     <div class="header">
-        <div class="header-top">
+        <div class="header-left">
             <input type="month" v-model="currentMonth" @change="onMonthChange" />
             <div class="graphic-selector">
                 <span>График:</span>
@@ -534,14 +636,14 @@ td { padding: 6px 3px; border-bottom: 1px solid #e8edf4; text-align: center; ver
                 </select>
             </div>
         </div>
-        <div class="header-bottom">
+        <div class="header-right">
             <span style="background:#eef3fa;padding:4px 12px;border-radius:20px;font-size:12px;">Норма: {{ normHours }}ч</span>
             <span class="cloud-status" :class="syncStatusClass">{{ syncStatusText }}</span>
             <button class="btn btn-history" style="padding:4px 12px;font-size:11px;" @click="showHistory">📜 История</button>
         </div>
     </div>
 
-    <!-- ТУЛБАР (МОБИЛЬНЫЙ) -->
+    <!-- ТУЛБАР -->
     <div class="toolbar">
         <button class="btn btn-success" @click="saveToCloud">
             <span class="icon">☁️</span>
@@ -577,6 +679,16 @@ td { padding: 6px 3px; border-bottom: 1px solid #e8edf4; text-align: center; ver
         </button>
     </div>
 
+    <!-- БЫСТРЫЕ КНОПКИ ТИПОВ ДНЕЙ -->
+    <div class="day-type-actions">
+        <span class="label">📋 Массовое проставление:</span>
+        <button class="btn btn-type-work" @click="massAssignType('work')">✅ Работа</button>
+        <button class="btn btn-type-sick" @click="massAssignType('sick')">🤒 Больничный</button>
+        <button class="btn btn-type-vacation" @click="massAssignType('vacation')">🌴 Отпуск</button>
+        <button class="btn btn-type-dayoff" @click="massAssignType('dayoff')">📅 Выходной</button>
+        <button class="btn btn-type-reset" @click="massAssignType('reset')">❌ Сбросить</button>
+    </div>
+
     <!-- ТАБЛИЦА -->
     <div class="table-wrap">
         <table>
@@ -604,15 +716,13 @@ td { padding: 6px 3px; border-bottom: 1px solid #e8edf4; text-align: center; ver
                                    :class="getDayClass(dayIdx, emp)"
                                    v-model.number="emp.hours[dayIdx]" 
                                    min="0" max="12" step="0.5"
-                                   placeholder="0" @change="autoSave" />
-                            <div class="day-type">
-                                <select v-model="emp.dayType[dayIdx]" @change="autoSave">
-                                    <option value="work">Работа</option>
-                                    <option value="sick">Больничный</option>
-                                    <option value="vacation">Отпуск</option>
-                                    <option value="dayoff">Выходной</option>
-                                </select>
-                            </div>
+                                   placeholder="0" 
+                                   @focus="openEditModal(emp, dayIdx)" />
+                            <span class="day-type-icon" 
+                                  :class="getDayTypeIcon(emp.dayType[dayIdx])"
+                                  @click="openEditModal(emp, dayIdx)">
+                                {{ getDayTypeEmoji(emp.dayType[dayIdx]) }}
+                            </span>
                         </div>
                     </td>
                     <td class="total-cell">{{ totalHours(emp.hours) }}</td>
@@ -635,7 +745,7 @@ td { padding: 6px 3px; border-bottom: 1px solid #e8edf4; text-align: center; ver
         <span><strong>Норма {{ selectedGraphic }}:</strong> {{ normHours }}ч</span>
         <span class="norm-calc">{{ normCalcText }}</span>
         <span class="highlight"><strong>Ставка:</strong> оклад / {{ normHours }}ч</span>
-        <span style="color:#888;font-size:11px;margin-left:auto;">✏️ Часы 0-12, шаг 0.5</span>
+        <span style="color:#888;font-size:11px;margin-left:auto;">✏️ Нажми на часы для редактирования</span>
     </div>
 
     <!-- ИСТОРИЯ (МОДАЛЬНОЕ ОКНО) -->
@@ -651,6 +761,41 @@ td { padding: 6px 3px; border-bottom: 1px solid #e8edf4; text-align: center; ver
                     <div class="details">{{ item.data.month }} · {{ item.data.graphic }} · {{ item.data.employees }} сотрудников</div>
                     <div class="time">{{ formatDate(item.timestamp) }}</div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ -->
+    <div class="modal-overlay edit-modal" :class="{active: editModalVisible}" @click.self="closeEditModal">
+        <div class="modal">
+            <button class="modal-close" @click="closeEditModal">✕</button>
+            <div class="modal-title">✏️ Редактирование дня</div>
+            <div v-if="editModalData">
+                <div class="field-group">
+                    <label>👤 Сотрудник</label>
+                    <div style="font-size:16px;font-weight:500;padding:4px 0;">{{ editModalData.empName }}</div>
+                </div>
+                <div class="field-group">
+                    <label>📅 Дата</label>
+                    <div style="font-size:16px;font-weight:500;padding:4px 0;">{{ editModalData.day }} {{ currentMonthName }}</div>
+                </div>
+                <div class="field-group">
+                    <label>⏱️ Часы</label>
+                    <input type="number" v-model.number="editModalData.hours" min="0" max="12" step="0.5" />
+                </div>
+                <div class="field-group">
+                    <label>📋 Тип дня</label>
+                    <div class="type-buttons">
+                        <button class="btn btn-type-work" :class="{active: editModalData.dayType === 'work'}" @click="editModalData.dayType = 'work'">✅ Работа</button>
+                        <button class="btn btn-type-sick" :class="{active: editModalData.dayType === 'sick'}" @click="editModalData.dayType = 'sick'">🤒 Больничный</button>
+                        <button class="btn btn-type-vacation" :class="{active: editModalData.dayType === 'vacation'}" @click="editModalData.dayType = 'vacation'">🌴 Отпуск</button>
+                        <button class="btn btn-type-dayoff" :class="{active: editModalData.dayType === 'dayoff'}" @click="editModalData.dayType = 'dayoff'">📅 Выходной</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" @click="closeEditModal">Отмена</button>
+                <button class="btn btn-success" @click="saveEditModal">💾 Сохранить</button>
             </div>
         </div>
     </div>
@@ -704,6 +849,7 @@ td { padding: 6px 3px; border-bottom: 1px solid #e8edf4; text-align: center; ver
     <!-- TOAST -->
     <div v-if="toast.show" class="toast" :class="toast.type" v-html="toast.message"></div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
 <script>
     (function() {
@@ -808,7 +954,12 @@ td { padding: 6px 3px; border-bottom: 1px solid #e8edf4; text-align: center; ver
                 autoSaveTimeout: null,
                 historyModalVisible: false,
                 historyList: [],
-                historyLoading: false
+                historyLoading: false,
+                // Модалка редактирования
+                editModalVisible: false,
+                editModalData: null,
+                editModalEmp: null,
+                editModalIdx: null
             },
             computed: {
                 currentMonthName() {
@@ -908,6 +1059,101 @@ td { padding: 6px 3px; border-bottom: 1px solid #e8edf4; text-align: center; ver
                     return formatDate(timestamp);
                 },
 
+                // ===== ИКОНКИ ТИПОВ =====
+                getDayTypeIcon(type) {
+                    return type || 'work';
+                },
+                getDayTypeEmoji(type) {
+                    const map = {
+                        'work': '✅',
+                        'sick': '🤒',
+                        'vacation': '🌴',
+                        'dayoff': '📅'
+                    };
+                    return map[type] || '✅';
+                },
+                getDayTypeLabel(type) {
+                    const map = {
+                        'work': 'Работа',
+                        'sick': 'Больничный',
+                        'vacation': 'Отпуск',
+                        'dayoff': 'Выходной',
+                        'reset': 'Сброс'
+                    };
+                    return map[type] || type;
+                },
+
+                // ===== МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ =====
+                openEditModal(emp, idx) {
+                    this.editModalEmp = emp;
+                    this.editModalIdx = idx;
+                    this.editModalData = {
+                        empName: emp.name,
+                        day: this.days[idx],
+                        hours: emp.hours[idx] || 0,
+                        dayType: emp.dayType[idx] || 'work'
+                    };
+                    this.editModalVisible = true;
+                },
+                closeEditModal() {
+                    this.editModalVisible = false;
+                    this.editModalData = null;
+                    this.editModalEmp = null;
+                    this.editModalIdx = null;
+                },
+                saveEditModal() {
+                    if (this.editModalEmp && this.editModalIdx !== null) {
+                        this.editModalEmp.hours[this.editModalIdx] = this.editModalData.hours;
+                        this.editModalEmp.dayType[this.editModalIdx] = this.editModalData.dayType;
+                        this.autoSave();
+                        this.closeEditModal();
+                        this.showToast('✅ Сохранено!', 'success');
+                    }
+                },
+
+                // ===== МАССОВОЕ ПРОСТАВЛЕНИЕ =====
+                massAssignType(type) {
+                    const choice = confirm(
+                        type === 'reset' 
+                            ? 'Сбросить типы дней для всех сотрудников?'
+                            : `Установить "${this.getDayTypeLabel(type)}" для всех сотрудников?`
+                    );
+                    if (!choice) return;
+
+                    const range = prompt('Введите диапазон дней (например, 1-15 или * для всех):', '*');
+                    if (range === null) return;
+
+                    let startIdx = 0;
+                    let endIdx = this.days.length - 1;
+
+                    if (range !== '*') {
+                        const parts = range.split('-');
+                        startIdx = Math.max(0, parseInt(parts[0]) - 1) || 0;
+                        endIdx = Math.min(this.days.length - 1, (parseInt(parts[1]) || parseInt(parts[0])) - 1);
+                    }
+
+                    if (isNaN(startIdx) || isNaN(endIdx) || startIdx > endIdx) {
+                        this.showToast('⚠️ Неверный диапазон', 'error');
+                        return;
+                    }
+
+                    this.employees.forEach(emp => {
+                        for (let i = startIdx; i <= endIdx; i++) {
+                            if (type === 'reset') {
+                                emp.dayType[i] = 'work';
+                            } else {
+                                emp.dayType[i] = type;
+                                if (type !== 'work') {
+                                    emp.hours[i] = 0;
+                                }
+                            }
+                        }
+                    });
+
+                    this.autoSave();
+                    this.showToast(`✅ Тип "${this.getDayTypeLabel(type)}" установлен для ${endIdx - startIdx + 1} дней`, 'success');
+                },
+
                 // ===== ИСТОРИЯ =====
                 async showHistory() {
                     this.historyModalVisible = true;
@@ -958,7 +1204,6 @@ td { padding: 6px 3px; border-bottom: 1px solid #e8edf4; text-align: center; ver
                         this.syncStatus = 'loading';
                         const data = await callApi('get');
                         if (data && data.employees) {
-                            // Инициализируем dayType для новых сотрудников
                             this.employees = data.employees.map(emp => {
                                 if (!emp.dayType) {
                                     emp.dayType = Array(this.days.length).fill('work');
