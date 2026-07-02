@@ -955,7 +955,6 @@
                 historyModalVisible: false,
                 historyList: [],
                 historyLoading: false,
-                // Модалка редактирования
                 editModalVisible: false,
                 editModalData: null,
                 editModalEmp: null,
@@ -1059,7 +1058,6 @@
                     return formatDate(timestamp);
                 },
 
-                // ===== ИКОНКИ ТИПОВ =====
                 getDayTypeIcon(type) {
                     return type || 'work';
                 },
@@ -1081,6 +1079,77 @@
                         'reset': 'Сброс'
                     };
                     return map[type] || type;
+                },
+
+                // ===== МАССОВОЕ ПРОСТАВЛЕНИЕ (ОБНОВЛЕНО) =====
+                massAssignType(type) {
+                    // 1. Выбор сотрудника
+                    let employeeOptions = this.employees.map((emp, i) => `${i+1}. ${emp.name}`).join('\n');
+                    let employeeChoice = prompt(
+                        `Выберите сотрудника:\n${employeeOptions}\n\nВведите номер сотрудника или * для всех:`,
+                        '*'
+                    );
+                    if (employeeChoice === null) return;
+
+                    let targetEmployees = [];
+                    if (employeeChoice === '*') {
+                        targetEmployees = this.employees;
+                    } else {
+                        let idx = parseInt(employeeChoice) - 1;
+                        if (isNaN(idx) || idx < 0 || idx >= this.employees.length) {
+                            this.showToast('⚠️ Неверный номер сотрудника!', 'error');
+                            return;
+                        }
+                        targetEmployees = [this.employees[idx]];
+                    }
+
+                    // 2. Выбор диапазона дат
+                    let range = prompt(
+                        `Введите диапазон дней (например, 1-15 или * для всех):\nДоступно: 1-${this.days.length}`,
+                        '*'
+                    );
+                    if (range === null) return;
+
+                    let startIdx = 0;
+                    let endIdx = this.days.length - 1;
+
+                    if (range !== '*') {
+                        let parts = range.split('-');
+                        startIdx = Math.max(0, parseInt(parts[0]) - 1) || 0;
+                        endIdx = Math.min(this.days.length - 1, (parseInt(parts[1]) || parseInt(parts[0])) - 1);
+                    }
+
+                    if (isNaN(startIdx) || isNaN(endIdx) || startIdx > endIdx) {
+                        this.showToast('⚠️ Неверный диапазон!', 'error');
+                        return;
+                    }
+
+                    // 3. Подтверждение
+                    let employeeNames = targetEmployees.map(e => e.name).join(', ');
+                    let daysRange = startIdx === 0 && endIdx === this.days.length - 1 ? 'все дни' : `${startIdx+1}-${endIdx+1}`;
+                    let confirmMsg = `Установить "${this.getDayTypeLabel(type)}" для:\n👤 ${employeeNames}\n📅 Дни: ${daysRange}\n\nПродолжить?`;
+                    
+                    if (!confirm(confirmMsg)) return;
+
+                    // 4. Применяем
+                    targetEmployees.forEach(emp => {
+                        for (let i = startIdx; i <= endIdx; i++) {
+                            if (type === 'reset') {
+                                emp.dayType[i] = 'work';
+                            } else {
+                                emp.dayType[i] = type;
+                                if (type !== 'work') {
+                                    emp.hours[i] = 0;
+                                }
+                            }
+                        }
+                    });
+
+                    this.autoSave();
+                    this.showToast(
+                        `✅ "${this.getDayTypeLabel(type)}" установлен для ${employeeNames} (${endIdx - startIdx + 1} дней)`,
+                        'success'
+                    );
                 },
 
                 // ===== МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ =====
@@ -1111,55 +1180,12 @@
                     }
                 },
 
-                // ===== МАССОВОЕ ПРОСТАВЛЕНИЕ =====
-                massAssignType(type) {
-                    const choice = confirm(
-                        type === 'reset' 
-                            ? 'Сбросить типы дней для всех сотрудников?'
-                            : `Установить "${this.getDayTypeLabel(type)}" для всех сотрудников?`
-                    );
-                    if (!choice) return;
-
-                    const range = prompt('Введите диапазон дней (например, 1-15 или * для всех):', '*');
-                    if (range === null) return;
-
-                    let startIdx = 0;
-                    let endIdx = this.days.length - 1;
-
-                    if (range !== '*') {
-                        const parts = range.split('-');
-                        startIdx = Math.max(0, parseInt(parts[0]) - 1) || 0;
-                        endIdx = Math.min(this.days.length - 1, (parseInt(parts[1]) || parseInt(parts[0])) - 1);
-                    }
-
-                    if (isNaN(startIdx) || isNaN(endIdx) || startIdx > endIdx) {
-                        this.showToast('⚠️ Неверный диапазон', 'error');
-                        return;
-                    }
-
-                    this.employees.forEach(emp => {
-                        for (let i = startIdx; i <= endIdx; i++) {
-                            if (type === 'reset') {
-                                emp.dayType[i] = 'work';
-                            } else {
-                                emp.dayType[i] = type;
-                                if (type !== 'work') {
-                                    emp.hours[i] = 0;
-                                }
-                            }
-                        }
-                    });
-
-                    this.autoSave();
-                    this.showToast(`✅ Тип "${this.getDayTypeLabel(type)}" установлен для ${endIdx - startIdx + 1} дней`, 'success');
-                },
-
                 // ===== ИСТОРИЯ =====
                 async showHistory() {
                     this.historyModalVisible = true;
                     this.historyLoading = true;
                     try {
-                        const history = await callApi('getHistory');
+                        let history = await callApi('getHistory');
                         this.historyList = history || [];
                     } catch (e) {
                         this.showToast('❌ Ошибка загрузки истории', 'error');
@@ -1182,7 +1208,7 @@
                 async saveToCloud() {
                     try {
                         this.syncStatus = 'loading';
-                        const data = {
+                        let data = {
                             employees: this.employees,
                             month: this.currentMonth,
                             norm: this.normHours,
@@ -1202,7 +1228,7 @@
                 async loadFromCloud() {
                     try {
                         this.syncStatus = 'loading';
-                        const data = await callApi('get');
+                        let data = await callApi('get');
                         if (data && data.employees) {
                             this.employees = data.employees.map(emp => {
                                 if (!emp.dayType) {
@@ -1228,7 +1254,7 @@
 
                 // ===== СОТРУДНИКИ =====
                 addEmployee() {
-                    const daysCount = this.days.length;
+                    let daysCount = this.days.length;
                     this.employees.push({
                         name: 'Новый сотрудник',
                         salaryBase: 90000,
@@ -1261,13 +1287,13 @@
                 },
                 fillByGraphic() {
                     if (confirm('Заполнить табель по графику ' + this.selectedGraphic + '?')) {
-                        const cycleLen = this.selectedGraphic === '3/3' ? 6 : 4;
-                        const workDays = this.selectedGraphic === '3/3' ? 3 : 2;
+                        let cycleLen = this.selectedGraphic === '3/3' ? 6 : 4;
+                        let workDays = this.selectedGraphic === '3/3' ? 3 : 2;
                         this.employees.forEach(emp => {
                             for (let i = 0; i < this.days.length; i++) {
-                                const isWork = (i % cycleLen) < workDays;
-                                const dow = this.dayOfWeek[i];
-                                const isWeekend = dow === 0 || dow === 6;
+                                let isWork = (i % cycleLen) < workDays;
+                                let dow = this.dayOfWeek[i];
+                                let isWeekend = dow === 0 || dow === 6;
                                 if (isWork && !isWeekend) {
                                     emp.hours[i] = 11;
                                     emp.dayType[i] = 'work';
@@ -1283,7 +1309,7 @@
                 },
                 deleteMonth() {
                     if (confirm(`Удалить все данные за ${this.currentMonthName} (${this.selectedGraphic})?`)) {
-                        const daysCount = this.days.length;
+                        let daysCount = this.days.length;
                         this.employees = JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES));
                         this.employees.forEach(emp => {
                             emp.hours = Array(daysCount).fill(0);
@@ -1322,8 +1348,8 @@
                         html += '<td>' + this.totalMonthHours + '</td><td>' + this.totalMonthSalary + '</td></tr>';
                         html += '</table></body></html>';
 
-                        const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
-                        const link = document.createElement('a');
+                        let blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
+                        let link = document.createElement('a');
                         link.href = URL.createObjectURL(blob);
                         link.download = `Табель_${this.currentMonth}_${this.selectedGraphic}.xls`;
                         document.body.appendChild(link);
@@ -1346,10 +1372,10 @@
                 // ===== ЗАГРУЗКА ДАННЫХ =====
                 loadMonthData(month, graphic) {
                     try {
-                        const monthKey = getMonthKey(month, graphic);
-                        const raw = localStorage.getItem(monthKey);
+                        let monthKey = getMonthKey(month, graphic);
+                        let raw = localStorage.getItem(monthKey);
                         if (raw) {
-                            const data = JSON.parse(raw);
+                            let data = JSON.parse(raw);
                             if (data.employees && Array.isArray(data.employees) && data.employees.length > 0) {
                                 this.employees = data.employees.map(emp => {
                                     if (!emp.dayType) {
@@ -1363,13 +1389,13 @@
                                 return true;
                             }
                         }
-                        const prevMonth = getPrevMonth(month);
-                        const prevMonthKey = getMonthKey(prevMonth, graphic);
-                        const prevRaw = localStorage.getItem(prevMonthKey);
+                        let prevMonth = getPrevMonth(month);
+                        let prevMonthKey = getMonthKey(prevMonth, graphic);
+                        let prevRaw = localStorage.getItem(prevMonthKey);
                         if (prevRaw) {
-                            const prevData = JSON.parse(prevRaw);
+                            let prevData = JSON.parse(prevRaw);
                             if (prevData.employees && Array.isArray(prevData.employees) && prevData.employees.length > 0) {
-                                const daysCount = this.days.length;
+                                let daysCount = this.days.length;
                                 this.employees = prevData.employees.map(emp => ({
                                     name: emp.name,
                                     salaryBase: emp.salaryBase || 90000,
@@ -1381,7 +1407,7 @@
                                 return true;
                             }
                         }
-                        const daysCount = this.days.length;
+                        let daysCount = this.days.length;
                         this.employees = JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES));
                         this.employees.forEach(emp => {
                             emp.hours = Array(daysCount).fill(0);
@@ -1398,10 +1424,10 @@
 
                 async updateDays(monthValue) {
                     if (!monthValue) return;
-                    const parts = monthValue.split('-');
-                    const year = parseInt(parts[0]);
-                    const month = parseInt(parts[1]);
-                    const daysCount = getDaysInMonth(year, month);
+                    let parts = monthValue.split('-');
+                    let year = parseInt(parts[0]);
+                    let month = parseInt(parts[1]);
+                    let daysCount = getDaysInMonth(year, month);
                     this.days = Array.from({ length: daysCount }, (_, i) => i + 1);
                     this.dayOfWeek = this.days.map(day => getDayOfWeek(year, month, day));
                     this.norm52 = calculateNorm52(daysCount);
@@ -1414,7 +1440,7 @@
                     this.updateDays(this.currentMonth);
                 },
                 onGraphicChange() {
-                    const daysCount = this.days.length;
+                    let daysCount = this.days.length;
                     this.normHours = calculateNormShift(daysCount, this.selectedGraphic);
                     this.loadMonthData(this.currentMonth, this.selectedGraphic);
                     this.loadFromCloud();
@@ -1422,9 +1448,9 @@
             },
 
             async mounted() {
-                const now = new Date();
-                const year = now.getFullYear();
-                const month = String(now.getMonth() + 1).padStart(2, '0');
+                let now = new Date();
+                let year = now.getFullYear();
+                let month = String(now.getMonth() + 1).padStart(2, '0');
                 this.currentMonth = `${year}-${month}`;
                 await this.updateDays(this.currentMonth);
             }
