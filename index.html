@@ -69,22 +69,10 @@
             outline: none;
             cursor: pointer;
         }
-        .month-status {
-            font-size: 12px;
-            color: #666;
-            background: #f0f4f8;
-            padding: 4px 14px;
-            border-radius: 12px;
-        }
         .cloud-status {
             font-size: 11px;
             padding: 4px 12px;
             border-radius: 12px;
-            background: #fef3c7;
-            color: #92400e;
-            border: 1px solid #fcd34d;
-        }
-        .cloud-status.synced {
             background: #d1fae5;
             color: #065f46;
             border: 1px solid #6ee7b7;
@@ -93,6 +81,11 @@
             background: #fee2e2;
             color: #991b1b;
             border: 1px solid #fca5a5;
+        }
+        .cloud-status.loading {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fcd34d;
         }
 
         .toolbar {
@@ -178,44 +171,6 @@
         .info-bar .norm-calc { color: #666; font-size: 12px; }
         .info-bar .highlight { background: #e8f0fe; padding: 4px 14px; border-radius: 12px; }
 
-        .print-container { display: none; padding: 20px 25px; background: white; font-family: 'Times New Roman', Times, serif; }
-        .print-container table { font-size: 13px; border-collapse: collapse; width: 100%; table-layout: fixed; }
-        .print-container th, .print-container td { border: 1.5px solid #000; padding: 10px 3px; text-align: center; vertical-align: middle; height: 40px; min-height: 40px; }
-        .print-container th { background: #f0f0f0; font-weight: 700; font-size: 12px; height: 36px; min-height: 36px; }
-        .print-container .print-title { text-align: center; font-size: 22px; font-weight: 700; margin-bottom: 8px; letter-spacing: 3px; }
-        .print-container .print-subtitle { text-align: center; font-size: 16px; margin-bottom: 14px; }
-        .print-container .print-emp-name { font-weight: 700; text-align: left; padding-left: 10px; font-size: 13px; }
-        .print-container .print-day { font-size: 12px; font-weight: 700; }
-        .print-container .print-hour-cell { font-size: 12px; line-height: 1.6; min-height: 40px; }
-        .print-container .print-total { font-weight: 700; font-size: 13px; }
-        .print-container .print-stats { font-weight: 700; background: #f5f5f5; }
-        .print-container .print-stats td { font-size: 12px; padding: 10px 3px; height: 40px; min-height: 40px; }
-        .print-container .print-footer { margin-top: 14px; display: flex; justify-content: space-between; font-size: 14px; }
-        .print-container .print-note { margin-top: 6px; font-size: 11px; color: #444; text-align: center; border-top: 1px dashed #999; padding-top: 6px; }
-        .print-container .print-time-row { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; line-height: 1.4; }
-
-        @media print {
-            @page { size: landscape; margin: 10mm; }
-            body * { visibility: hidden; }
-            .print-container, .print-container * { visibility: visible; }
-            .print-container { display: block !important; position: absolute; left: 0; top: 0; width: 100%; padding: 12px 18px; }
-            .print-container table { font-size: 11px; }
-            .print-container th, .print-container td { padding: 8px 2px; height: 34px; min-height: 34px; }
-            .print-container .print-hour-cell { font-size: 10px; min-height: 34px; }
-            .print-container .print-emp-name { font-size: 11px; }
-            .print-container .print-title { font-size: 18px; }
-            .print-container .print-subtitle { font-size: 13px; }
-            .print-container .print-stats td { height: 34px; min-height: 34px; padding: 8px 2px; }
-        }
-
-        @media (max-width: 768px) {
-            .container { padding: 12px; }
-            .dashboard { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 12px; }
-            .day-input { width: 38px; font-size: 13px; padding: 6px 0; }
-            .btn { font-size: 12px; padding: 5px 10px; }
-            .btn-group { padding: 0 4px; }
-        }
-
         .toast {
             position: fixed;
             bottom: 20px;
@@ -262,15 +217,15 @@
                 </select>
             </div>
             <span style="background:#eef3fa;padding:4px 14px;border-radius:20px;font-size:13px;">Норма: {{ normHours }}ч</span>
-            <span class="month-status" :style="{background: monthDataExists ? '#e8f5e9' : '#f5f5f5'}">{{ monthDataExists ? '✅ Данные загружены' : '📝 Новый месяц' }}</span>
-            <span class="cloud-status" :class="cloudSyncStatusClass">{{ cloudSyncText }}</span>
+            <span class="cloud-status" :class="syncStatusClass">{{ syncStatusText }}</span>
         </div>
     </div>
 
     <div class="toolbar">
         <div class="btn-group">
             <span class="btn-group-label">📋 Данные</span>
-            <button class="btn btn-success" @click="saveToLocal">💾 Сохранить</button>
+            <button class="btn btn-success" @click="saveToCloud">☁️ Сохранить</button>
+            <button class="btn btn-outline" @click="loadFromCloud">☁️ Загрузить</button>
             <button class="btn btn-danger" @click="deleteMonth">🗑️ Удалить</button>
         </div>
         <div class="btn-group">
@@ -314,7 +269,7 @@
                                :class="getDayClass(dayIdx)"
                                v-model.number="emp.hours[dayIdx]" 
                                min="0" max="12" step="0.5"
-                               placeholder="0" />
+                               placeholder="0" @change="autoSave" />
                     </td>
                     <td class="total-cell">{{ totalHours(emp.hours) }}</td>
                     <td class="salary-cell">{{ formatSalary(calcSalary(emp)) }}</td>
@@ -340,30 +295,18 @@
         <span style="color:#888;font-size:12px;margin-left:auto;">✏️ Часы вводятся вручную (0-12, шаг 0.5)</span>
     </div>
 
-    <div class="print-container" id="printContainer">
-        <div class="print-title">ТАБЕЛЬ УЧЕТА РАБОЧЕГО ВРЕМЕНИ</div>
-        <div class="print-subtitle">Цех порошковой покраски · {{ currentMonthName }} · График {{ selectedGraphic }} · Норма {{ normHours }}ч</div>
-        <table>
-            <thead><tr><th style="width:100px;min-width:80px;">Сотрудник</th><th v-for="day in days" :key="'p-'+day" style="width:40px;min-width:32px;"><span class="print-day">{{ day }}</span></th><th style="width:36px;min-width:30px;">Итого</th></tr></thead>
-            <tbody>
-                <tr v-for="(emp, idx) in employees" :key="'p-emp-'+idx">
-                    <td class="print-emp-name">{{ emp.name }}</td>
-                    <td v-for="(day, dayIdx) in days" :key="'p-day-'+dayIdx" class="print-hour-cell"><div class="print-time-row"><span>____ / ____</span></div></td>
-                    <td class="print-total">{{ totalHours(emp.hours) }}</td>
-                </tr>
-                <tr class="print-stats"><td style="text-align:right;padding-right:8px;font-weight:700;">Итого часов:</td><td v-for="day in days" :key="'p-stat-'+day" style="font-weight:700;">{{ dayStats[day-1] || '' }}</td><td style="font-weight:700;">{{ totalMonthHours }}</td></tr>
-            </tbody>
-        </table>
-        <div style="margin-top:14px;display:flex;justify-content:space-between;font-size:14px;"><div>______________________ / ______________________ / <span style="margin-left:20px;">(подпись)</span></div><div>Дата: _______________</div></div>
-        <div class="print-note">В графах указывается время прихода и ухода (например, 8:00 / 20:00)</div>
-    </div>
-
     <div v-if="toast.show" class="toast" :class="toast.type" v-html="toast.message"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
 <script>
     (function() {
+        // ============================================================
+        // ⚠️ ВСТАВЬ СЮДА ССЫЛКУ НА ТВОЮ ФУНКЦИЮ
+        // ============================================================
+        const API_URL = 'https://functions.yandexcloud.net/d4e18nbmmgli5kcghqrs';
+        // ============================================================
+
         const STORAGE_KEY = 'powder_coating_timesheet_v4';
 
         const DEFAULT_EMPLOYEES = [
@@ -405,123 +348,22 @@
             return `${year}-${String(monthNum).padStart(2, '0')}`;
         }
 
-        // === GITHUB GIST СИНХРОНИЗАЦИЯ ===
-        function getGitHubToken() {
-            return localStorage.getItem('github_token') || '';
-        }
-
-        function getGistId() {
-            return localStorage.getItem('github_gist_id') || '';
-        }
-
-        function isCloudConfigured() {
-            return !!getGitHubToken();
-        }
-
-        async function saveToGist(data) {
-            const token = getGitHubToken();
-            if (!token) {
-                console.warn('GitHub токен не настроен');
-                return false;
-            }
-
-            const fileName = `tabel_${data.month}_${data.graphic}.json`;
-            const content = JSON.stringify(data, null, 2);
-            
-            let gistId = getGistId();
-            let method = 'POST';
-            let url = 'https://api.github.com/gists';
-            let body = {
-                description: `Табель ${data.month} (${data.graphic})`,
-                public: false,
-                files: {
-                    [fileName]: {
-                        content: content
-                    }
-                }
-            };
-
-            // Если есть gistId — обновляем существующий
-            if (gistId) {
-                method = 'PATCH';
-                url = `https://api.github.com/gists/${gistId}`;
-                body = {
-                    files: {
-                        [fileName]: {
-                            content: content
-                        }
-                    }
-                };
-            }
-
+        async function callApi(method, data) {
             try {
-                const response = await fetch(url, {
-                    method: method,
+                const response = await fetch(API_URL, {
+                    method: 'POST',
                     headers: {
-                        'Authorization': `token ${token}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/vnd.github.v3+json'
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(body)
+                    body: JSON.stringify({ method, data })
                 });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    if (!gistId && result.id) {
-                        localStorage.setItem('github_gist_id', result.id);
-                    }
-                    console.log('✅ Данные сохранены в GitHub Gist');
-                    return true;
-                } else {
-                    console.error('Ошибка сохранения в Gist:', response.status, await response.text());
-                    return false;
+                if (!response.ok) {
+                    throw new Error('Ошибка API: ' + response.status);
                 }
+                return await response.json();
             } catch (e) {
-                console.error('Ошибка:', e);
-                return false;
-            }
-        }
-
-        async function loadFromGist(month, graphic) {
-            const token = getGitHubToken();
-            if (!token) {
-                console.warn('GitHub токен не настроен');
-                return null;
-            }
-
-            const gistId = getGistId();
-            if (!gistId) {
-                console.log('📝 Gist ID не найден');
-                return null;
-            }
-
-            const fileName = `tabel_${month}_${graphic}.json`;
-
-            try {
-                const response = await fetch(`https://api.github.com/gists/${gistId}`, {
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-
-                if (response.ok) {
-                    const gist = await response.json();
-                    if (gist.files && gist.files[fileName]) {
-                        const content = JSON.parse(gist.files[fileName].content);
-                        console.log('✅ Данные загружены из GitHub Gist');
-                        return content;
-                    } else {
-                        console.log('📝 Файл не найден в Gist');
-                        return null;
-                    }
-                } else {
-                    console.error('Ошибка загрузки из Gist:', response.status);
-                    return null;
-                }
-            } catch (e) {
-                console.error('Ошибка:', e);
-                return null;
+                console.error('API ошибка:', e);
+                throw e;
             }
         }
 
@@ -536,10 +378,10 @@
                 dayOfWeek: [],
                 weekDays: WEEKDAYS,
                 selectedGraphic: '3/3',
-                monthDataExists: false,
                 toast: { show: false, message: '', type: 'success' },
                 toastTimeout: null,
-                cloudSyncStatus: 'idle'
+                syncStatus: 'idle',
+                autoSaveTimeout: null
             },
             computed: {
                 currentMonthName() {
@@ -547,19 +389,16 @@
                     const parts = this.currentMonth.split('-');
                     return `${getMonthName(parseInt(parts[1]))} ${parseInt(parts[0])}`;
                 },
-                cloudConfigured() {
-                    return isCloudConfigured();
-                },
-                cloudSyncText() {
-                    if (!this.cloudConfigured) return '🔑 Токен не настроен';
-                    if (this.cloudSyncStatus === 'synced') return '☁️ Синхронизировано';
-                    if (this.cloudSyncStatus === 'error') return '☁️ Ошибка';
-                    if (this.cloudSyncStatus === 'loading') return '☁️ Загрузка...';
+                syncStatusText() {
+                    if (this.syncStatus === 'synced') return '☁️ Синхронизировано';
+                    if (this.syncStatus === 'loading') return '☁️ Синхронизация...';
+                    if (this.syncStatus === 'error') return '☁️ Ошибка';
                     return '☁️ Готово';
                 },
-                cloudSyncStatusClass() {
-                    if (this.cloudSyncStatus === 'synced') return 'synced';
-                    if (this.cloudSyncStatus === 'error') return 'error';
+                syncStatusClass() {
+                    if (this.syncStatus === 'synced') return '';
+                    if (this.syncStatus === 'error') return 'error';
+                    if (this.syncStatus === 'loading') return 'loading';
                     return '';
                 },
                 totalMonthHours() {
@@ -629,49 +468,52 @@
                     return 'day-off';
                 },
 
-                async syncToCloud() {
-                    if (!this.cloudConfigured) return;
-                    this.cloudSyncStatus = 'loading';
-                    const data = {
-                        employees: this.employees,
-                        month: this.currentMonth,
-                        norm: this.normHours,
-                        norm52: this.norm52,
-                        graphic: this.selectedGraphic,
-                        savedAt: new Date().toISOString()
-                    };
-                    const success = await saveToGist(data);
-                    if (success) {
-                        this.cloudSyncStatus = 'synced';
-                    } else {
-                        this.cloudSyncStatus = 'error';
-                        this.showToast('❌ Ошибка сохранения в облако', 'error');
+                autoSave() {
+                    if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
+                    this.autoSaveTimeout = setTimeout(() => {
+                        this.saveToCloud();
+                    }, 2000);
+                },
+
+                async saveToCloud() {
+                    try {
+                        this.syncStatus = 'loading';
+                        const data = {
+                            employees: this.employees,
+                            month: this.currentMonth,
+                            norm: this.normHours,
+                            norm52: this.norm52,
+                            graphic: this.selectedGraphic,
+                            savedAt: new Date().toISOString()
+                        };
+                        await callApi('save', data);
+                        this.syncStatus = 'synced';
+                        this.showToast('✅ Данные сохранены в облако', 'success');
+                    } catch (e) {
+                        this.syncStatus = 'error';
+                        this.showToast('❌ Ошибка сохранения: ' + e.message, 'error');
                     }
                 },
 
-                async syncFromCloud() {
-                    if (!this.cloudConfigured) return;
-                    this.cloudSyncStatus = 'loading';
-                    const data = await loadFromGist(this.currentMonth, this.selectedGraphic);
-                    if (data) {
-                        this.employees = data.employees;
-                        if (data.norm) this.normHours = data.norm;
-                        if (data.norm52) this.norm52 = data.norm52;
-                        if (data.graphic) this.selectedGraphic = data.graphic;
-                        this.monthDataExists = true;
-                        this.cloudSyncStatus = 'synced';
-                        this.showToast('☁️ Данные загружены из облака', 'success');
-                        return true;
-                    } else {
-                        this.cloudSyncStatus = 'idle';
+                async loadFromCloud() {
+                    try {
+                        this.syncStatus = 'loading';
+                        const data = await callApi('get');
+                        if (data && data.employees) {
+                            this.employees = data.employees;
+                            if (data.norm) this.normHours = data.norm;
+                            if (data.norm52) this.norm52 = data.norm52;
+                            if (data.graphic) this.selectedGraphic = data.graphic;
+                            this.syncStatus = 'synced';
+                            this.showToast('☁️ Данные загружены из облака', 'success');
+                            return true;
+                        }
+                        this.syncStatus = 'idle';
                         return false;
-                    }
-                },
-
-                async syncAfterChange() {
-                    this.saveToLocal();
-                    if (this.cloudConfigured) {
-                        await this.syncToCloud();
+                    } catch (e) {
+                        this.syncStatus = 'error';
+                        this.showToast('❌ Ошибка загрузки: ' + e.message, 'error');
+                        return false;
                     }
                 },
 
@@ -682,7 +524,7 @@
                         salaryBase: 90000,
                         hours: Array(daysCount).fill(0)
                     });
-                    this.syncAfterChange();
+                    this.autoSave();
                 },
                 removeEmployee(index) {
                     if (this.employees.length <= 1) {
@@ -691,7 +533,7 @@
                     }
                     if (confirm(`Удалить "${this.employees[index].name}"?`)) {
                         this.employees.splice(index, 1);
-                        this.syncAfterChange();
+                        this.autoSave();
                     }
                 },
                 resetMonth() {
@@ -699,7 +541,7 @@
                         this.employees.forEach(emp => {
                             emp.hours = Array(this.days.length).fill(0);
                         });
-                        this.syncAfterChange();
+                        this.autoSave();
                         this.showToast('🔄 Часы сброшены', 'success');
                     }
                 },
@@ -719,15 +561,12 @@
                                 }
                             }
                         });
-                        this.syncAfterChange();
+                        this.autoSave();
                         this.showToast('✅ Табель заполнен', 'success');
                     }
                 },
                 deleteMonth() {
-                    const monthKey = getMonthKey(this.currentMonth, this.selectedGraphic);
                     if (confirm(`Удалить все данные за ${this.currentMonthName} (${this.selectedGraphic})?`)) {
-                        localStorage.removeItem(monthKey);
-                        this.monthDataExists = false;
                         const daysCount = this.days.length;
                         this.employees = JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES));
                         this.employees.forEach(emp => {
@@ -735,118 +574,8 @@
                         });
                         this.norm52 = calculateNorm52(daysCount);
                         this.normHours = calculateNormShift(daysCount, this.selectedGraphic);
-                        // Сохраняем пустые данные в облако
-                        if (this.cloudConfigured) {
-                            const data = {
-                                employees: this.employees,
-                                month: this.currentMonth,
-                                norm: this.normHours,
-                                norm52: this.norm52,
-                                graphic: this.selectedGraphic,
-                                savedAt: new Date().toISOString()
-                            };
-                            saveToGist(data);
-                        }
+                        this.autoSave();
                         this.showToast('🗑️ Данные удалены!', 'success');
-                    }
-                },
-                saveToLocal() {
-                    try {
-                        const monthKey = getMonthKey(this.currentMonth, this.selectedGraphic);
-                        const data = {
-                            employees: this.employees,
-                            month: this.currentMonth,
-                            norm: this.normHours,
-                            norm52: this.norm52,
-                            graphic: this.selectedGraphic,
-                            savedAt: new Date().toISOString()
-                        };
-                        localStorage.setItem(monthKey, JSON.stringify(data));
-                        this.monthDataExists = true;
-                        return true;
-                    } catch (e) {
-                        console.error('Ошибка сохранения:', e);
-                        return false;
-                    }
-                },
-                loadFromLocal() {
-                    return this.loadMonthData(this.currentMonth, this.selectedGraphic);
-                },
-                loadMonthData(month, graphic) {
-                    try {
-                        const monthKey = getMonthKey(month, graphic);
-                        const raw = localStorage.getItem(monthKey);
-                        if (raw) {
-                            const data = JSON.parse(raw);
-                            if (data.employees && Array.isArray(data.employees) && data.employees.length > 0) {
-                                this.employees = data.employees;
-                                if (data.norm) this.normHours = data.norm;
-                                if (data.norm52) this.norm52 = data.norm52;
-                                if (data.graphic) this.selectedGraphic = data.graphic;
-                                this.monthDataExists = true;
-                                return true;
-                            }
-                        }
-                        const prevMonth = getPrevMonth(month);
-                        const prevMonthKey = getMonthKey(prevMonth, graphic);
-                        const prevRaw = localStorage.getItem(prevMonthKey);
-                        if (prevRaw) {
-                            const prevData = JSON.parse(prevRaw);
-                            if (prevData.employees && Array.isArray(prevData.employees) && prevData.employees.length > 0) {
-                                const daysCount = this.days.length;
-                                this.employees = prevData.employees.map(emp => ({
-                                    name: emp.name,
-                                    salaryBase: emp.salaryBase || 90000,
-                                    hours: Array(daysCount).fill(0)
-                                }));
-                                this.norm52 = calculateNorm52(daysCount);
-                                this.normHours = calculateNormShift(daysCount, this.selectedGraphic);
-                                this.monthDataExists = false;
-                                return true;
-                            }
-                        }
-                        this.monthDataExists = false;
-                        const daysCount = this.days.length;
-                        this.employees = JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES));
-                        this.employees.forEach(emp => {
-                            emp.hours = Array(daysCount).fill(0);
-                        });
-                        this.norm52 = calculateNorm52(daysCount);
-                        this.normHours = calculateNormShift(daysCount, this.selectedGraphic);
-                        return false;
-                    } catch (e) {
-                        console.error('Ошибка загрузки:', e);
-                        return false;
-                    }
-                },
-                async updateDays(monthValue) {
-                    if (!monthValue) return;
-                    const parts = monthValue.split('-');
-                    const year = parseInt(parts[0]);
-                    const month = parseInt(parts[1]);
-                    const daysCount = getDaysInMonth(year, month);
-                    this.days = Array.from({ length: daysCount }, (_, i) => i + 1);
-                    this.dayOfWeek = this.days.map(day => getDayOfWeek(year, month, day));
-                    this.norm52 = calculateNorm52(daysCount);
-                    this.normHours = calculateNormShift(daysCount, this.selectedGraphic);
-                    
-                    let loaded = false;
-                    if (this.cloudConfigured) {
-                        loaded = await this.syncFromCloud();
-                    }
-                    if (!loaded) {
-                        this.loadMonthData(monthValue, this.selectedGraphic);
-                    }
-                },
-                onMonthChange() {
-                    this.updateDays(this.currentMonth);
-                },
-                onGraphicChange() {
-                    const daysCount = this.days.length;
-                    this.normHours = calculateNormShift(daysCount, this.selectedGraphic);
-                    this.loadMonthData(this.currentMonth, this.selectedGraphic);
-                    if (this.cloudConfigured) {
-                        this.syncFromCloud();
                     }
                 },
                 printTable() { window.print(); },
@@ -887,6 +616,72 @@
                     if (this.toastTimeout) clearTimeout(this.toastTimeout);
                     this.toast = { show: true, message, type };
                     this.toastTimeout = setTimeout(() => { this.toast.show = false; }, 3000);
+                },
+                loadMonthData(month, graphic) {
+                    try {
+                        const monthKey = getMonthKey(month, graphic);
+                        const raw = localStorage.getItem(monthKey);
+                        if (raw) {
+                            const data = JSON.parse(raw);
+                            if (data.employees && Array.isArray(data.employees) && data.employees.length > 0) {
+                                this.employees = data.employees;
+                                if (data.norm) this.normHours = data.norm;
+                                if (data.norm52) this.norm52 = data.norm52;
+                                if (data.graphic) this.selectedGraphic = data.graphic;
+                                return true;
+                            }
+                        }
+                        const prevMonth = getPrevMonth(month);
+                        const prevMonthKey = getMonthKey(prevMonth, graphic);
+                        const prevRaw = localStorage.getItem(prevMonthKey);
+                        if (prevRaw) {
+                            const prevData = JSON.parse(prevRaw);
+                            if (prevData.employees && Array.isArray(prevData.employees) && prevData.employees.length > 0) {
+                                const daysCount = this.days.length;
+                                this.employees = prevData.employees.map(emp => ({
+                                    name: emp.name,
+                                    salaryBase: emp.salaryBase || 90000,
+                                    hours: Array(daysCount).fill(0)
+                                }));
+                                this.norm52 = calculateNorm52(daysCount);
+                                this.normHours = calculateNormShift(daysCount, this.selectedGraphic);
+                                return true;
+                            }
+                        }
+                        const daysCount = this.days.length;
+                        this.employees = JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES));
+                        this.employees.forEach(emp => {
+                            emp.hours = Array(daysCount).fill(0);
+                        });
+                        this.norm52 = calculateNorm52(daysCount);
+                        this.normHours = calculateNormShift(daysCount, this.selectedGraphic);
+                        return false;
+                    } catch (e) {
+                        console.error('Ошибка загрузки:', e);
+                        return false;
+                    }
+                },
+                async updateDays(monthValue) {
+                    if (!monthValue) return;
+                    const parts = monthValue.split('-');
+                    const year = parseInt(parts[0]);
+                    const month = parseInt(parts[1]);
+                    const daysCount = getDaysInMonth(year, month);
+                    this.days = Array.from({ length: daysCount }, (_, i) => i + 1);
+                    this.dayOfWeek = this.days.map(day => getDayOfWeek(year, month, day));
+                    this.norm52 = calculateNorm52(daysCount);
+                    this.normHours = calculateNormShift(daysCount, this.selectedGraphic);
+                    this.loadMonthData(monthValue, this.selectedGraphic);
+                    await this.loadFromCloud();
+                },
+                onMonthChange() {
+                    this.updateDays(this.currentMonth);
+                },
+                onGraphicChange() {
+                    const daysCount = this.days.length;
+                    this.normHours = calculateNormShift(daysCount, this.selectedGraphic);
+                    this.loadMonthData(this.currentMonth, this.selectedGraphic);
+                    this.loadFromCloud();
                 }
             },
             async mounted() {
@@ -895,10 +690,6 @@
                 const month = String(now.getMonth() + 1).padStart(2, '0');
                 this.currentMonth = `${year}-${month}`;
                 await this.updateDays(this.currentMonth);
-                
-                if (this.cloudConfigured) {
-                    await this.syncFromCloud();
-                }
             }
         });
     })();
