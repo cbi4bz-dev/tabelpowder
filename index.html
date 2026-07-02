@@ -278,7 +278,7 @@
         .info-bar .norm-calc { color: #666; font-size: 12px; }
         .info-bar .highlight { background: #e8f0fe; padding: 4px 14px; border-radius: 12px; }
 
-        /* ===== МОДАЛЬНОЕ ОКНО ===== */
+        /* ===== МОДАЛЬНЫЕ ОКНА ===== */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -307,25 +307,9 @@
         .history-item .action { font-weight: 600; color: #1a3b6e; }
         .history-item .details { color: #555; font-size: 12px; }
 
-        /* ===== МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ ===== */
-        .edit-modal .modal {
-            max-width: 420px;
-        }
-        .edit-modal .modal-title {
-            font-size: 18px;
-            margin-bottom: 12px;
-        }
-        .edit-modal .field-group {
-            margin-bottom: 14px;
-        }
-        .edit-modal .field-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: #1a2332;
-            margin-bottom: 4px;
-        }
-        .edit-modal .field-group input[type="number"] {
+        .field-group { margin-bottom: 14px; }
+        .field-group label { display: block; font-size: 13px; font-weight: 600; color: #1a2332; margin-bottom: 4px; }
+        .field-group input[type="number"] {
             width: 100%;
             padding: 10px 12px;
             border: 1px solid #d0d7e3;
@@ -333,33 +317,35 @@
             font-size: 16px;
             text-align: center;
         }
-        .edit-modal .field-group input[type="number"]:focus {
+        .field-group input[type="number"]:focus {
             outline: 2px solid #1a3b6e;
             border-color: transparent;
         }
-        .edit-modal .type-buttons {
+
+        .type-buttons {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 8px;
         }
-        .edit-modal .type-buttons .btn {
+        .type-buttons .btn {
             padding: 10px;
             font-size: 14px;
             justify-content: center;
             border-radius: 8px;
             border: 2px solid transparent;
         }
-        .edit-modal .type-buttons .btn.active {
+        .type-buttons .btn.active {
             border-color: #1a3b6e;
             box-shadow: 0 0 0 2px rgba(26, 59, 110, 0.2);
         }
-        .edit-modal .modal-actions {
+
+        .modal-actions {
             display: flex;
             gap: 10px;
             margin-top: 16px;
             justify-content: flex-end;
         }
-        .edit-modal .modal-actions .btn {
+        .modal-actions .btn {
             padding: 10px 24px;
             font-size: 14px;
         }
@@ -561,10 +547,10 @@
             .modal-title { font-size: 17px; }
             .history-item { font-size: 12px; padding: 8px 10px; }
             
-            .edit-modal .type-buttons {
+            .type-buttons {
                 grid-template-columns: 1fr 1fr;
             }
-            .edit-modal .modal-actions .btn {
+            .modal-actions .btn {
                 padding: 8px 16px;
                 font-size: 13px;
             }
@@ -682,11 +668,7 @@
     <!-- БЫСТРЫЕ КНОПКИ ТИПОВ ДНЕЙ -->
     <div class="day-type-actions">
         <span class="label">📋 Массовое проставление:</span>
-        <button class="btn btn-type-work" @click="massAssignType('work')">✅ Работа</button>
-        <button class="btn btn-type-sick" @click="massAssignType('sick')">🤒 Больничный</button>
-        <button class="btn btn-type-vacation" @click="massAssignType('vacation')">🌴 Отпуск</button>
-        <button class="btn btn-type-dayoff" @click="massAssignType('dayoff')">📅 Выходной</button>
-        <button class="btn btn-type-reset" @click="massAssignType('reset')">❌ Сбросить</button>
+        <button class="btn btn-type-work" @click="openMassModal">📋 Открыть</button>
     </div>
 
     <!-- ТАБЛИЦА -->
@@ -746,6 +728,51 @@
         <span class="norm-calc">{{ normCalcText }}</span>
         <span class="highlight"><strong>Ставка:</strong> оклад / {{ normHours }}ч</span>
         <span style="color:#888;font-size:11px;margin-left:auto;">✏️ Нажми на часы для редактирования</span>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО МАССОВОГО ПРОСТАВЛЕНИЯ -->
+    <div class="modal-overlay" :class="{active: massModalVisible}" @click.self="closeMassModal">
+        <div class="modal" style="max-width:450px;">
+            <button class="modal-close" @click="closeMassModal">✕</button>
+            <div class="modal-title" style="font-size:18px;margin-bottom:16px;">📋 Массовое проставление</div>
+            
+            <div class="field-group">
+                <label>👤 Сотрудник</label>
+                <select v-model="massData.employee" style="width:100%;padding:10px;border:1px solid #d0d7e3;border-radius:8px;font-size:14px;background:white;">
+                    <option value="all">Все сотрудники</option>
+                    <option v-for="(emp, idx) in employees" :key="idx" :value="idx">{{ emp.name }}</option>
+                </select>
+            </div>
+            
+            <div class="field-group">
+                <label>📅 Диапазон дат</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                    <div>
+                        <label style="font-size:11px;color:#666;">С</label>
+                        <select v-model="massData.dateFrom" style="width:100%;padding:8px;border:1px solid #d0d7e3;border-radius:6px;font-size:13px;background:white;">
+                            <option v-for="day in days" :key="'from-'+day" :value="day">{{ day }}</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:11px;color:#666;">По</label>
+                        <select v-model="massData.dateTo" style="width:100%;padding:8px;border:1px solid #d0d7e3;border-radius:6px;font-size:13px;background:white;">
+                            <option v-for="day in days" :key="'to-'+day" :value="day">{{ day }}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="field-group" style="margin-bottom:0;">
+                <label style="display:block;font-size:13px;font-weight:600;color:#1a2332;margin-bottom:6px;">📋 Тип дня</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                    <button class="btn btn-type-work" style="padding:10px;font-size:14px;border-radius:8px;border:2px solid transparent;background:#e8f5e9;color:#1e7b4c;border-color:#a5d6a7;cursor:pointer;" @click="applyMassType('work')">✅ Работа</button>
+                    <button class="btn btn-type-sick" style="padding:10px;font-size:14px;border-radius:8px;border:2px solid transparent;background:#fef3c7;color:#92400e;border-color:#fcd34d;cursor:pointer;" @click="applyMassType('sick')">🤒 Больничный</button>
+                    <button class="btn btn-type-vacation" style="padding:10px;font-size:14px;border-radius:8px;border:2px solid transparent;background:#dbeafe;color:#1e40af;border-color:#93c5fd;cursor:pointer;" @click="applyMassType('vacation')">🌴 Отпуск</button>
+                    <button class="btn btn-type-dayoff" style="padding:10px;font-size:14px;border-radius:8px;border:2px solid transparent;background:#f3f4f6;color:#4b5563;border-color:#d1d5db;cursor:pointer;" @click="applyMassType('dayoff')">📅 Выходной</button>
+                    <button class="btn btn-type-reset" style="padding:10px;font-size:14px;border-radius:8px;border:2px solid transparent;background:#fef2f2;color:#991b1b;border-color:#fca5a5;cursor:pointer;grid-column:1/3;" @click="applyMassType('reset')">❌ Сбросить (все станут "Работа")</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- ИСТОРИЯ (МОДАЛЬНОЕ ОКНО) -->
@@ -958,7 +985,14 @@
                 editModalVisible: false,
                 editModalData: null,
                 editModalEmp: null,
-                editModalIdx: null
+                editModalIdx: null,
+                // Массовое проставление
+                massModalVisible: false,
+                massData: {
+                    employee: 'all',
+                    dateFrom: 1,
+                    dateTo: 30
+                }
             },
             computed: {
                 currentMonthName() {
@@ -1081,57 +1115,50 @@
                     return map[type] || type;
                 },
 
-                // ===== МАССОВОЕ ПРОСТАВЛЕНИЕ (ОБНОВЛЕНО) =====
-                massAssignType(type) {
-                    // 1. Выбор сотрудника
-                    let employeeOptions = this.employees.map((emp, i) => `${i+1}. ${emp.name}`).join('\n');
-                    let employeeChoice = prompt(
-                        `Выберите сотрудника:\n${employeeOptions}\n\nВведите номер сотрудника или * для всех:`,
-                        '*'
-                    );
-                    if (employeeChoice === null) return;
+                // ===== МАССОВОЕ ПРОСТАВЛЕНИЕ (С МОДАЛКОЙ) =====
+                openMassModal() {
+                    this.massData.dateFrom = 1;
+                    this.massData.dateTo = this.days.length;
+                    this.massData.employee = 'all';
+                    this.massModalVisible = true;
+                },
 
+                closeMassModal() {
+                    this.massModalVisible = false;
+                },
+
+                applyMassType(type) {
+                    // Определяем сотрудников
                     let targetEmployees = [];
-                    if (employeeChoice === '*') {
+                    if (this.massData.employee === 'all') {
                         targetEmployees = this.employees;
                     } else {
-                        let idx = parseInt(employeeChoice) - 1;
-                        if (isNaN(idx) || idx < 0 || idx >= this.employees.length) {
-                            this.showToast('⚠️ Неверный номер сотрудника!', 'error');
+                        let idx = parseInt(this.massData.employee);
+                        if (idx >= 0 && idx < this.employees.length) {
+                            targetEmployees = [this.employees[idx]];
+                        } else {
+                            this.showToast('⚠️ Ошибка выбора сотрудника', 'error');
                             return;
                         }
-                        targetEmployees = [this.employees[idx]];
                     }
 
-                    // 2. Выбор диапазона дат
-                    let range = prompt(
-                        `Введите диапазон дней (например, 1-15 или * для всех):\nДоступно: 1-${this.days.length}`,
-                        '*'
-                    );
-                    if (range === null) return;
+                    // Определяем диапазон
+                    let startIdx = Math.max(0, this.massData.dateFrom - 1);
+                    let endIdx = Math.min(this.days.length - 1, this.massData.dateTo - 1);
 
-                    let startIdx = 0;
-                    let endIdx = this.days.length - 1;
-
-                    if (range !== '*') {
-                        let parts = range.split('-');
-                        startIdx = Math.max(0, parseInt(parts[0]) - 1) || 0;
-                        endIdx = Math.min(this.days.length - 1, (parseInt(parts[1]) || parseInt(parts[0])) - 1);
-                    }
-
-                    if (isNaN(startIdx) || isNaN(endIdx) || startIdx > endIdx) {
-                        this.showToast('⚠️ Неверный диапазон!', 'error');
+                    if (startIdx > endIdx) {
+                        this.showToast('⚠️ Неверный диапазон дат', 'error');
                         return;
                     }
 
-                    // 3. Подтверждение
+                    // Подтверждение
                     let employeeNames = targetEmployees.map(e => e.name).join(', ');
-                    let daysRange = startIdx === 0 && endIdx === this.days.length - 1 ? 'все дни' : `${startIdx+1}-${endIdx+1}`;
-                    let confirmMsg = `Установить "${this.getDayTypeLabel(type)}" для:\n👤 ${employeeNames}\n📅 Дни: ${daysRange}\n\nПродолжить?`;
+                    let typeLabel = this.getDayTypeLabel(type);
+                    let confirmMsg = `Установить "${typeLabel}" для:\n👤 ${employeeNames}\n📅 ${this.massData.dateFrom}-${this.massData.dateTo} числа\n\nПродолжить?`;
                     
                     if (!confirm(confirmMsg)) return;
 
-                    // 4. Применяем
+                    // Применяем
                     targetEmployees.forEach(emp => {
                         for (let i = startIdx; i <= endIdx; i++) {
                             if (type === 'reset') {
@@ -1146,8 +1173,9 @@
                     });
 
                     this.autoSave();
+                    this.closeMassModal();
                     this.showToast(
-                        `✅ "${this.getDayTypeLabel(type)}" установлен для ${employeeNames} (${endIdx - startIdx + 1} дней)`,
+                        `✅ "${typeLabel}" установлен для ${employeeNames} (${startIdx+1}-${endIdx+1} числа)`,
                         'success'
                     );
                 },
@@ -1432,6 +1460,8 @@
                     this.dayOfWeek = this.days.map(day => getDayOfWeek(year, month, day));
                     this.norm52 = calculateNorm52(daysCount);
                     this.normHours = calculateNormShift(daysCount, this.selectedGraphic);
+                    // Обновляем dateTo в массовом проставлении
+                    this.massData.dateTo = daysCount;
                     this.loadMonthData(monthValue, this.selectedGraphic);
                     await this.loadFromCloud();
                 },
