@@ -528,10 +528,7 @@
 
     <!-- ===== ДАШБОРД ===== -->
     <div class="dashboard" :class="{hidden: currentView!=='dashboard'}">
-        <div class="greeting">
-            Сегодня, {{ currentDate }}
-            <small>· Смена {{ selectedGraphic }}</small>
-        </div>
+        <div class="greeting">Сегодня, {{ currentDate }} <small>· Смена {{ selectedGraphic }}</small></div>
 
         <div class="employee-grid">
             <div v-for="emp in employees" :key="emp.name" class="emp-card" @click="openProfile(emp)">
@@ -569,7 +566,7 @@
             </div>
             <div class="days">
                 <div v-for="d in weekDays" :key="d" class="dow">{{ d }}</div>
-                <div v-for="day in calendarDays" :key="day.date" 
+                <div v-for="day in calendarDays" :key="day.day" 
                      class="day" 
                      :class="{
                          today: day.isToday,
@@ -612,7 +609,7 @@
                         <th style="min-width:100px;">Сотрудник</th>
                         <th style="min-width:55px;">Роль</th>
                         <th style="min-width:55px;">Оклад</th>
-                        <th v-for="(day, i) in days" :key="day" style="min-width:55px;">
+                        <th v-for="(day, i) in days" :key="i" style="min-width:55px;">
                             {{ day }}<br><span style="font-weight:400;font-size:8px;color:#5a6a80;">{{ weekDays[dayOfWeek[i]] }}</span>
                         </th>
                         <th>Итого</th>
@@ -647,7 +644,7 @@
                     </tr>
                     <tr class="stats-row">
                         <td class="stats-label" colspan="3">📊 Итого за месяц</td>
-                        <td v-for="day in days" :key="'stat-'+day">{{ dayStats[day-1] || '' }}</td>
+                        <td v-for="(day, i) in days" :key="i">{{ dayStats[i] || '' }}</td>
                         <td class="total-cell">{{ totalMonthHours }}</td>
                         <td class="salary-cell">{{ formatSalary(totalMonthSalary) }}</td>
                     </tr>
@@ -682,9 +679,7 @@
             <button class="modal-close" @click="closeDayDetail">✕</button>
             <div class="modal-title">📅 {{ dayDetailData ? dayDetailData.day + ' ' + currentMonthName : '' }}</div>
             <div v-if="dayDetailData">
-                <div v-if="dayDetailData.employees.length === 0" style="color:#5a6a80;text-align:center;padding:20px 0;">
-                    В этот день никто не работал
-                </div>
+                <div v-if="dayDetailData.employees.length === 0" style="color:#5a6a80;text-align:center;padding:20px 0;">В этот день никто не работал</div>
                 <div v-else>
                     <div v-for="emp in dayDetailData.employees" :key="emp.name" class="history-item">
                         <span style="font-weight:500;">{{ emp.name }}</span>
@@ -788,16 +783,16 @@
         <div class="print-title">📋 ТАБЕЛЬ УЧЕТА РАБОЧЕГО ВРЕМЕНИ</div>
         <div class="print-subtitle">Цех порошковой покраски · {{ currentMonthName }} · График {{ selectedGraphic }}</div>
         <table>
-            <thead><tr><th>Сотрудник</th><th v-for="day in days" :key="'p-'+day">{{ day }}</th><th>Итого</th></tr></thead>
+            <thead><tr><th>Сотрудник</th><th v-for="(day, i) in days" :key="i">{{ day }}</th><th>Итого</th></tr></thead>
             <tbody>
-                <tr v-for="emp in employees" :key="'p-'+emp.name">
+                <tr v-for="emp in employees" :key="emp.name">
                     <td>{{ emp.name }}</td>
-                    <td v-for="(day, i) in days" :key="'pd-'+i">{{ emp.hours[i] || '' }}</td>
+                    <td v-for="(day, i) in days" :key="i">{{ emp.hours[i] || '' }}</td>
                     <td>{{ totalHours(emp.hours) }}</td>
                 </tr>
                 <tr style="font-weight:700;background:#f5f5f5;">
                     <td>Итого часов:</td>
-                    <td v-for="day in days" :key="'ps-'+day">{{ dayStats[day-1] || '' }}</td>
+                    <td v-for="(day, i) in days" :key="i">{{ dayStats[i] || '' }}</td>
                     <td>{{ totalMonthHours }}</td>
                 </tr>
             </tbody>
@@ -879,6 +874,11 @@
             } catch (e) { console.error('API error:', e); throw e; }
         }
 
+        function ensureArray(val) {
+            if (Array.isArray(val)) return val;
+            return [];
+        }
+
         new Vue({
             el: '#app',
             data: {
@@ -937,7 +937,9 @@
                 },
                 totalMonthHours() {
                     let total = 0;
-                    this.employees.forEach(e => { total += this.totalHours(e.hours); });
+                    this.employees.forEach(e => { 
+                        total += this.totalHours(e.hours); 
+                    });
                     return Math.round(total * 10) / 10;
                 },
                 totalMonthSalary() {
@@ -953,7 +955,8 @@
                 dayStats() {
                     const stats = Array(this.days.length).fill(0);
                     this.employees.forEach(e => {
-                        e.hours.forEach((h, i) => {
+                        const hours = ensureArray(e.hours);
+                        hours.forEach((h, i) => {
                             if (h && e.dayType && e.dayType[i] === 'work') stats[i] += h;
                         });
                     });
@@ -989,7 +992,8 @@
                         const isWeekend = dow === 0 || dow === 6;
                         let hasWork = false;
                         this.employees.forEach(e => {
-                            if (e.hours && e.hours[d-1] > 0) hasWork = true;
+                            const hours = ensureArray(e.hours);
+                            if (hours && hours[d-1] > 0) hasWork = true;
                         });
                         days.push({ day: d, date: new Date(year, month, d), isToday, hasWork, isWeekend });
                     }
@@ -998,8 +1002,8 @@
             },
             methods: {
                 totalHours(arr) {
-                    if (!arr) return 0;
-                    return arr.reduce((a, v) => a + (v || 0), 0);
+                    const safe = ensureArray(arr);
+                    return safe.reduce((a, v) => a + (v || 0), 0);
                 },
                 calcSalary(emp) {
                     const total = this.totalHours(emp.hours);
@@ -1024,8 +1028,9 @@
                 getTodayHours(emp) {
                     const now = new Date();
                     const idx = now.getDate() - 1;
-                    if (!emp.hours || idx < 0 || idx >= emp.hours.length) return 0;
-                    return emp.hours[idx] || 0;
+                    const hours = ensureArray(emp.hours);
+                    if (idx < 0 || idx >= hours.length) return 0;
+                    return hours[idx] || 0;
                 },
                 getTodayProgress(emp) {
                     const h = this.getTodayHours(emp);
@@ -1034,8 +1039,8 @@
                 },
                 formatDate(ts) { return formatDate(ts); },
                 countShifts(emp) {
-                    if (!emp.hours) return 0;
-                    return emp.hours.filter(h => h > 0).length;
+                    const hours = ensureArray(emp.hours);
+                    return hours.filter(h => h > 0).length;
                 },
                 avgHoursPerDay(emp) {
                     const total = this.totalHours(emp.hours);
@@ -1051,8 +1056,9 @@
                     if (dayIdx < 0 || dayIdx >= this.days.length) return;
                     const employees = [];
                     this.employees.forEach(e => {
-                        if (e.hours && e.hours[dayIdx] > 0) {
-                            employees.push({ name: e.name, hours: e.hours[dayIdx] });
+                        const hours = ensureArray(e.hours);
+                        if (hours && hours[dayIdx] > 0) {
+                            employees.push({ name: e.name, hours: hours[dayIdx] });
                         }
                     });
                     this.dayDetailData = {
@@ -1178,6 +1184,7 @@
                             this.employees = data.employees.map(e => {
                                 if (!e.dayType) e.dayType = Array(this.days.length).fill('work');
                                 if (!e.role) e.role = 'Сотрудник';
+                                if (!Array.isArray(e.hours)) e.hours = [];
                                 return e;
                             });
                             if (data.norm) this.normHours = data.norm;
@@ -1319,6 +1326,7 @@
                                 this.employees = data.employees.map(e => {
                                     if (!e.dayType) e.dayType = Array(this.days.length).fill('work');
                                     if (!e.role) e.role = 'Сотрудник';
+                                    if (!Array.isArray(e.hours)) e.hours = [];
                                     return e;
                                 });
                                 if (data.norm) this.normHours = data.norm;
