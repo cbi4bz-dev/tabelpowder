@@ -128,6 +128,7 @@
         .emp-card .badge { font-size: 11px; padding: 2px 10px; border-radius: 12px; background: #1e2738; color: #f0b90b; }
         .emp-card .progress-wrap { margin: 8px 0 4px; height: 6px; background: #1e2738; border-radius: 4px; overflow: hidden; }
         .emp-card .progress-wrap .fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #f0b90b, #f59e0b); transition: width 0.6s; }
+        /* ИСПРАВЛЕНО: подпись процента */
         .emp-card .bottom { display: flex; justify-content: space-between; font-size: 13px; color: #8a9bb0; }
         .emp-card .bottom .hours { color: #e8edf4; font-weight: 500; }
 
@@ -145,6 +146,7 @@
             text-align: center;
         }
         .stat-box .val { font-size: 22px; font-weight: 700; color: #f0b90b; }
+        /* ИСПРАВЛЕНО: подпись "за месяц" */
         .stat-box .label { font-size: 11px; color: #8a9bb0; margin-top: 2px; }
 
         .mini-calendar {
@@ -289,7 +291,6 @@
             cursor: pointer;
         }
         .day-cell .day-input:focus { outline: 2px solid #f0b90b; border-color: transparent; background: #1a2130; }
-
         .day-cell.norm { background: #0f2a0f; border-radius: 4px; }
         .day-cell.norm .day-input { background: #1a3a1a; border-color: #2a5a2a; color: #4ade80; }
         .day-cell.below { background: #2a2a0f; border-radius: 4px; }
@@ -599,17 +600,19 @@
                 <div class="progress-wrap">
                     <div class="fill" :style="{width: Math.min(getTodayProgress(emp), 100) + '%'}"></div>
                 </div>
+                <!-- ИСПРАВЛЕНО: процент и часы за день -->
                 <div class="bottom">
-                    <span>{{ Math.min(getTodayProgress(emp), 100) }}%</span>
+                    <span>{{ Math.min(getTodayProgress(emp), 100) }}% от нормы за день</span>
                     <span class="hours">{{ getTodayHours(emp) }}ч / {{ getDayNorm }}ч</span>
                 </div>
             </div>
         </div>
         <div class="stats-grid">
             <div class="stat-box"><div class="val">{{ employees.length }}</div><div class="label">👥 Сотрудников</div></div>
-            <div class="stat-box"><div class="val">{{ totalMonthHours }}</div><div class="label">⏱️ Всего часов</div></div>
-            <div class="stat-box"><div class="val">{{ formatSalary(totalMonthSalary) }}</div><div class="label">💰 Зарплата</div></div>
-            <div class="stat-box"><div class="val">{{ normHours }}</div><div class="label">📅 Норма</div></div>
+            <!-- ИСПРАВЛЕНО: подпись "за месяц" -->
+            <div class="stat-box"><div class="val">{{ totalMonthHours }}</div><div class="label">⏱️ Всего часов за месяц</div></div>
+            <div class="stat-box"><div class="val">{{ formatSalary(totalMonthSalary) }}</div><div class="label">💰 Зарплата за месяц</div></div>
+            <div class="stat-box"><div class="val">{{ normHours }}</div><div class="label">📅 Норма за месяц</div></div>
             <div class="stat-box"><div class="val" style="color:#4ade80;">{{ Math.round(totalMonthHours / (employees.length || 1) * 10) / 10 }}</div><div class="label">📊 Среднее на сотрудника</div></div>
             <div class="stat-box"><div class="val" :style="{color: overtime > 0 ? '#fbbf24' : '#4ade80'}">{{ overtime > 0 ? '+' + overtime : overtime }}</div><div class="label">📈 Переработка</div></div>
         </div>
@@ -719,6 +722,8 @@
                 <div class="field-group"><label>👤 Имя</label><div style="font-size:16px;font-weight:500;">{{ profileData.name }}</div></div>
                 <div class="field-group"><label>📋 Роль</label><div style="font-size:16px;font-weight:500;">{{ profileData.role || 'Сотрудник' }}</div></div>
                 <div class="field-group"><label>💰 Оклад (5/2)</label><div style="font-size:16px;font-weight:500;color:#4ade80;">{{ formatSalary(profileData.salaryBase) }} ₽</div></div>
+                <!-- ДОБАВЛЕНО: норма за месяц -->
+                <div class="field-group"><label>📋 Норма за месяц</label><div style="font-size:16px;font-weight:500;color:#f0b90b;">{{ normHours }}ч</div></div>
                 <div class="field-group"><label>⏱️ Отработано часов</label><div style="font-size:16px;font-weight:500;">{{ totalHours(profileData.hours) }}</div></div>
                 <div class="field-group"><label>📅 Смен за месяц</label><div style="font-size:16px;font-weight:500;">{{ countShifts(profileData) }}</div></div>
                 <div class="field-group"><label>📈 Среднее в день</label><div style="font-size:16px;font-weight:500;">{{ avgHoursPerDay(profileData) }}ч</div></div>
@@ -1150,7 +1155,7 @@
                 },
                 closeProfile() { this.profileModalVisible = false; this.profileData = null; },
 
-                // ===== РЕДАКТИРОВАНИЕ ДНЯ С ИСТОРИЕЙ =====
+                // ===== РЕДАКТИРОВАНИЕ ДНЯ =====
                 openEditModal(emp, idx) {
                     this.editModalEmp = emp;
                     this.editModalIdx = idx;
@@ -1175,7 +1180,6 @@
                         const idx = this.editModalIdx;
                         const day = this.days[idx];
                         
-                        // Собираем изменения для истории
                         const changes = [];
                         const oldHours = emp.hours[idx] || 0;
                         const newHours = this.editModalData.hours;
@@ -1200,13 +1204,11 @@
                             return;
                         }
 
-                        // Применяем изменения
                         emp.hours[idx] = newHours;
                         emp.dayType[idx] = newType;
                         if (!emp.comments) emp.comments = [];
                         emp.comments[idx] = newComment;
 
-                        // Записываем историю
                         const historyEntry = {
                             timestamp: new Date().toISOString(),
                             action: '✏️ Редактирование',
@@ -1221,20 +1223,16 @@
                     }
                 },
 
-                // ===== ИСТОРИЯ ДЕЙСТВИЙ =====
+                // ===== ИСТОРИЯ =====
                 async saveHistoryToCloud(entry) {
                     try {
-                        // Получаем текущую историю
                         let history = [];
                         try {
                             const data = await callApi('getHistory');
                             history = data || [];
                         } catch (e) {}
-                        
                         history.push(entry);
                         if (history.length > 200) history = history.slice(-200);
-                        
-                        // Сохраняем историю отдельным методом
                         await callApi('saveHistory', history);
                     } catch (e) {
                         console.error('Ошибка сохранения истории:', e);
@@ -1285,7 +1283,6 @@
                         }
                     });
                     
-                    // Записываем в историю
                     const historyEntry = {
                         timestamp: new Date().toISOString(),
                         action: '📋 Массовое проставление',
