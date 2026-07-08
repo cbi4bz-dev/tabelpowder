@@ -5,16 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Powder Flow OS — Табель</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-            background: #0b0f1a; 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0b0f1a;
             color: #e8edf4;
             min-height: 100vh;
             padding: 12px;
         }
-        .app { max-width: 1400px; margin: 0 auto; }
+        .app {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
 
+        /* ===== HEADER ===== */
         .header {
             display: flex;
             justify-content: space-between;
@@ -27,9 +35,23 @@
             flex-wrap: wrap;
             gap: 10px;
         }
-        .logo { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; color: #f0b90b; }
-        .logo span { color: #e8edf4; font-weight: 400; }
-        .nav { display: flex; gap: 6px; flex-wrap: wrap; }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #f0b90b;
+        }
+        .logo span {
+            color: #e8edf4;
+            font-weight: 400;
+        }
+        .nav {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
         .nav .btn {
             padding: 6px 14px;
             border: none;
@@ -41,8 +63,14 @@
             color: #8a9bb0;
             transition: 0.2s;
         }
-        .nav .btn:hover { background: #1e2738; color: #e8edf4; }
-        .nav .btn.active { background: #1e2738; color: #f0b90b; }
+        .nav .btn:hover {
+            background: #1e2738;
+            color: #e8edf4;
+        }
+        .nav .btn.active {
+            background: #1e2738;
+            color: #f0b90b;
+        }
 
         .header-right {
             display: flex;
@@ -50,6 +78,7 @@
             gap: 10px;
             flex-wrap: wrap;
         }
+
         .cloud-status {
             font-size: 11px;
             padding: 4px 12px;
@@ -59,9 +88,26 @@
             border: 1px solid #2a4a2a;
             transition: all 0.3s;
         }
-        .cloud-status.error { background: #2a1a1a; color: #f87171; border-color: #4a2a2a; }
-        .cloud-status.loading { background: #2a2a1a; color: #fbbf24; border-color: #4a4a2a; animation: pulse 1s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .cloud-status.error {
+            background: #2a1a1a;
+            color: #f87171;
+            border-color: #4a2a2a;
+        }
+        .cloud-status.loading {
+            background: #2a2a1a;
+            color: #fbbf24;
+            border-color: #4a4a2a;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
 
         .save-indicator {
             display: inline-flex;
@@ -73,10 +119,26 @@
             background: transparent;
             transition: all 0.3s;
         }
-        .save-indicator.saving { color: #fbbf24; }
-        .save-indicator.saved { color: #4ade80; }
-        .save-indicator.saved .check { animation: popIn 0.3s ease; }
-        @keyframes popIn { 0% { transform: scale(0); } 70% { transform: scale(1.3); } 100% { transform: scale(1); } }
+        .save-indicator.saving {
+            color: #fbbf24;
+        }
+        .save-indicator.saved {
+            color: #4ade80;
+        }
+        .save-indicator.saved .check {
+            animation: popIn 0.3s ease;
+        }
+        @keyframes popIn {
+            0% {
+                transform: scale(0);
+            }
+            70% {
+                transform: scale(1.3);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
 
         .tabs {
             display: flex;
@@ -99,14 +161,34 @@
             color: #8a9bb0;
             transition: 0.2s;
         }
-        .tabs .btn:hover { background: #1e2738; color: #e8edf4; }
-        .tabs .btn.active { background: #f0b90b; color: #0b0f1a; }
+        .tabs .btn:hover {
+            background: #1e2738;
+            color: #e8edf4;
+        }
+        .tabs .btn.active {
+            background: #f0b90b;
+            color: #0b0f1a;
+        }
 
-        .dashboard { display: block; }
-        .dashboard.hidden { display: none; }
-        .greeting { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
-        .greeting small { font-weight: 400; color: #8a9bb0; font-size: 14px; }
+        .dashboard {
+            display: block;
+        }
+        .dashboard.hidden {
+            display: none;
+        }
 
+        .greeting {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .greeting small {
+            font-weight: 400;
+            color: #8a9bb0;
+            font-size: 14px;
+        }
+
+        /* ===== EMPLOYEE CARDS ===== */
         .employee-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -121,15 +203,54 @@
             transition: 0.2s;
             cursor: pointer;
         }
-        .emp-card:hover { border-color: #f0b90b44; transform: translateY(-2px); }
-        .emp-card .top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-        .emp-card .name { font-size: 16px; font-weight: 600; }
-        .emp-card .role { font-size: 12px; color: #8a9bb0; }
-        .emp-card .badge { font-size: 11px; padding: 2px 10px; border-radius: 12px; background: #1e2738; color: #f0b90b; }
-        .emp-card .progress-wrap { margin: 8px 0 4px; height: 6px; background: #1e2738; border-radius: 4px; overflow: hidden; }
-        .emp-card .progress-wrap .fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #f0b90b, #f59e0b); transition: width 0.6s; }
-        .emp-card .bottom { display: flex; justify-content: space-between; font-size: 13px; color: #8a9bb0; }
-        .emp-card .bottom .hours { color: #e8edf4; font-weight: 500; }
+        .emp-card:hover {
+            border-color: #f0b90b44;
+            transform: translateY(-2px);
+        }
+        .emp-card .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        .emp-card .name {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .emp-card .role {
+            font-size: 12px;
+            color: #8a9bb0;
+        }
+        .emp-card .badge {
+            font-size: 11px;
+            padding: 2px 10px;
+            border-radius: 12px;
+            background: #1e2738;
+            color: #f0b90b;
+        }
+        .emp-card .progress-wrap {
+            margin: 8px 0 4px;
+            height: 6px;
+            background: #1e2738;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .emp-card .progress-wrap .fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #f0b90b, #f59e0b);
+            transition: width 0.6s;
+        }
+        .emp-card .bottom {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #8a9bb0;
+        }
+        .emp-card .bottom .hours {
+            color: #e8edf4;
+            font-weight: 500;
+        }
 
         .stats-grid {
             display: grid;
@@ -144,9 +265,18 @@
             padding: 12px 14px;
             text-align: center;
         }
-        .stat-box .val { font-size: 22px; font-weight: 700; color: #f0b90b; }
-        .stat-box .label { font-size: 11px; color: #8a9bb0; margin-top: 2px; }
+        .stat-box .val {
+            font-size: 22px;
+            font-weight: 700;
+            color: #f0b90b;
+        }
+        .stat-box .label {
+            font-size: 11px;
+            color: #8a9bb0;
+            margin-top: 2px;
+        }
 
+        /* ===== CALENDAR ===== */
         .mini-calendar {
             background: #131926;
             border: 1px solid #1e2738;
@@ -160,7 +290,9 @@
             align-items: center;
             margin-bottom: 10px;
         }
-        .mini-calendar .head .month { font-weight: 600; }
+        .mini-calendar .head .month {
+            font-weight: 600;
+        }
         .mini-calendar .head .nav-btn {
             background: none;
             border: none;
@@ -169,14 +301,20 @@
             cursor: pointer;
             padding: 0 8px;
         }
-        .mini-calendar .head .nav-btn:hover { color: #e8edf4; }
+        .mini-calendar .head .nav-btn:hover {
+            color: #e8edf4;
+        }
         .mini-calendar .days {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 4px;
             text-align: center;
         }
-        .mini-calendar .days .dow { font-size: 11px; color: #5a6a80; padding: 4px 0; }
+        .mini-calendar .days .dow {
+            font-size: 11px;
+            color: #5a6a80;
+            padding: 4px 0;
+        }
         .mini-calendar .days .day {
             padding: 6px 0;
             border-radius: 8px;
@@ -185,9 +323,18 @@
             transition: 0.2s;
             position: relative;
         }
-        .mini-calendar .days .day:hover { background: #1e2738; }
-        .mini-calendar .days .day.today { background: #f0b90b; color: #0b0f1a; font-weight: 700; }
-        .mini-calendar .days .day.has-work { color: #f0b90b; font-weight: 600; }
+        .mini-calendar .days .day:hover {
+            background: #1e2738;
+        }
+        .mini-calendar .days .day.today {
+            background: #f0b90b;
+            color: #0b0f1a;
+            font-weight: 700;
+        }
+        .mini-calendar .days .day.has-work {
+            color: #f0b90b;
+            font-weight: 600;
+        }
         .mini-calendar .days .day.has-work::after {
             content: '';
             position: absolute;
@@ -199,11 +346,21 @@
             border-radius: 50%;
             background: #f0b90b;
         }
-        .mini-calendar .days .day.weekend { color: #5a6a80; }
+        .mini-calendar .days .day.weekend {
+            color: #5a6a80;
+        }
 
-        .table-view { display: none; }
-        .table-view.active { display: block; }
-        .table-wrap { overflow-x: auto; margin-top: 8px; }
+        /* ===== TABLE ===== */
+        .table-view {
+            display: none;
+        }
+        .table-view.active {
+            display: block;
+        }
+        .table-wrap {
+            overflow-x: auto;
+            margin-top: 8px;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -243,7 +400,10 @@
             border-bottom: 1px dashed #2a3a4a;
             color: #e8edf4;
         }
-        .emp-name input:focus { outline: none; border-bottom: 2px solid #f0b90b; }
+        .emp-name input:focus {
+            outline: none;
+            border-bottom: 2px solid #f0b90b;
+        }
         .emp-role-input {
             border: none;
             background: transparent;
@@ -253,7 +413,10 @@
             padding: 2px 4px;
             border-bottom: 1px dashed #2a3a4a;
         }
-        .emp-role-input:focus { outline: none; border-bottom: 2px solid #f0b90b; }
+        .emp-role-input:focus {
+            outline: none;
+            border-bottom: 2px solid #f0b90b;
+        }
         .salary-input {
             width: 65px;
             padding: 4px 4px;
@@ -264,7 +427,10 @@
             text-align: center;
             font-size: 12px;
         }
-        .salary-input:focus { outline: 2px solid #f0b90b; border-color: transparent; }
+        .salary-input:focus {
+            outline: 2px solid #f0b90b;
+            border-color: transparent;
+        }
 
         .day-cell {
             display: flex;
@@ -288,15 +454,48 @@
             color: #e8edf4;
             cursor: pointer;
         }
-        .day-cell .day-input:focus { outline: 2px solid #f0b90b; border-color: transparent; background: #1a2130; }
-        .day-cell.norm { background: #0f2a0f; border-radius: 4px; }
-        .day-cell.norm .day-input { background: #1a3a1a; border-color: #2a5a2a; color: #4ade80; }
-        .day-cell.below { background: #2a2a0f; border-radius: 4px; }
-        .day-cell.below .day-input { background: #3a3a1a; border-color: #5a5a2a; color: #fbbf24; }
-        .day-cell.zero { background: #2a0f0f; border-radius: 4px; }
-        .day-cell.zero .day-input { background: #3a1a1a; border-color: #5a2a2a; color: #f87171; }
-        .day-cell.weekend-cell { background: #1a1a1a; border-radius: 4px; }
-        .day-cell.weekend-cell .day-input { background: #1a1a1a; border-color: #2a2a2a; color: #5a6a80; }
+        .day-cell .day-input:focus {
+            outline: 2px solid #f0b90b;
+            border-color: transparent;
+            background: #1a2130;
+        }
+
+        .day-cell.norm {
+            background: #0f2a0f;
+            border-radius: 4px;
+        }
+        .day-cell.norm .day-input {
+            background: #1a3a1a;
+            border-color: #2a5a2a;
+            color: #4ade80;
+        }
+        .day-cell.below {
+            background: #2a2a0f;
+            border-radius: 4px;
+        }
+        .day-cell.below .day-input {
+            background: #3a3a1a;
+            border-color: #5a5a2a;
+            color: #fbbf24;
+        }
+        .day-cell.zero {
+            background: #2a0f0f;
+            border-radius: 4px;
+        }
+        .day-cell.zero .day-input {
+            background: #3a1a1a;
+            border-color: #5a2a2a;
+            color: #f87171;
+        }
+        .day-cell.weekend-cell {
+            background: #1a1a1a;
+            border-radius: 4px;
+        }
+        .day-cell.weekend-cell .day-input {
+            background: #1a1a1a;
+            border-color: #2a2a2a;
+            color: #5a6a80;
+        }
 
         .day-cell .day-type-icon {
             font-size: 12px;
@@ -305,11 +504,21 @@
             border-radius: 4px;
             transition: background 0.2s;
         }
-        .day-cell .day-type-icon:hover { background: #1e2738; }
-        .day-cell .day-type-icon.work { color: #4ade80; }
-        .day-cell .day-type-icon.sick { color: #fbbf24; }
-        .day-cell .day-type-icon.vacation { color: #60a5fa; }
-        .day-cell .day-type-icon.dayoff { color: #6b7280; }
+        .day-cell .day-type-icon:hover {
+            background: #1e2738;
+        }
+        .day-cell .day-type-icon.work {
+            color: #4ade80;
+        }
+        .day-cell .day-type-icon.sick {
+            color: #fbbf24;
+        }
+        .day-cell .day-type-icon.vacation {
+            color: #60a5fa;
+        }
+        .day-cell .day-type-icon.dayoff {
+            color: #6b7280;
+        }
 
         .day-cell .comment-indicator {
             font-size: 8px;
@@ -317,13 +526,39 @@
             cursor: pointer;
             padding: 0 2px;
         }
-        .day-cell .comment-indicator:hover { color: #f0b90b; }
+        .day-cell .comment-indicator:hover {
+            color: #f0b90b;
+        }
 
-        .total-cell { font-weight: 600; background: #131926; color: #f0b90b; min-width: 35px; font-size: 12px; }
-        .salary-cell { font-weight: 600; color: #4ade80; background: #0f1a0f; min-width: 70px; font-size: 12px; }
-        .stats-row { background: #131926; border-top: 2px solid #1e2738; font-weight: 600; }
-        .stats-row td { padding: 8px 2px; font-size: 12px; }
-        .stats-label { text-align: right; padding-right: 10px; color: #8a9bb0; font-size: 12px; }
+        .total-cell {
+            font-weight: 600;
+            background: #131926;
+            color: #f0b90b;
+            min-width: 35px;
+            font-size: 12px;
+        }
+        .salary-cell {
+            font-weight: 600;
+            color: #4ade80;
+            background: #0f1a0f;
+            min-width: 70px;
+            font-size: 12px;
+        }
+        .stats-row {
+            background: #131926;
+            border-top: 2px solid #1e2738;
+            font-weight: 600;
+        }
+        .stats-row td {
+            padding: 8px 2px;
+            font-size: 12px;
+        }
+        .stats-label {
+            text-align: right;
+            padding-right: 10px;
+            color: #8a9bb0;
+            font-size: 12px;
+        }
 
         .remove-btn {
             background: none;
@@ -333,7 +568,9 @@
             font-size: 14px;
             padding: 0 4px;
         }
-        .remove-btn:hover { color: #f87171; }
+        .remove-btn:hover {
+            color: #f87171;
+        }
 
         .btn {
             padding: 6px 14px;
@@ -349,19 +586,54 @@
             align-items: center;
             gap: 5px;
         }
-        .btn:hover { background: #2a3a4a; transform: translateY(-1px); }
-        .btn-primary { background: #f0b90b; color: #0b0f1a; }
-        .btn-primary:hover { background: #d4a00a; }
-        .btn-success { background: #1a4a2a; color: #4ade80; }
-        .btn-success:hover { background: #2a5a3a; }
-        .btn-danger { background: #4a1a1a; color: #f87171; }
-        .btn-danger:hover { background: #5a2a2a; }
-        .btn-outline { background: transparent; border: 1px solid #1e2738; }
-        .btn-outline:hover { background: #1e2738; }
-        .btn-print { background: #2a2a4a; color: #a5b4fc; }
-        .btn-excel { background: #1a3a2a; color: #4ade80; }
-        .btn-warning { background: #3a2a1a; color: #fbbf24; }
-        .btn-history { background: #2a1a3a; color: #c4b5fd; }
+        .btn:hover {
+            background: #2a3a4a;
+            transform: translateY(-1px);
+        }
+        .btn-primary {
+            background: #f0b90b;
+            color: #0b0f1a;
+        }
+        .btn-primary:hover {
+            background: #d4a00a;
+        }
+        .btn-success {
+            background: #1a4a2a;
+            color: #4ade80;
+        }
+        .btn-success:hover {
+            background: #2a5a3a;
+        }
+        .btn-danger {
+            background: #4a1a1a;
+            color: #f87171;
+        }
+        .btn-danger:hover {
+            background: #5a2a2a;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #1e2738;
+        }
+        .btn-outline:hover {
+            background: #1e2738;
+        }
+        .btn-print {
+            background: #2a2a4a;
+            color: #a5b4fc;
+        }
+        .btn-excel {
+            background: #1a3a2a;
+            color: #4ade80;
+        }
+        .btn-warning {
+            background: #3a2a1a;
+            color: #fbbf24;
+        }
+        .btn-history {
+            background: #2a1a3a;
+            color: #c4b5fd;
+        }
 
         .toolbar {
             display: flex;
@@ -384,19 +656,30 @@
             border: 1px solid #1e2738;
             align-items: center;
         }
-        .day-type-actions .label { font-size: 12px; font-weight: 600; color: #8a9bb0; margin-right: 4px; }
+        .day-type-actions .label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #8a9bb0;
+            margin-right: 4px;
+        }
 
+        /* ===== MODALS ===== */
         .modal-overlay {
             display: none;
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.7);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
             z-index: 1000;
             justify-content: center;
             align-items: center;
             padding: 20px;
         }
-        .modal-overlay.active { display: flex; }
+        .modal-overlay.active {
+            display: flex;
+        }
         .modal {
             background: #131926;
             border: 1px solid #1e2738;
@@ -408,12 +691,35 @@
             overflow-y: auto;
             color: #e8edf4;
         }
-        .modal-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; color: #f0b90b; }
-        .modal-close { float: right; background: none; border: none; font-size: 24px; cursor: pointer; color: #5a6a80; }
-        .modal-close:hover { color: #e8edf4; }
-        .field-group { margin-bottom: 14px; }
-        .field-group label { display: block; font-size: 13px; font-weight: 600; color: #8a9bb0; margin-bottom: 4px; }
-        .field-group input, .field-group select {
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #f0b90b;
+        }
+        .modal-close {
+            float: right;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #5a6a80;
+        }
+        .modal-close:hover {
+            color: #e8edf4;
+        }
+        .field-group {
+            margin-bottom: 14px;
+        }
+        .field-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #8a9bb0;
+            margin-bottom: 4px;
+        }
+        .field-group input,
+        .field-group select {
             width: 100%;
             padding: 10px 12px;
             border: 1px solid #1e2738;
@@ -422,7 +728,8 @@
             color: #e8edf4;
             font-size: 14px;
         }
-        .field-group input:focus, .field-group select:focus {
+        .field-group input:focus,
+        .field-group select:focus {
             outline: 2px solid #f0b90b;
             border-color: transparent;
         }
@@ -453,18 +760,38 @@
             border-radius: 8px;
             border: 2px solid transparent;
         }
-        .type-buttons .btn.active { border-color: #f0b90b; box-shadow: 0 0 0 2px rgba(240, 185, 11, 0.2); }
-        .modal-actions { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
+        .type-buttons .btn.active {
+            border-color: #f0b90b;
+            box-shadow: 0 0 0 2px rgba(240, 185, 11, 0.2);
+        }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+            justify-content: flex-end;
+        }
 
         .history-item {
             padding: 10px 12px;
             border-bottom: 1px solid #1e2738;
             font-size: 13px;
         }
-        .history-item .time { color: #5a6a80; font-size: 11px; }
-        .history-item .action { font-weight: 600; color: #f0b90b; }
-        .history-item .details { color: #8a9bb0; font-size: 12px; }
-        .history-item .user { color: #4ade80; font-size: 11px; }
+        .history-item .time {
+            color: #5a6a80;
+            font-size: 11px;
+        }
+        .history-item .action {
+            font-weight: 600;
+            color: #f0b90b;
+        }
+        .history-item .details {
+            color: #8a9bb0;
+            font-size: 12px;
+        }
+        .history-item .user {
+            color: #4ade80;
+            font-size: 11px;
+        }
 
         .toast {
             position: fixed;
@@ -478,13 +805,22 @@
             border-radius: 12px;
             font-size: 13px;
             z-index: 999;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
             max-width: 90%;
             text-align: center;
         }
-        .toast.success { border-color: #4ade80; color: #4ade80; }
-        .toast.error { border-color: #f87171; color: #f87171; }
-        .toast.warning { border-color: #fbbf24; color: #fbbf24; }
+        .toast.success {
+            border-color: #4ade80;
+            color: #4ade80;
+        }
+        .toast.error {
+            border-color: #f87171;
+            color: #f87171;
+        }
+        .toast.warning {
+            border-color: #fbbf24;
+            color: #fbbf24;
+        }
 
         .print-container {
             display: none;
@@ -499,151 +835,280 @@
             width: 100%;
             table-layout: fixed;
         }
-        .print-container th, .print-container td {
+        .print-container th,
+        .print-container td {
             border: 1.5px solid #000;
             padding: 8px 3px;
             text-align: center;
             vertical-align: middle;
             height: 36px;
         }
-        .print-container th { background: #f0f0f0; font-weight: 700; }
-        .print-container .print-title { text-align: center; font-size: 22px; font-weight: 700; margin-bottom: 8px; }
-        .print-container .print-subtitle { text-align: center; font-size: 14px; margin-bottom: 12px; }
-        .print-container .print-footer { margin-top: 16px; display: flex; justify-content: space-between; font-size: 13px; }
-
-        @media print {
-            @page { size: landscape; margin: 10mm; }
-            body * { visibility: hidden; }
-            .print-container, .print-container * { visibility: visible; }
-            .print-container { display: block !important; position: absolute; left: 0; top: 0; width: 100%; padding: 15px 20px; }
+        .print-container th {
+            background: #f0f0f0;
+            font-weight: 700;
+        }
+        .print-container .print-title {
+            text-align: center;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .print-container .print-subtitle {
+            text-align: center;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+        .print-container .print-footer {
+            margin-top: 16px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
         }
 
+        @media print {
+            @page {
+                size: landscape;
+                margin: 10mm;
+            }
+            body * {
+                visibility: hidden;
+            }
+            .print-container,
+            .print-container * {
+                visibility: visible;
+            }
+            .print-container {
+                display: block !important;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 15px 20px;
+            }
+        }
+
+        /* ===== MOBILE ===== */
         @media (max-width: 768px) {
-            body { padding: 8px; }
-            .header { padding: 10px 12px; flex-direction: column; align-items: stretch; }
-            .nav { justify-content: center; }
-            .employee-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
-            .emp-card { padding: 12px; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            table { font-size: 11px; min-width: 500px; }
-            .day-cell .day-input { width: 28px; font-size: 9px; padding: 2px 0; }
-            .day-cell .day-type-icon { font-size: 9px; }
-            .emp-name { font-size: 10px; min-width: 60px; padding-left: 4px; }
-            .emp-name input { font-size: 10px; }
-            .salary-input { width: 45px; font-size: 10px; padding: 2px 2px; }
-            .emp-role-input { width: 50px; font-size: 9px; }
-            .total-cell { font-size: 10px; min-width: 30px; }
-            .salary-cell { font-size: 10px; min-width: 50px; }
+            body {
+                padding: 8px;
+            }
+            .header {
+                padding: 10px 12px;
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .nav {
+                justify-content: center;
+            }
+            .employee-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .emp-card {
+                padding: 12px;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            table {
+                font-size: 11px;
+                min-width: 500px;
+            }
+            .day-cell .day-input {
+                width: 28px;
+                font-size: 9px;
+                padding: 2px 0;
+            }
+            .day-cell .day-type-icon {
+                font-size: 9px;
+            }
+            .emp-name {
+                font-size: 10px;
+                min-width: 60px;
+                padding-left: 4px;
+            }
+            .emp-name input {
+                font-size: 10px;
+            }
+            .salary-input {
+                width: 45px;
+                font-size: 10px;
+                padding: 2px 2px;
+            }
+            .emp-role-input {
+                width: 50px;
+                font-size: 9px;
+            }
+            .total-cell {
+                font-size: 10px;
+                min-width: 30px;
+            }
+            .salary-cell {
+                font-size: 10px;
+                min-width: 50px;
+            }
             .toolbar {
                 display: grid;
                 grid-template-columns: repeat(4, 1fr);
                 gap: 4px;
                 padding: 6px;
             }
-            .toolbar .btn { justify-content: center; font-size: 10px; padding: 6px 4px; }
-            .tabs .btn { font-size: 11px; padding: 8px; }
-            .day-type-actions .btn { font-size: 10px; padding: 4px 8px; }
-            .stats-label { font-size: 10px; padding-right: 4px; }
-            .stats-row td { font-size: 10px; padding: 4px 2px; }
+            .toolbar .btn {
+                justify-content: center;
+                font-size: 10px;
+                padding: 6px 4px;
+            }
+            .tabs .btn {
+                font-size: 11px;
+                padding: 8px;
+            }
+            .day-type-actions .btn {
+                font-size: 10px;
+                padding: 4px 8px;
+            }
+            .stats-label {
+                font-size: 10px;
+                padding-right: 4px;
+            }
+            .stats-row td {
+                font-size: 10px;
+                padding: 4px 2px;
+            }
         }
         @media (max-width: 480px) {
-            .employee-grid { grid-template-columns: 1fr; }
-            .stats-grid { grid-template-columns: 1fr 1fr; }
-            .day-cell .day-input { width: 24px; font-size: 8px; }
-            table { font-size: 9px; min-width: 400px; }
+            .employee-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .day-cell .day-input {
+                width: 24px;
+                font-size: 8px;
+            }
+            table {
+                font-size: 9px;
+                min-width: 400px;
+            }
         }
     </style>
 </head>
 <body>
-<div class="app" id="app">
-    <!-- ХЕДЕР -->
-    <div class="header">
-        <div class="logo">🧑‍🏭 <span>Powder Flow OS</span></div>
-        <div class="nav">
-            <button class="btn active" @click="currentView='dashboard'">📊 Дашборд</button>
-            <button class="btn" @click="currentView='table'">📋 Табель</button>
-            <button class="btn" @click="showHistory">📜 История</button>
+    <div class="app" id="app">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="logo">🧑‍🏭 <span>Powder Flow OS</span></div>
+            <div class="nav">
+                <button class="btn active" @click="currentView='dashboard'">📊 Дашборд</button>
+                <button class="btn" @click="currentView='table'">📋 Табель</button>
+                <button class="btn" @click="showHistory">📜 История</button>
+            </div>
+            <div class="header-right">
+                <span class="save-indicator" :class="saveStatus">
+                    <span v-if="saveStatus === 'saving'">⏳</span>
+                    <span v-else-if="saveStatus === 'saved'" class="check">✅</span>
+                    <span v-else>💾</span>
+                    <span v-if="saveStatus === 'saving'">Сохранение...</span>
+                    <span v-else-if="saveStatus === 'saved'">Сохранено</span>
+                    <span v-else>Готово</span>
+                </span>
+                <span class="cloud-status" :class="syncStatusClass">{{ syncStatusText }}</span>
+            </div>
         </div>
-        <div class="header-right">
-            <span class="save-indicator" :class="saveStatus">
-                <span v-if="saveStatus === 'saving'">⏳</span>
-                <span v-else-if="saveStatus === 'saved'" class="check">✅</span>
-                <span v-else>💾</span>
-                <span v-if="saveStatus === 'saving'">Сохранение...</span>
-                <span v-else-if="saveStatus === 'saved'">Сохранено</span>
-                <span v-else>Готово</span>
-            </span>
-            <span class="cloud-status" :class="syncStatusClass">{{ syncStatusText }}</span>
+
+        <!-- TABS (mobile) -->
+        <div class="tabs">
+            <button class="btn" :class="{active: currentView==='dashboard'}" @click="currentView='dashboard'">📊 Дашборд</button>
+            <button class="btn" :class="{active: currentView==='table'}" @click="currentView='table'">📋 Табель</button>
         </div>
-    </div>
 
-    <!-- ВКЛАДКИ -->
-    <div class="tabs">
-        <button class="btn" :class="{active: currentView==='dashboard'}" @click="currentView='dashboard'">📊 Дашборд</button>
-        <button class="btn" :class="{active: currentView==='table'}" @click="currentView='table'">📋 Табель</button>
-    </div>
+        <!-- ===== DASHBOARD ===== -->
+        <div class="dashboard" :class="{hidden: currentView!=='dashboard'}">
+            <div class="greeting">
+                Сегодня, {{ currentDate }}
+                <small>· Смена {{ selectedGraphic }}</small>
+            </div>
 
-    <!-- ДАШБОРД -->
-    <div class="dashboard" :class="{hidden: currentView!=='dashboard'}">
-        <div class="greeting">Сегодня, {{ currentDate }} <small>· Смена {{ selectedGraphic }}</small></div>
-        <div class="employee-grid">
-            <div v-for="emp in employees" :key="emp.name" class="emp-card" @click="openProfile(emp)">
-                <div class="top">
-                    <div>
-                        <div class="name">{{ emp.name }}</div>
-                        <div class="role">{{ emp.role || 'Сотрудник' }}</div>
+            <div class="employee-grid">
+                <div v-for="emp in employees" :key="emp.name" class="emp-card" @click="openProfile(emp)">
+                    <div class="top">
+                        <div>
+                            <div class="name">{{ emp.name }}</div>
+                            <div class="role">{{ emp.role || 'Сотрудник' }}</div>
+                        </div>
+                        <span class="badge">{{ getTodayHours(emp) }}ч</span>
                     </div>
-                    <span class="badge">{{ getTodayHours(emp) }}ч</span>
-                </div>
-                <div class="progress-wrap">
-                    <div class="fill" :style="{width: Math.min(getMonthProgress(emp), 100) + '%'}"></div>
-                </div>
-                <div class="bottom">
-                    <span>{{ getMonthProgress(emp) }}% от нормы за месяц</span>
-                    <span class="hours">{{ totalHours(emp.hours) }}ч / {{ normHours }}ч</span>
+                    <div class="progress-wrap">
+                        <div class="fill" :style="{width: Math.min(getMonthProgress(emp), 100) + '%'}"></div>
+                    </div>
+                    <div class="bottom">
+                        <span>{{ getMonthProgress(emp) }}% от нормы за месяц</span>
+                        <span class="hours">{{ totalHours(emp.hours) }}ч / {{ normHours }}ч</span>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="stats-grid">
-            <div class="stat-box"><div class="val">{{ employees.length }}</div><div class="label">👥 Сотрудников</div></div>
-            <div class="stat-box"><div class="val">{{ totalMonthHours }}</div><div class="label">⏱️ Всего часов за месяц</div></div>
-            <div class="stat-box"><div class="val">{{ formatSalary(totalMonthSalary) }}</div><div class="label">💰 Зарплата за месяц</div></div>
-            <div class="stat-box"><div class="val">{{ normHours }}</div><div class="label">📅 Норма за месяц</div></div>
-            <div class="stat-box"><div class="val" style="color:#4ade80;">{{ Math.round(totalMonthHours / (employees.length || 1) * 10) / 10 }}</div><div class="label">📊 Среднее на сотрудника</div></div>
-            <div class="stat-box"><div class="val" :style="{color: overtime > 0 ? '#fbbf24' : '#4ade80'}">{{ overtime > 0 ? '+' + overtime : overtime }}</div><div class="label">📈 Переработка</div></div>
-        </div>
-        <div class="mini-calendar">
-            <div class="head">
-                <button class="nav-btn" @click="changeMonth(-1)">‹</button>
-                <span class="month">{{ calendarMonthName }} {{ calendarYear }}</span>
-                <button class="nav-btn" @click="changeMonth(1)">›</button>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="val">{{ employees.length }}</div>
+                    <div class="label">👥 Сотрудников</div>
+                </div>
+                <div class="stat-box">
+                    <div class="val">{{ totalMonthHours }}</div>
+                    <div class="label">⏱️ Всего часов за месяц</div>
+                </div>
+                <div class="stat-box">
+                    <div class="val">{{ formatSalary(totalMonthSalary) }}</div>
+                    <div class="label">💰 Зарплата за месяц</div>
+                </div>
+                <div class="stat-box">
+                    <div class="val">{{ normHours }}</div>
+                    <div class="label">📅 Норма за месяц</div>
+                </div>
+                <div class="stat-box">
+                    <div class="val" style="color:#4ade80;">{{ Math.round(totalMonthHours / (employees.length || 1) * 10) / 10 }}</div>
+                    <div class="label">📊 Среднее на сотрудника</div>
+                </div>
+                <div class="stat-box">
+                    <div class="val" :style="{color: overtime > 0 ? '#fbbf24' : '#4ade80'}">{{ overtime > 0 ? '+' + overtime : overtime }}</div>
+                    <div class="label">📈 Переработка</div>
+                </div>
             </div>
-            <div class="days">
-                <div v-for="d in weekDays" :key="d" class="dow">{{ d }}</div>
-                <div v-for="day in calendarDays" :key="day.day" 
-                     class="day" 
-                     :class="{
-                         today: day.isToday,
-                         'has-work': day.hasWork,
-                         weekend: day.isWeekend
-                     }"
-                     @click="openDayDetail(day)">
+
+            <div class="mini-calendar">
+                <div class="head">
+                    <button class="nav-btn" @click="changeMonth(-1)">‹</button>
+                    <span class="month">{{ calendarMonthName }} {{ calendarYear }}</span>
+                    <button class="nav-btn" @click="changeMonth(1)">›</button>
+                </div>
+                <div class="days">
+                    <div v-for="d in weekDays" :key="d" class="dow">{{ d }}</div>
+                    <div v-for="day in calendarDays" :key="day.day"
+                    class="day"
+                    :class="{
+                        today: day.isToday,
+                        'has-work': day.hasWork,
+                        weekend: day.isWeekend
+                    }"
+                    @click="openDayDetail(day)">
                     {{ day.day }}
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ТАБЕЛЬ -->
+    <!-- ===== TABLE VIEW ===== -->
     <div class="table-view" :class="{active: currentView==='table'}">
         <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
             <span style="color:#8a9bb0;font-size:13px;">📅 {{ currentMonthName }} · Норма: {{ normHours }}ч</span>
             <span style="color:#8a9bb0;font-size:13px;">✏️ Нажми на часы для редактирования</span>
         </div>
+
         <div class="day-type-actions">
             <span class="label">📋 Массовое проставление:</span>
             <button class="btn" style="background:#1a2a1a;color:#4ade80;border-color:#2a4a2a;" @click="openMassModal">📋 Открыть</button>
         </div>
+
         <div class="toolbar">
             <button class="btn btn-primary" @click="addEmployee">➕ Добавить</button>
             <button class="btn btn-warning" @click="fillByGraphic">📋 Заполнить</button>
@@ -653,6 +1118,7 @@
             <button class="btn btn-excel" @click="exportExcel">📊 Excel</button>
             <button class="btn btn-success" @click="loadFromCloud">📥 Загрузить</button>
         </div>
+
         <div class="table-wrap">
             <table>
                 <thead>
@@ -677,201 +1143,208 @@
                         <td><input type="number" class="salary-input" v-model.number="emp.salaryBase" step="1000" @change="autoSave" /></td>
                         <td v-for="(day, dayIdx) in days" :key="dayIdx">
                             <div class="day-cell" :class="getDayCellClass(dayIdx, emp)">
-                                <input type="number" class="day-input" 
-                                       v-model.number="emp.hours[dayIdx]" 
-                                       min="0" max="12" step="0.5"
-                                       placeholder="0" 
-                                       @focus="openEditModal(emp, dayIdx)" />
+                                <input type="number" class="day-input"
+                                v-model.number="emp.hours[dayIdx]"
+                                min="0" max="12" step="0.5"
+                                placeholder="0"
+                                @focus="openEditModal(emp, dayIdx)" />
                                 <div style="display:flex;gap:2px;align-items:center;">
-                                    <span class="day-type-icon" 
-                                          :class="getDayTypeIcon(emp.dayType[dayIdx])"
-                                          @click="openEditModal(emp, dayIdx)">
-                                        {{ getDayTypeEmoji(emp.dayType[dayIdx]) }}
-                                    </span>
-                                    <span class="comment-indicator" 
-                                          v-if="emp.comments && emp.comments[dayIdx]"
-                                          @click="openEditModal(emp, dayIdx)"
-                                          title="Есть комментарий">💬</span>
-                                </div>
+                                    <span class="day-type-icon"
+                                    :class="getDayTypeIcon(emp.dayType[dayIdx])"
+                                    @click="openEditModal(emp, dayIdx)">
+                                    {{ getDayTypeEmoji(emp.dayType[dayIdx]) }}
+                                </span>
+                                <span class="comment-indicator"
+                                v-if="emp.comments && emp.comments[dayIdx]"
+                                @click="openEditModal(emp, dayIdx)"
+                                title="Есть комментарий">💬</span>
                             </div>
-                        </td>
-                        <td class="total-cell">{{ totalHours(emp.hours) }}</td>
-                        <td class="salary-cell">{{ formatSalary(calcSalary(emp)) }}</td>
-                    </tr>
-                    <tr class="stats-row">
-                        <td class="stats-label" colspan="3">📊 Итого за месяц</td>
-                        <td v-for="(day, i) in days" :key="i">{{ dayStats[i] || '' }}</td>
-                        <td class="total-cell">{{ totalMonthHours }}</td>
-                        <td class="salary-cell">{{ formatSalary(totalMonthSalary) }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- ПРОФИЛЬ -->
-    <div class="modal-overlay" :class="{active: profileModalVisible}" @click.self="closeProfile">
-        <div class="modal">
-            <button class="modal-close" @click="closeProfile">✕</button>
-            <div class="modal-title">👤 Профиль сотрудника</div>
-            <div v-if="profileData">
-                <div class="field-group"><label>👤 Имя</label><div style="font-size:16px;font-weight:500;">{{ profileData.name }}</div></div>
-                <div class="field-group"><label>📋 Роль</label><div style="font-size:16px;font-weight:500;">{{ profileData.role || 'Сотрудник' }}</div></div>
-                <div class="field-group"><label>💰 Оклад (5/2)</label><div style="font-size:16px;font-weight:500;color:#4ade80;">{{ formatSalary(profileData.salaryBase) }} ₽</div></div>
-                <div class="field-group"><label>📋 Норма за месяц</label><div style="font-size:16px;font-weight:500;color:#f0b90b;">{{ normHours }}ч</div></div>
-                <div class="field-group"><label>⏱️ Отработано часов</label><div style="font-size:16px;font-weight:500;">{{ totalHours(profileData.hours) }}</div></div>
-                <div class="field-group"><label>📅 Смен за месяц</label><div style="font-size:16px;font-weight:500;">{{ countShifts(profileData) }}</div></div>
-                <div class="field-group"><label>📈 Среднее в день</label><div style="font-size:16px;font-weight:500;">{{ avgHoursPerDay(profileData) }}ч</div></div>
-                <div class="field-group"><label>💰 Зарплата за месяц</label><div style="font-size:18px;font-weight:700;color:#4ade80;">{{ formatSalary(calcSalary(profileData)) }} ₽</div></div>
-                <div class="field-group"><label>📊 Загрузка</label><div style="font-size:16px;font-weight:500;">{{ Math.round(totalHours(profileData) / normHours * 100) }}%</div></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ДЕТАЛИ ДНЯ -->
-    <div class="modal-overlay" :class="{active: dayDetailModalVisible}" @click.self="closeDayDetail">
-        <div class="modal">
-            <button class="modal-close" @click="closeDayDetail">✕</button>
-            <div class="modal-title">📅 {{ dayDetailData ? dayDetailData.day + ' ' + currentMonthName : '' }}</div>
-            <div v-if="dayDetailData">
-                <div v-if="dayDetailData.employees.length === 0" style="color:#5a6a80;text-align:center;padding:20px 0;">В этот день никто не работал</div>
-                <div v-else>
-                    <div v-for="emp in dayDetailData.employees" :key="emp.name" class="history-item">
-                        <span style="font-weight:500;">{{ emp.name }}</span>
-                        <span style="float:right;color:#f0b90b;">{{ emp.hours }}ч</span>
-                        <span v-if="emp.comment" style="display:block;font-size:11px;color:#8a9bb0;">💬 {{ emp.comment }}</span>
-                    </div>
-                    <div style="margin-top:12px;padding-top:12px;border-top:1px solid #1e2738;font-size:16px;font-weight:700;color:#4ade80;">
-                        Итого: {{ dayDetailData.total }}ч
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- РЕДАКТИРОВАНИЕ ДНЯ -->
-    <div class="modal-overlay" :class="{active: editModalVisible}" @click.self="closeEditModal">
-        <div class="modal">
-            <button class="modal-close" @click="closeEditModal">✕</button>
-            <div class="modal-title">✏️ Редактирование дня</div>
-            <div v-if="editModalData">
-                <div class="field-group"><label>👤 Сотрудник</label><div style="font-size:16px;font-weight:500;padding:4px 0;">{{ editModalData.empName }}</div></div>
-                <div class="field-group"><label>📅 Дата</label><div style="font-size:16px;font-weight:500;padding:4px 0;">{{ editModalData.day }} {{ currentMonthName }}</div></div>
-                <div class="field-group"><label>⏱️ Часы</label><input type="number" v-model.number="editModalData.hours" min="0" max="12" step="0.5" /></div>
-                <div class="field-group">
-                    <label>📋 Тип дня</label>
-                    <div class="type-buttons">
-                        <button class="btn" :class="{active: editModalData.dayType === 'work'}" style="background:#1a2a1a;color:#4ade80;border-color:#2a4a2a;" @click="editModalData.dayType = 'work'">✅ Работа</button>
-                        <button class="btn" :class="{active: editModalData.dayType === 'sick'}" style="background:#2a2a1a;color:#fbbf24;border-color:#4a4a2a;" @click="editModalData.dayType = 'sick'">🤒 Больничный</button>
-                        <button class="btn" :class="{active: editModalData.dayType === 'vacation'}" style="background:#1a1a2a;color:#60a5fa;border-color:#2a2a4a;" @click="editModalData.dayType = 'vacation'">🌴 Отпуск</button>
-                        <button class="btn" :class="{active: editModalData.dayType === 'dayoff'}" style="background:#1a1a1a;color:#6b7280;border-color:#2a2a2a;" @click="editModalData.dayType = 'dayoff'">📅 Выходной</button>
-                    </div>
-                </div>
-                <div class="field-group">
-                    <label>💬 Комментарий</label>
-                    <textarea v-model="editModalData.comment" placeholder="Дополнительная информация..." rows="2"></textarea>
-                </div>
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-outline" @click="closeEditModal">Отмена</button>
-                <button class="btn btn-primary" @click="saveEditModal">💾 Сохранить</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- МАССОВОЕ ПРОСТАВЛЕНИЕ -->
-    <div class="modal-overlay" :class="{active: massModalVisible}" @click.self="closeMassModal">
-        <div class="modal">
-            <button class="modal-close" @click="closeMassModal">✕</button>
-            <div class="modal-title">📋 Массовое проставление</div>
-            <div class="field-group">
-                <label>👤 Сотрудник</label>
-                <select v-model="massData.employee">
-                    <option value="all">Все сотрудники</option>
-                    <option v-for="(emp, idx) in employees" :key="idx" :value="idx">{{ emp.name }}</option>
-                </select>
-            </div>
-            <div class="field-group">
-                <label>📅 Диапазон дат</label>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-                    <div>
-                        <label style="font-size:11px;color:#5a6a80;">С</label>
-                        <select v-model="massData.dateFrom">
-                            <option v-for="day in days" :key="'from-'+day" :value="day">{{ day }}</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="font-size:11px;color:#5a6a80;">По</label>
-                        <select v-model="massData.dateTo">
-                            <option v-for="day in days" :key="'to-'+day" :value="day">{{ day }}</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="field-group">
-                <label>📋 Тип дня</label>
-                <div class="type-buttons">
-                    <button class="btn" style="background:#1a2a1a;color:#4ade80;border-color:#2a4a2a;" @click="applyMassType('work')">✅ Работа</button>
-                    <button class="btn" style="background:#2a2a1a;color:#fbbf24;border-color:#4a4a2a;" @click="applyMassType('sick')">🤒 Больничный</button>
-                    <button class="btn" style="background:#1a1a2a;color:#60a5fa;border-color:#2a2a4a;" @click="applyMassType('vacation')">🌴 Отпуск</button>
-                    <button class="btn" style="background:#1a1a1a;color:#6b7280;border-color:#2a2a2a;" @click="applyMassType('dayoff')">📅 Выходной</button>
-                    <button class="btn" style="background:#2a1a1a;color:#f87171;border-color:#4a2a2a;grid-column:1/3;" @click="applyMassType('reset')">❌ Сбросить</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ИСТОРИЯ -->
-    <div class="modal-overlay" :class="{active: historyModalVisible}" @click.self="closeHistory">
-        <div class="modal">
-            <button class="modal-close" @click="closeHistory">✕</button>
-            <div class="modal-title">📜 История действий</div>
-            <div v-if="historyLoading">Загрузка...</div>
-            <div v-else-if="historyList.length === 0">История пуста</div>
-            <div v-else>
-                <div v-for="item in historyList" :key="item.timestamp" class="history-item">
-                    <div><span class="action">{{ item.action }}</span></div>
-                    <div class="details">{{ item.details }}</div>
-                    <div class="user">👤 {{ item.user || 'Пользователь' }}</div>
-                    <div class="time">{{ formatDate(item.timestamp) }}</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ПЕЧАТЬ -->
-    <div class="print-container" id="printContainer">
-        <div class="print-title">📋 ТАБЕЛЬ УЧЕТА РАБОЧЕГО ВРЕМЕНИ</div>
-        <div class="print-subtitle">Цех порошковой покраски · {{ currentMonthName }} · График {{ selectedGraphic }}</div>
-        <table>
-            <thead><tr><th>Сотрудник</th><th v-for="(day, i) in days" :key="i">{{ day }}</th><th>Итого</th></tr></thead>
-            <tbody>
-                <tr v-for="emp in employees" :key="emp.name">
-                    <td>{{ emp.name }}</td>
-                    <td v-for="(day, i) in days" :key="i">{{ emp.hours[i] || '' }}</td>
-                    <td>{{ totalHours(emp.hours) }}</td>
+                        </div>
+                    </td>
+                    <td class="total-cell">{{ totalHours(emp.hours) }}</td>
+                    <td class="salary-cell">{{ formatSalary(calcSalary(emp)) }}</td>
                 </tr>
-                <tr style="font-weight:700;background:#f5f5f5;">
-                    <td>Итого часов:</td>
+                <tr class="stats-row">
+                    <td class="stats-label" colspan="3">📊 Итого за месяц</td>
                     <td v-for="(day, i) in days" :key="i">{{ dayStats[i] || '' }}</td>
-                    <td>{{ totalMonthHours }}</td>
+                    <td class="total-cell">{{ totalMonthHours }}</td>
+                    <td class="salary-cell">{{ formatSalary(totalMonthSalary) }}</td>
                 </tr>
             </tbody>
         </table>
-        <div class="print-footer"><div>Руководитель: ______________________ / ______________________ /</div><div>Дата: _______________</div></div>
     </div>
-
-    <div v-if="toast.show" class="toast" :class="toast.type" v-html="toast.message"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
+<!-- ===== MODALS ===== -->
+
+<!-- PROFILE -->
+<div class="modal-overlay" :class="{active: profileModalVisible}" @click.self="closeProfile">
+    <div class="modal">
+        <button class="modal-close" @click="closeProfile">✕</button>
+        <div class="modal-title">👤 Профиль сотрудника</div>
+        <div v-if="profileData">
+            <div class="field-group"><label>👤 Имя</label><div style="font-size:16px;font-weight:500;">{{ profileData.name }}</div></div>
+            <div class="field-group"><label>📋 Роль</label><div style="font-size:16px;font-weight:500;">{{ profileData.role || 'Сотрудник' }}</div></div>
+            <div class="field-group"><label>💰 Оклад (5/2)</label><div style="font-size:16px;font-weight:500;color:#4ade80;">{{ formatSalary(profileData.salaryBase) }} ₽</div></div>
+            <div class="field-group"><label>📋 Норма за месяц</label><div style="font-size:16px;font-weight:500;color:#f0b90b;">{{ normHours }}ч</div></div>
+            <div class="field-group"><label>⏱️ Отработано часов</label><div style="font-size:16px;font-weight:500;">{{ totalHours(profileData.hours) }}</div></div>
+            <div class="field-group"><label>📅 Смен за месяц</label><div style="font-size:16px;font-weight:500;">{{ countShifts(profileData) }}</div></div>
+            <div class="field-group"><label>📈 Среднее в день</label><div style="font-size:16px;font-weight:500;">{{ avgHoursPerDay(profileData) }}ч</div></div>
+            <div class="field-group"><label>💰 Зарплата за месяц</label><div style="font-size:18px;font-weight:700;color:#4ade80;">{{ formatSalary(calcSalary(profileData)) }} ₽</div></div>
+            <div class="field-group"><label>📊 Загрузка</label><div style="font-size:16px;font-weight:500;">{{ Math.round(totalHours(profileData) / normHours * 100) }}%</div></div>
+        </div>
+    </div>
+</div>
+
+<!-- DAY DETAIL -->
+<div class="modal-overlay" :class="{active: dayDetailModalVisible}" @click.self="closeDayDetail">
+    <div class="modal">
+        <button class="modal-close" @click="closeDayDetail">✕</button>
+        <div class="modal-title">📅 {{ dayDetailData ? dayDetailData.day + ' ' + currentMonthName : '' }}</div>
+        <div v-if="dayDetailData">
+            <div v-if="dayDetailData.employees.length === 0" style="color:#5a6a80;text-align:center;padding:20px 0;">
+                В этот день никто не работал
+            </div>
+            <div v-else>
+                <div v-for="emp in dayDetailData.employees" :key="emp.name" class="history-item">
+                    <span style="font-weight:500;">{{ emp.name }}</span>
+                    <span style="float:right;color:#f0b90b;">{{ emp.hours }}ч</span>
+                    <span v-if="emp.comment" style="display:block;font-size:11px;color:#8a9bb0;">💬 {{ emp.comment }}</span>
+                </div>
+                <div style="margin-top:12px;padding-top:12px;border-top:1px solid #1e2738;font-size:16px;font-weight:700;color:#4ade80;">
+                    Итого: {{ dayDetailData.total }}ч
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- EDIT DAY -->
+<div class="modal-overlay" :class="{active: editModalVisible}" @click.self="closeEditModal">
+    <div class="modal">
+        <button class="modal-close" @click="closeEditModal">✕</button>
+        <div class="modal-title">✏️ Редактирование дня</div>
+        <div v-if="editModalData">
+            <div class="field-group"><label>👤 Сотрудник</label><div style="font-size:16px;font-weight:500;padding:4px 0;">{{ editModalData.empName }}</div></div>
+            <div class="field-group"><label>📅 Дата</label><div style="font-size:16px;font-weight:500;padding:4px 0;">{{ editModalData.day }} {{ currentMonthName }}</div></div>
+            <div class="field-group"><label>⏱️ Часы</label><input type="number" v-model.number="editModalData.hours" min="0" max="12" step="0.5" /></div>
+            <div class="field-group">
+                <label>📋 Тип дня</label>
+                <div class="type-buttons">
+                    <button class="btn" :class="{active: editModalData.dayType === 'work'}" style="background:#1a2a1a;color:#4ade80;border-color:#2a4a2a;" @click="editModalData.dayType = 'work'">✅ Работа</button>
+                    <button class="btn" :class="{active: editModalData.dayType === 'sick'}" style="background:#2a2a1a;color:#fbbf24;border-color:#4a4a2a;" @click="editModalData.dayType = 'sick'">🤒 Больничный</button>
+                    <button class="btn" :class="{active: editModalData.dayType === 'vacation'}" style="background:#1a1a2a;color:#60a5fa;border-color:#2a2a4a;" @click="editModalData.dayType = 'vacation'">🌴 Отпуск</button>
+                    <button class="btn" :class="{active: editModalData.dayType === 'dayoff'}" style="background:#1a1a1a;color:#6b7280;border-color:#2a2a2a;" @click="editModalData.dayType = 'dayoff'">📅 Выходной</button>
+                </div>
+            </div>
+            <div class="field-group">
+                <label>💬 Комментарий</label>
+                <textarea v-model="editModalData.comment" placeholder="Дополнительная информация..." rows="2"></textarea>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-outline" @click="closeEditModal">Отмена</button>
+            <button class="btn btn-primary" @click="saveEditModal">💾 Сохранить</button>
+        </div>
+    </div>
+</div>
+
+<!-- MASS ASSIGN -->
+<div class="modal-overlay" :class="{active: massModalVisible}" @click.self="closeMassModal">
+    <div class="modal">
+        <button class="modal-close" @click="closeMassModal">✕</button>
+        <div class="modal-title">📋 Массовое проставление</div>
+        <div class="field-group">
+            <label>👤 Сотрудник</label>
+            <select v-model="massData.employee">
+                <option value="all">Все сотрудники</option>
+                <option v-for="(emp, idx) in employees" :key="idx" :value="idx">{{ emp.name }}</option>
+            </select>
+        </div>
+        <div class="field-group">
+            <label>📅 Диапазон дат</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div>
+                    <label style="font-size:11px;color:#5a6a80;">С</label>
+                    <select v-model="massData.dateFrom">
+                        <option v-for="day in days" :key="'from-'+day" :value="day">{{ day }}</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:11px;color:#5a6a80;">По</label>
+                    <select v-model="massData.dateTo">
+                        <option v-for="day in days" :key="'to-'+day" :value="day">{{ day }}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="field-group">
+            <label>📋 Тип дня</label>
+            <div class="type-buttons">
+                <button class="btn" style="background:#1a2a1a;color:#4ade80;border-color:#2a4a2a;" @click="applyMassType('work')">✅ Работа</button>
+                <button class="btn" style="background:#2a2a1a;color:#fbbf24;border-color:#4a4a2a;" @click="applyMassType('sick')">🤒 Больничный</button>
+                <button class="btn" style="background:#1a1a2a;color:#60a5fa;border-color:#2a2a4a;" @click="applyMassType('vacation')">🌴 Отпуск</button>
+                <button class="btn" style="background:#1a1a1a;color:#6b7280;border-color:#2a2a2a;" @click="applyMassType('dayoff')">📅 Выходной</button>
+                <button class="btn" style="background:#2a1a1a;color:#f87171;border-color:#4a2a2a;grid-column:1/3;" @click="applyMassType('reset')">❌ Сбросить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- HISTORY -->
+<div class="modal-overlay" :class="{active: historyModalVisible}" @click.self="closeHistory">
+    <div class="modal">
+        <button class="modal-close" @click="closeHistory">✕</button>
+        <div class="modal-title">📜 История действий</div>
+        <div v-if="historyLoading">Загрузка...</div>
+        <div v-else-if="historyList.length === 0">История пуста</div>
+        <div v-else>
+            <div v-for="item in historyList" :key="item.timestamp" class="history-item">
+                <div><span class="action">{{ item.action }}</span></div>
+                <div class="details">{{ item.details }}</div>
+                <div class="user">👤 {{ item.user || 'Пользователь' }}</div>
+                <div class="time">{{ formatDate(item.timestamp) }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PRINT -->
+<div class="print-container" id="printContainer">
+    <div class="print-title">📋 ТАБЕЛЬ УЧЕТА РАБОЧЕГО ВРЕМЕНИ</div>
+    <div class="print-subtitle">Цех порошковой покраски · {{ currentMonthName }} · График {{ selectedGraphic }}</div>
+    <table>
+        <thead><tr><th>Сотрудник</th><th v-for="(day, i) in days" :key="i">{{ day }}</th><th>Итого</th></tr></thead>
+        <tbody>
+            <tr v-for="emp in employees" :key="emp.name">
+                <td>{{ emp.name }}</td>
+                <td v-for="(day, i) in days" :key="i">{{ emp.hours[i] || '' }}</td>
+                <td>{{ totalHours(emp.hours) }}</td>
+            </tr>
+            <tr style="font-weight:700;background:#f5f5f5;">
+                <td>Итого часов:</td>
+                <td v-for="(day, i) in days" :key="i">{{ dayStats[i] || '' }}</td>
+                <td>{{ totalMonthHours }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="print-footer"><div>Руководитель: ______________________ / ______________________ /</div><div>Дата: _______________</div></div>
+</div>
+
+<div v-if="toast.show" class="toast" :class="toast.type" v-html="toast.message"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js">
+</script>
 <script>
     (function() {
         const API_URL = 'https://functions.yandexcloud.net/d4e18nbmmgli5kcghqrs';
         const STORAGE_KEY = 'powder_coating_timesheet_v7';
-        const MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+        const MONTHS = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь',
+            'Ноябрь', 'Декабрь'
+        ];
         const WEEKDAYS = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-        const DAYS_RU = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+        const DAYS_RU = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
 
         const DEFAULT_EMPLOYEES = [
             { name: 'Иван', role: 'Маляр', salaryBase: 90000, hours: [], dayType: [], comments: [] },
@@ -880,25 +1353,34 @@
         ];
 
         function getDaysInMonth(year, month) { return new Date(year, month, 0).getDate(); }
+
         function getDayOfWeek(year, month, day) { return new Date(year, month - 1, day).getDay(); }
+
         function getMonthName(m) { return MONTHS[m - 1] || ''; }
+
         function formatDate(ts) {
             const d = new Date(ts);
-            return d.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            return d.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit',
+                minute: '2-digit' });
         }
+
         function getDayTypeClass(t) {
             const map = { work: 'work-day', sick: 'sick', vacation: 'vacation', dayoff: 'day-off' };
             return map[t] || 'work-day';
         }
+
         function getDayTypeEmoji(t) {
             const map = { work: '✅', sick: '🤒', vacation: '🌴', dayoff: '📅' };
             return map[t] || '✅';
         }
+
         function getDayTypeLabel(t) {
             const map = { work: 'Работа', sick: 'Больничный', vacation: 'Отпуск', dayoff: 'Выходной', reset: 'Сброс' };
             return map[t] || t;
         }
+
         function calculateNorm52(days) { return Math.round((days * 40) / 7); }
+
         function calculateNormShift(days, graphic) {
             if (graphic === '3/3') {
                 const full = Math.floor(days / 6);
@@ -913,12 +1395,16 @@
             }
             return 0;
         }
+
         function getMonthKey(month, graphic) { return `${STORAGE_KEY}_${month}_${graphic}`; }
+
         function getPrevMonth(month) {
             const parts = month.split('-');
-            let y = parseInt(parts[0]), m = parseInt(parts[1]);
+            let y = parseInt(parts[0]),
+                m = parseInt(parts[1]);
             m--;
-            if (m === 0) { m = 12; y--; }
+            if (m === 0) { m = 12;
+                y--; }
             return `${y}-${String(m).padStart(2, '0')}`;
         }
 
@@ -931,7 +1417,8 @@
                 });
                 if (!res.ok) throw new Error('API error: ' + res.status);
                 return await res.json();
-            } catch (e) { console.error('API error:', e); throw e; }
+            } catch (e) { console.error('API error:', e);
+                throw e; }
         }
 
         function ensureArray(val) {
@@ -998,8 +1485,8 @@
                 },
                 totalMonthHours() {
                     let total = 0;
-                    this.employees.forEach(e => { 
-                        total += this.totalHours(e.hours); 
+                    this.employees.forEach(e => {
+                        total += this.totalHours(e.hours);
                     });
                     return Math.round(total * 10) / 10;
                 },
@@ -1042,7 +1529,9 @@
                     const firstDay = getDayOfWeek(year, month + 1, 1);
                     const days = [];
                     const today = new Date();
-                    const td = today.getDate(), tm = today.getMonth(), ty = today.getFullYear();
+                    const td = today.getDate(),
+                        tm = today.getMonth(),
+                        ty = today.getFullYear();
 
                     for (let i = 0; i < firstDay; i++) {
                         days.push({ day: '', date: null, isToday: false, hasWork: false, isWeekend: false });
@@ -1054,7 +1543,7 @@
                         let hasWork = false;
                         this.employees.forEach(e => {
                             const hours = ensureArray(e.hours);
-                            if (hours && hours[d-1] > 0) hasWork = true;
+                            if (hours && hours[d - 1] > 0) hasWork = true;
                         });
                         days.push({ day: d, date: new Date(year, month, d), isToday, hasWork, isWeekend });
                     }
@@ -1074,7 +1563,7 @@
                 },
                 formatSalary(v) { return v.toLocaleString('ru-RU'); },
 
-                // ===== НОВЫЙ МЕТОД ДЛЯ ПРОЦЕНТА ЗА МЕСЯЦ =====
+                // ===== ПРОЦЕНТ ЗА МЕСЯЦ =====
                 getMonthProgress(emp) {
                     const total = this.totalHours(emp.hours);
                     const norm = this.normHours;
@@ -1136,8 +1625,8 @@
                     this.employees.forEach(e => {
                         const hours = ensureArray(e.hours);
                         if (hours && hours[dayIdx] > 0) {
-                            employees.push({ 
-                                name: e.name, 
+                            employees.push({
+                                name: e.name,
                                 hours: hours[dayIdx],
                                 comment: e.comments && e.comments[dayIdx] || ''
                             });
@@ -1150,13 +1639,15 @@
                     };
                     this.dayDetailModalVisible = true;
                 },
-                closeDayDetail() { this.dayDetailModalVisible = false; this.dayDetailData = null; },
+                closeDayDetail() { this.dayDetailModalVisible = false;
+                    this.dayDetailData = null; },
 
                 openProfile(emp) {
                     this.profileData = emp;
                     this.profileModalVisible = true;
                 },
-                closeProfile() { this.profileModalVisible = false; this.profileData = null; },
+                closeProfile() { this.profileModalVisible = false;
+                    this.profileData = null; },
 
                 // ===== РЕДАКТИРОВАНИЕ ДНЯ =====
                 openEditModal(emp, idx) {
@@ -1182,7 +1673,7 @@
                         const emp = this.editModalEmp;
                         const idx = this.editModalIdx;
                         const day = this.days[idx];
-                        
+
                         const changes = [];
                         const oldHours = emp.hours[idx] || 0;
                         const newHours = this.editModalData.hours;
@@ -1248,7 +1739,7 @@
                     try {
                         const data = await callApi('getHistory');
                         this.historyList = data || [];
-                    } catch (e) { 
+                    } catch (e) {
                         this.showToast('❌ Ошибка загрузки истории', 'error');
                     }
                     this.historyLoading = false;
@@ -1277,15 +1768,16 @@
                     if (start > end) { this.showToast('⚠️ Неверный диапазон дат', 'error'); return; }
                     const names = targets.map(e => e.name).join(', ');
                     const label = getDayTypeLabel(type);
-                    if (!confirm(`Установить "${label}" для:\n👤 ${names}\n📅 ${this.massData.dateFrom}-${this.massData.dateTo} числа`)) return;
-                    
+                    if (!confirm(`Установить "${label}" для:\n👤 ${names}\n📅 ${this.massData.dateFrom}-${this.massData.dateTo} числа`))
+                        return;
+
                     targets.forEach(e => {
                         for (let i = start; i <= end; i++) {
-                            if (type === 'reset') { e.dayType[i] = 'work'; }
-                            else { e.dayType[i] = type; if (type !== 'work') e.hours[i] = 0; }
+                            if (type === 'reset') { e.dayType[i] = 'work'; } else { e.dayType[i] = type; if (
+                                    type !== 'work') e.hours[i] = 0; }
                         }
                     });
-                    
+
                     const historyEntry = {
                         timestamp: new Date().toISOString(),
                         action: '📋 Массовое проставление',
@@ -1293,7 +1785,7 @@
                         details: `${names}, дни ${this.massData.dateFrom}-${this.massData.dateTo}: установлен "${label}"`
                     };
                     this.saveHistoryToCloud(historyEntry);
-                    
+
                     this.autoSave();
                     this.closeMassModal();
                     this.showToast(`✅ "${label}" установлен для ${names}`, 'success');
@@ -1305,7 +1797,8 @@
                     this.autoSaveTimeout = setTimeout(() => { this.saveToCloud(); }, 1500);
                 },
 
-                // ===== ОБЛАКО =====                async saveToCloud() {
+                // ===== ОБЛАКО =====
+                async saveToCloud() {
                     try {
                         this.saveStatus = 'saving';
                         this.syncStatus = 'loading';
@@ -1367,7 +1860,7 @@
                         dayType: Array(cnt).fill('work'),
                         comments: Array(cnt).fill('')
                     });
-                    
+
                     const historyEntry = {
                         timestamp: new Date().toISOString(),
                         action: '➕ Добавление сотрудника',
@@ -1385,7 +1878,7 @@
                     const name = this.employees[idx].name;
                     if (confirm(`Удалить "${name}"? Данные будут потеряны!`)) {
                         this.employees.splice(idx, 1);
-                        
+
                         const historyEntry = {
                             timestamp: new Date().toISOString(),
                             action: '🗑️ Удаление сотрудника',
@@ -1406,7 +1899,7 @@
                         e.dayType = Array(this.days.length).fill('work');
                         e.comments = Array(this.days.length).fill('');
                     });
-                    
+
                     const historyEntry = {
                         timestamp: new Date().toISOString(),
                         action: '🔄 Сброс месяца',
@@ -1435,7 +1928,7 @@
                             if (e.comments) e.comments[i] = '';
                         }
                     });
-                    
+
                     const historyEntry = {
                         timestamp: new Date().toISOString(),
                         action: '📋 Заполнение по графику',
@@ -1447,7 +1940,9 @@
                     this.showToast('✅ Табель заполнен', 'success');
                 },
                 deleteMonth() {
-                    if (!confirm(`⚠️ Удалить все данные за ${this.currentMonthName}? Это действие НЕЛЬЗЯ отменить!`)) return;
+                    if (!confirm(
+                            `⚠️ Удалить все данные за ${this.currentMonthName}? Это действие НЕЛЬЗЯ отменить!`
+                            )) return;
                     const cnt = this.days.length;
                     this.employees = JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES));
                     this.employees.forEach(e => {
@@ -1457,7 +1952,7 @@
                     });
                     this.norm52 = calculateNorm52(cnt);
                     this.normHours = calculateNormShift(cnt, this.selectedGraphic);
-                    
+
                     const historyEntry = {
                         timestamp: new Date().toISOString(),
                         action: '🗑️ Удаление месяца',
@@ -1475,18 +1970,25 @@
                 // ===== EXCEL =====
                 exportExcel() {
                     try {
-                        let html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
-                        html += '<head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Табель</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head>';
+                        let html =
+                            '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
+                        html +=
+                            '<head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Табель</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head>';
                         html += '<body><table border="1" cellpadding="5">';
-                        html += '<tr><th colspan="' + (this.days.length + 4) + '" style="font-size:16px;text-align:center;">ТАБЕЛЬ УЧЕТА РАБОЧЕГО ВРЕМЕНИ</th></tr>';
-                        html += '<tr><td colspan="' + (this.days.length + 4) + '" style="text-align:center;">Цех порошковой покраски · ' + this.currentMonthName + ' · График ' + this.selectedGraphic + ' · Норма ' + this.normHours + 'ч</td></tr>';
+                        html += '<tr><th colspan="' + (this.days.length + 4) +
+                            '" style="font-size:16px;text-align:center;">ТАБЕЛЬ УЧЕТА РАБОЧЕГО ВРЕМЕНИ</th></tr>';
+                        html += '<tr><td colspan="' + (this.days.length + 4) +
+                            '" style="text-align:center;">Цех порошковой покраски · ' + this.currentMonthName +
+                            ' · График ' + this.selectedGraphic + ' · Норма ' + this.normHours + 'ч</td></tr>';
                         html += '<tr><th>Сотрудник</th><th>Роль</th><th>Оклад</th>';
                         this.days.forEach(d => { html += '<th>' + d + '</th>'; });
                         html += '<th>Итого</th><th>Зарплата</th></tr>';
                         this.employees.forEach(e => {
-                            html += '<tr><td>' + e.name + '</td><td>' + (e.role || '') + '</td><td>' + (e.salaryBase || 0) + '</td>';
+                            html += '<tr><td>' + e.name + '</td><td>' + (e.role || '') + '</td><td>' + (e
+                                .salaryBase || 0) + '</td>';
                             e.hours.forEach(h => { html += '<td>' + (h || 0) + '</td>'; });
-                            html += '<td>' + this.totalHours(e.hours) + '</td><td>' + this.calcSalary(e) + '</td></tr>';
+                            html += '<td>' + this.totalHours(e.hours) + '</td><td>' + this.calcSalary(e) +
+                                '</td></tr>';
                         });
                         html += '<tr style="font-weight:700;"><td colspan="3">ИТОГО</td>';
                         this.dayStats.forEach(s => { html += '<td>' + (s || 0) + '</td>'; });
@@ -1571,7 +2073,8 @@
                 async updateDays(month) {
                     if (!month) return;
                     const parts = month.split('-');
-                    const year = parseInt(parts[0]), monthNum = parseInt(parts[1]);
+                    const year = parseInt(parts[0]),
+                        monthNum = parseInt(parts[1]);
                     const cnt = getDaysInMonth(year, monthNum);
                     this.days = Array.from({ length: cnt }, (_, i) => i + 1);
                     this.dayOfWeek = this.days.map(d => getDayOfWeek(year, monthNum, d));
