@@ -97,8 +97,9 @@
             border-radius: 16px;
             padding: 16px;
             transition: 0.2s;
+            cursor: pointer;
         }
-        .emp-card:hover { border-color: #f0b90b44; }
+        .emp-card:hover { border-color: #f0b90b44; transform: translateY(-2px); }
         .emp-card .top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
         .emp-card .name { font-size: 16px; font-weight: 600; }
         .emp-card .role { font-size: 12px; color: #8a9bb0; }
@@ -126,6 +127,7 @@
             border-radius: 12px;
             padding: 12px 14px;
             text-align: center;
+            cursor: default;
         }
         .stat-box .val { font-size: 22px; font-weight: 700; color: #f0b90b; }
         .stat-box .label { font-size: 11px; color: #8a9bb0; margin-top: 2px; }
@@ -164,12 +166,68 @@
             padding: 6px 0;
             border-radius: 8px;
             font-size: 13px;
-            cursor: default;
+            cursor: pointer;
             transition: 0.2s;
+            position: relative;
         }
+        .mini-calendar .days .day:hover { background: #1e2738; }
         .mini-calendar .days .day.today { background: #f0b90b; color: #0b0f1a; font-weight: 700; }
         .mini-calendar .days .day.has-work { color: #f0b90b; font-weight: 600; }
+        .mini-calendar .days .day.has-work::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #f0b90b;
+        }
         .mini-calendar .days .day.weekend { color: #5a6a80; }
+
+        /* Модалка дня */
+        .day-detail-modal .modal { max-width: 500px; }
+        .day-detail-modal .emp-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #1e2738;
+        }
+        .day-detail-modal .emp-row .name { font-weight: 500; }
+        .day-detail-modal .emp-row .hours { color: #f0b90b; }
+        .day-detail-modal .total-hours { font-size: 18px; font-weight: 700; color: #4ade80; margin-top: 8px; }
+
+        /* Модалка профиля сотрудника */
+        .profile-modal .modal { max-width: 450px; }
+        .profile-modal .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .profile-modal .profile-header .avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #1e2738;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: #f0b90b;
+        }
+        .profile-modal .profile-header .info .name { font-size: 20px; font-weight: 600; }
+        .profile-modal .profile-header .info .role { color: #8a9bb0; font-size: 14px; }
+        .profile-modal .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #1a2130;
+        }
+        .profile-modal .stat-row .label { color: #8a9bb0; }
+        .profile-modal .stat-row .value { font-weight: 500; color: #f0b90b; }
 
         .table-view { display: none; }
         .table-view.active { display: block; }
@@ -518,8 +576,9 @@
             <small>· Смена {{ selectedGraphic }}</small>
         </div>
 
+        <!-- Карточки сотрудников (кликабельные) -->
         <div class="employee-grid">
-            <div v-for="emp in employees" :key="emp.name" class="emp-card">
+            <div v-for="emp in employees" :key="emp.name" class="emp-card" @click="openProfile(emp)">
                 <div class="top">
                     <div>
                         <div class="name">{{ emp.name }}</div>
@@ -537,13 +596,17 @@
             </div>
         </div>
 
+        <!-- Статистика -->
         <div class="stats-grid">
             <div class="stat-box"><div class="val">{{ employees.length }}</div><div class="label">👥 Сотрудников</div></div>
             <div class="stat-box"><div class="val">{{ totalMonthHours }}</div><div class="label">⏱️ Всего часов</div></div>
             <div class="stat-box"><div class="val">{{ formatSalary(totalMonthSalary) }}</div><div class="label">💰 Зарплата</div></div>
             <div class="stat-box"><div class="val">{{ normHours }}</div><div class="label">📅 Норма</div></div>
+            <div class="stat-box"><div class="val" style="color:#4ade80;">{{ Math.round(totalMonthHours / (employees.length || 1) * 10) / 10 }}</div><div class="label">📊 Среднее на сотрудника</div></div>
+            <div class="stat-box"><div class="val" :style="{color: overtime > 0 ? '#fbbf24' : '#4ade80'}">{{ overtime > 0 ? '+' + overtime : overtime }}</div><div class="label">📈 Переработка</div></div>
         </div>
 
+        <!-- Календарь (кликабельный) -->
         <div class="mini-calendar">
             <div class="head">
                 <button class="nav-btn" @click="changeMonth(-1)">‹</button>
@@ -558,7 +621,8 @@
                          today: day.isToday,
                          'has-work': day.hasWork,
                          weekend: day.isWeekend
-                     }">
+                     }"
+                     @click="openDayDetail(day)">
                     {{ day.day }}
                 </div>
             </div>
@@ -639,6 +703,50 @@
     </div>
 
     <!-- ===== МОДАЛКИ ===== -->
+
+    <!-- Профиль сотрудника -->
+    <div class="modal-overlay profile-modal" :class="{active: profileModalVisible}" @click.self="closeProfile">
+        <div class="modal">
+            <button class="modal-close" @click="closeProfile">✕</button>
+            <div class="modal-title">👤 Профиль сотрудника</div>
+            <div v-if="profileData">
+                <div class="profile-header">
+                    <div class="avatar">{{ profileData.name ? profileData.name.charAt(0) : '?' }}</div>
+                    <div class="info">
+                        <div class="name">{{ profileData.name }}</div>
+                        <div class="role">{{ profileData.role || 'Сотрудник' }}</div>
+                    </div>
+                </div>
+                <div class="stat-row"><span class="label">💰 Оклад (5/2)</span><span class="value">{{ formatSalary(profileData.salaryBase) }} ₽</span></div>
+                <div class="stat-row"><span class="label">⏱️ Отработано часов</span><span class="value">{{ totalHours(profileData.hours) }}</span></div>
+                <div class="stat-row"><span class="label">📅 Смен за месяц</span><span class="value">{{ countShifts(profileData) }}</span></div>
+                <div class="stat-row"><span class="label">📈 Среднее в день</span><span class="value">{{ avgHoursPerDay(profileData) }}</span></div>
+                <div class="stat-row"><span class="label">💰 Зарплата за месяц</span><span class="value" style="color:#4ade80;">{{ formatSalary(calcSalary(profileData)) }} ₽</span></div>
+                <div class="stat-row"><span class="label">📊 Загрузка</span><span class="value">{{ Math.round(totalHours(profileData) / normHours * 100) }}%</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Детали дня -->
+    <div class="modal-overlay day-detail-modal" :class="{active: dayDetailModalVisible}" @click.self="closeDayDetail">
+        <div class="modal">
+            <button class="modal-close" @click="closeDayDetail">✕</button>
+            <div class="modal-title">📅 {{ dayDetailData ? dayDetailData.day + ' ' + currentMonthName : '' }}</div>
+            <div v-if="dayDetailData">
+                <div v-if="dayDetailData.employees.length === 0" style="color:#5a6a80;text-align:center;padding:20px 0;">
+                    В этот день никто не работал
+                </div>
+                <div v-else>
+                    <div v-for="emp in dayDetailData.employees" :key="emp.name" class="emp-row">
+                        <span class="name">{{ emp.name }}</span>
+                        <span class="hours">{{ emp.hours }}ч</span>
+                    </div>
+                    <div class="total-hours">Итого: {{ dayDetailData.total }}ч</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Массовое проставление -->
     <div class="modal-overlay" :class="{active: massModalVisible}" @click.self="closeMassModal">
         <div class="modal">
@@ -846,6 +954,12 @@
                 massData: { employee: 'all', dateFrom: 1, dateTo: 30 },
                 currentView: 'dashboard',
                 calendarMonthOffset: 0,
+                // Профиль
+                profileModalVisible: false,
+                profileData: null,
+                // Детали дня
+                dayDetailModalVisible: false,
+                dayDetailData: null
             },
             computed: {
                 currentMonthName() {
@@ -881,6 +995,11 @@
                     let total = 0;
                     this.employees.forEach(e => { total += this.calcSalary(e); });
                     return total;
+                },
+                overtime() {
+                    const total = this.totalMonthHours;
+                    const norm = this.normHours;
+                    return total > norm ? Math.round((total - norm) * 10) / 10 : 0;
                 },
                 dayStats() {
                     const stats = Array(this.days.length).fill(0);
@@ -965,19 +1084,52 @@
                     return Math.round((h / norm) * 100);
                 },
                 formatDate(ts) { return formatDate(ts); },
+                countShifts(emp) {
+                    if (!emp.hours) return 0;
+                    return emp.hours.filter(h => h > 0).length;
+                },
+                avgHoursPerDay(emp) {
+                    const total = this.totalHours(emp.hours);
+                    const days = this.days.length;
+                    return days > 0 ? Math.round(total / days * 10) / 10 : 0;
+                },
 
+                // ===== ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК =====
                 switchView(view) {
                     this.currentView = view;
-                    // обновляем активные кнопки
-                    document.querySelectorAll('.nav .btn').forEach(b => b.classList.remove('active'));
                     const btns = document.querySelectorAll('.nav .btn');
+                    btns.forEach(b => b.classList.remove('active'));
                     if (view === 'dashboard') btns[0].classList.add('active');
                     else if (view === 'table') btns[1].classList.add('active');
                 },
 
-                changeMonth(delta) {
-                    this.calendarMonthOffset += delta;
+                // ===== КАЛЕНДАРЬ =====
+                changeMonth(delta) { this.calendarMonthOffset += delta; },
+                openDayDetail(day) {
+                    if (!day.day) return;
+                    const dayIdx = day.day - 1;
+                    if (dayIdx < 0 || dayIdx >= this.days.length) return;
+                    const employees = [];
+                    this.employees.forEach(e => {
+                        if (e.hours && e.hours[dayIdx] > 0) {
+                            employees.push({ name: e.name, hours: e.hours[dayIdx] });
+                        }
+                    });
+                    this.dayDetailData = {
+                        day: day.day,
+                        employees: employees,
+                        total: employees.reduce((sum, e) => sum + e.hours, 0)
+                    };
+                    this.dayDetailModalVisible = true;
                 },
+                closeDayDetail() { this.dayDetailModalVisible = false; this.dayDetailData = null; },
+
+                // ===== ПРОФИЛЬ =====
+                openProfile(emp) {
+                    this.profileData = emp;
+                    this.profileModalVisible = true;
+                },
+                closeProfile() { this.profileModalVisible = false; this.profileData = null; },
 
                 // ===== МАССОВОЕ ПРОСТАВЛЕНИЕ =====
                 openMassModal() {
