@@ -3,287 +3,418 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Табель цеха порошковой покраски</title>
+    <title>Powder Flow OS — Табель</title>
     <style>
+        /* ===== ОБЩИЕ СТИЛИ ===== */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-            background: #f0f4f8; 
-            padding: 16px; 
+            background: #0b0f1a; 
+            color: #e8edf4;
             min-height: 100vh;
+            padding: 12px;
         }
-        .container { 
-            max-width: 1440px; 
-            margin: 0 auto; 
-            background: white; 
-            border-radius: 16px; 
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08); 
-            padding: 20px 24px; 
-        }
-
-        h1 { font-size: 26px; color: #1a2332; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-
-        /* ===== ДАШБОРД ===== */
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
-            background: #f7faff;
-            border-radius: 12px;
-            padding: 16px 20px;
-            border: 1px solid #e8edf4;
-        }
-        .dash-item { text-align: center; }
-        .dash-item .label { font-size: 11px; color: #7a8aa0; text-transform: uppercase; letter-spacing: 0.5px; }
-        .dash-item .value { font-size: 18px; font-weight: 700; color: #1a2332; }
-        .dash-item .value.green { color: #1e7b4c; }
-        .dash-item .value.orange { color: #d97706; }
-        .dash-item .value.red { color: #b13e4b; }
-        .dash-item .value.blue { color: #1a3b6e; }
+        .app { max-width: 1400px; margin: 0 auto; }
 
         /* ===== ХЕДЕР ===== */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
+            padding: 12px 16px;
+            background: #131926;
+            border-radius: 16px;
+            border: 1px solid #1e2738;
             margin-bottom: 16px;
-            padding-bottom: 14px;
-            border-bottom: 2px solid #e8edf4;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-        .header-left {
+        .logo {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #f0b90b;
+        }
+        .logo span { color: #e8edf4; font-weight: 400; }
+        .nav {
+            display: flex;
+            gap: 6px;
             flex-wrap: wrap;
         }
-        .header-left input[type="month"] {
-            padding: 8px 12px;
-            border: 1px solid #d0d7e3;
+        .nav .btn {
+            padding: 6px 14px;
+            border: none;
             border-radius: 8px;
-            font-size: 14px;
-            background: white;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            background: transparent;
+            color: #8a9bb0;
+            transition: 0.2s;
         }
+        .nav .btn:hover { background: #1e2738; color: #e8edf4; }
+        .nav .btn.active { background: #1e2738; color: #f0b90b; }
+
         .header-right {
             display: flex;
             align-items: center;
             gap: 10px;
             flex-wrap: wrap;
         }
-        .graphic-selector {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: #eef3fa;
-            padding: 4px 12px 4px 16px;
+        .cloud-status {
+            font-size: 11px;
+            padding: 4px 12px;
             border-radius: 20px;
+            background: #1a2a1a;
+            color: #4ade80;
+            border: 1px solid #2a4a2a;
         }
-        .graphic-selector select {
-            padding: 6px 8px;
+        .cloud-status.error { background: #2a1a1a; color: #f87171; border-color: #4a2a2a; }
+        .cloud-status.loading { background: #2a2a1a; color: #fbbf24; border-color: #4a4a2a; }
+
+        /* ===== ВКЛАДКИ ===== */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+            background: #131926;
+            border-radius: 12px;
+            padding: 4px;
+            border: 1px solid #1e2738;
+        }
+        .tabs .btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            background: transparent;
+            color: #8a9bb0;
+            transition: 0.2s;
+        }
+        .tabs .btn:hover { background: #1e2738; color: #e8edf4; }
+        .tabs .btn.active { background: #f0b90b; color: #0b0f1a; }
+
+        /* ===== ДАШБОРД ===== */
+        .dashboard { display: block; }
+        .dashboard.hidden { display: none; }
+
+        .greeting {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .greeting small {
+            font-weight: 400;
+            color: #8a9bb0;
+            font-size: 14px;
+        }
+
+        /* ===== КАРТОЧКИ СОТРУДНИКОВ ===== */
+        .employee-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin: 12px 0 20px;
+        }
+        .emp-card {
+            background: #131926;
+            border: 1px solid #1e2738;
+            border-radius: 16px;
+            padding: 16px;
+            transition: 0.2s;
+        }
+        .emp-card:hover { border-color: #f0b90b44; }
+        .emp-card .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        .emp-card .name { font-size: 16px; font-weight: 600; }
+        .emp-card .role { font-size: 12px; color: #8a9bb0; }
+        .emp-card .badge {
+            font-size: 11px;
+            padding: 2px 10px;
+            border-radius: 12px;
+            background: #1e2738;
+            color: #f0b90b;
+        }
+        .emp-card .progress-wrap {
+            margin: 8px 0 4px;
+            height: 6px;
+            background: #1e2738;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .emp-card .progress-wrap .fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #f0b90b, #f59e0b);
+            transition: width 0.6s;
+        }
+        .emp-card .bottom {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #8a9bb0;
+        }
+        .emp-card .bottom .hours { color: #e8edf4; font-weight: 500; }
+
+        /* ===== СТАТИСТИКА ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin: 12px 0 20px;
+        }
+        .stat-box {
+            background: #131926;
+            border: 1px solid #1e2738;
+            border-radius: 12px;
+            padding: 12px 14px;
+            text-align: center;
+        }
+        .stat-box .val { font-size: 22px; font-weight: 700; color: #f0b90b; }
+        .stat-box .label { font-size: 11px; color: #8a9bb0; margin-top: 2px; }
+
+        /* ===== КАЛЕНДАРЬ (МИНИ) ===== */
+        .mini-calendar {
+            background: #131926;
+            border: 1px solid #1e2738;
+            border-radius: 16px;
+            padding: 16px;
+            margin: 12px 0 20px;
+        }
+        .mini-calendar .head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .mini-calendar .head .month { font-weight: 600; }
+        .mini-calendar .head .nav-btn {
+            background: none;
+            border: none;
+            color: #8a9bb0;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0 8px;
+        }
+        .mini-calendar .head .nav-btn:hover { color: #e8edf4; }
+        .mini-calendar .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            text-align: center;
+        }
+        .mini-calendar .days .dow {
+            font-size: 11px;
+            color: #5a6a80;
+            padding: 4px 0;
+        }
+        .mini-calendar .days .day {
+            padding: 6px 0;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: default;
+            transition: 0.2s;
+        }
+        .mini-calendar .days .day.today {
+            background: #f0b90b;
+            color: #0b0f1a;
+            font-weight: 700;
+        }
+        .mini-calendar .days .day.has-work {
+            color: #f0b90b;
+            font-weight: 600;
+        }
+        .mini-calendar .days .day.weekend {
+            color: #5a6a80;
+        }
+
+        /* ===== ТАБЕЛЬ (ТАБЛИЦА) ===== */
+        .table-view { display: none; }
+        .table-view.active { display: block; }
+
+        .table-wrap { overflow-x: auto; margin-top: 8px; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            min-width: 700px;
+            color: #e8edf4;
+        }
+        th {
+            background: #131926;
+            color: #8a9bb0;
+            font-weight: 600;
+            padding: 8px 4px;
+            border-bottom: 2px solid #1e2738;
+            text-align: center;
+            font-size: 11px;
+        }
+        td {
+            padding: 4px 2px;
+            border-bottom: 1px solid #1a2130;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .emp-name {
+            min-width: 120px;
+            text-align: left;
+            padding-left: 8px;
+            font-weight: 500;
+            font-size: 12px;
+        }
+        .emp-name input {
             border: none;
             background: transparent;
             font-weight: 500;
-            font-size: 13px;
-            color: #1a2332;
-            outline: none;
+            font-size: 12px;
+            width: 100%;
+            padding: 4px 0;
+            border-bottom: 1px dashed #2a3a4a;
+            color: #e8edf4;
+        }
+        .emp-name input:focus { outline: none; border-bottom: 2px solid #f0b90b; }
+
+        .salary-input {
+            width: 65px;
+            padding: 4px 4px;
+            border: 1px solid #1e2738;
+            border-radius: 4px;
+            background: #0b0f1a;
+            color: #e8edf4;
+            text-align: center;
+            font-size: 12px;
+        }
+        .salary-input:focus { outline: 2px solid #f0b90b; border-color: transparent; }
+
+        .day-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1px;
+            padding: 2px 0;
+            min-width: 50px;
+        }
+        .day-cell .day-input {
+            width: 36px;
+            padding: 4px 0;
+            text-align: center;
+            border: 1px solid #1e2738;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            background: #0b0f1a;
+            color: #e8edf4;
             cursor: pointer;
         }
-        .cloud-status {
+        .day-cell .day-input:focus { outline: 2px solid #f0b90b; border-color: transparent; background: #1a2130; }
+        .day-cell .day-input.work-day { background: #1a2a1a; border-color: #2a4a2a; }
+        .day-cell .day-input.day-off { background: #1a1a1a; color: #5a6a80; border-color: #2a2a2a; }
+        .day-cell .day-input.sick { background: #2a2a1a; border-color: #4a4a2a; }
+        .day-cell .day-input.vacation { background: #1a1a2a; border-color: #2a2a4a; }
+
+        .day-cell .day-type-icon {
             font-size: 12px;
-            padding: 4px 14px;
-            border-radius: 12px;
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #6ee7b7;
-            white-space: nowrap;
+            cursor: pointer;
+            padding: 0 4px;
+            border-radius: 4px;
+            transition: background 0.2s;
         }
-        .cloud-status.error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fca5a5;
-        }
-        .cloud-status.loading {
-            background: #fef3c7;
-            color: #92400e;
-            border: 1px solid #fcd34d;
-        }
+        .day-cell .day-type-icon:hover { background: #1e2738; }
+        .day-cell .day-type-icon.work { color: #4ade80; }
+        .day-cell .day-type-icon.sick { color: #fbbf24; }
+        .day-cell .day-type-icon.vacation { color: #60a5fa; }
+        .day-cell .day-type-icon.dayoff { color: #6b7280; }
 
-        /* ===== ТУЛБАР ===== */
-        .toolbar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px 12px;
-            margin-bottom: 16px;
-            padding: 12px 16px;
-            background: #fafcff;
-            border-radius: 12px;
-            border: 1px solid #e8edf4;
-        }
-        .btn-group {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-wrap: wrap;
-            padding: 0 8px;
-            border-right: 1px solid #e8edf4;
-        }
-        .btn-group:last-child { border-right: none; }
-        .btn-group-label { font-size: 10px; font-weight: 600; color: #7a8aa0; text-transform: uppercase; letter-spacing: 0.3px; margin-right: 4px; }
+        .total-cell { font-weight: 600; background: #131926; color: #f0b90b; min-width: 35px; font-size: 12px; }
+        .salary-cell { font-weight: 600; color: #4ade80; background: #0f1a0f; min-width: 70px; font-size: 12px; }
 
+        .stats-row { background: #131926; border-top: 2px solid #1e2738; font-weight: 600; }
+        .stats-row td { padding: 8px 2px; font-size: 12px; }
+        .stats-label { text-align: right; padding-right: 10px; color: #8a9bb0; font-size: 12px; }
+
+        .remove-btn {
+            background: none;
+            border: none;
+            color: #5a6a80;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0 4px;
+        }
+        .remove-btn:hover { color: #f87171; }
+
+        /* ===== КНОПКИ ===== */
         .btn {
-            padding: 7px 16px;
+            padding: 6px 14px;
             border: none;
             border-radius: 8px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s;
-            background: #e8edf4;
-            color: #1a2332;
-            white-space: nowrap;
+            transition: 0.2s;
+            background: #1e2738;
+            color: #e8edf4;
             display: inline-flex;
             align-items: center;
             gap: 5px;
         }
-        .btn:hover { opacity: 0.85; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .btn:active { transform: translateY(0); }
-        .btn .icon { font-size: 16px; }
-        .btn .label { font-size: 13px; }
-        .btn-primary { background: #1a3b6e; color: white; }
-        .btn-success { background: #1e7b4c; color: white; }
-        .btn-danger { background: #b13e4b; color: white; }
-        .btn-outline { background: transparent; border: 1px solid #d0d7e3; }
-        .btn-print { background: #6c5b7b; color: white; }
-        .btn-excel { background: #1d6f42; color: white; }
-        .btn-warning { background: #d97706; color: white; }
-        .btn-purple { background: #7c3aed; color: white; }
-        .btn-cloud { background: #0891b2; color: white; }
-        .btn-history { background: #4f46e5; color: white; }
-        .btn-outline:hover { background: #f0f5fe; }
+        .btn:hover { background: #2a3a4a; transform: translateY(-1px); }
+        .btn-primary { background: #f0b90b; color: #0b0f1a; }
+        .btn-primary:hover { background: #d4a00a; }
+        .btn-success { background: #1a4a2a; color: #4ade80; }
+        .btn-success:hover { background: #2a5a3a; }
+        .btn-danger { background: #4a1a1a; color: #f87171; }
+        .btn-danger:hover { background: #5a2a2a; }
+        .btn-outline { background: transparent; border: 1px solid #1e2738; }
+        .btn-outline:hover { background: #1e2738; }
+        .btn-print { background: #2a2a4a; color: #a5b4fc; }
+        .btn-excel { background: #1a3a2a; color: #4ade80; }
+        .btn-warning { background: #3a2a1a; color: #fbbf24; }
+        .btn-history { background: #2a1a3a; color: #c4b5fd; }
 
-        /* ===== БЫСТРЫЕ КНОПКИ ТИПОВ ДНЕЙ ===== */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            background: #131926;
+            border-radius: 12px;
+            border: 1px solid #1e2738;
+        }
+
         .day-type-actions {
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
             margin-bottom: 12px;
             padding: 8px 12px;
-            background: #f8fafc;
-            border-radius: 10px;
-            border: 1px solid #e8edf4;
+            background: #131926;
+            border-radius: 12px;
+            border: 1px solid #1e2738;
             align-items: center;
         }
         .day-type-actions .label {
             font-size: 12px;
             font-weight: 600;
-            color: #7a8aa0;
+            color: #8a9bb0;
             margin-right: 4px;
         }
-        .day-type-actions .btn {
-            padding: 5px 12px;
-            font-size: 12px;
-            border-radius: 6px;
-        }
-        .btn-type-work { background: #e8f5e9; color: #1e7b4c; border: 1px solid #a5d6a7; }
-        .btn-type-work:hover { background: #c8e6c9; }
-        .btn-type-sick { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
-        .btn-type-sick:hover { background: #fde68a; }
-        .btn-type-vacation { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
-        .btn-type-vacation:hover { background: #bfdbfe; }
-        .btn-type-dayoff { background: #f3f4f6; color: #4b5563; border: 1px solid #d1d5db; }
-        .btn-type-dayoff:hover { background: #e5e7eb; }
-        .btn-type-reset { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
-        .btn-type-reset:hover { background: #fee2e2; }
-
-        /* ===== ТАБЛИЦА ===== */
-        .table-wrap { overflow-x: auto; margin-top: 8px; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 900px; }
-        th { background: #f7f9fc; color: #1a2332; font-weight: 600; padding: 10px 4px; border-bottom: 2px solid #dce3ed; text-align: center; position: sticky; top: 0; z-index: 10; font-size: 12px; }
-        td { padding: 6px 3px; border-bottom: 1px solid #e8edf4; text-align: center; vertical-align: middle; }
-
-        .emp-name { min-width: 140px; text-align: left; padding-left: 10px; font-weight: 500; font-size: 13px; }
-        .emp-name input { border: none; background: transparent; font-weight: 500; font-size: 13px; width: 100%; padding: 4px 0; border-bottom: 1px dashed #d0d7e3; }
-        .emp-name input:focus { outline: none; border-bottom: 2px solid #1a3b6e; }
-
-        .salary-input { width: 75px; padding: 6px 4px; border: 1px solid #d0d7e3; border-radius: 6px; text-align: center; font-size: 13px; }
-        .salary-input:focus { outline: 2px solid #1a3b6e; border-color: transparent; }
-
-        .day-cell {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-            padding: 2px 0;
-            min-width: 65px;
-        }
-        .day-cell .day-input {
-            width: 44px;
-            padding: 6px 0;
-            text-align: center;
-            border: 1px solid #dce3ed;
-            border-radius: 4px;
-            font-size: 13px;
-            font-weight: 500;
-            background: white;
-            cursor: pointer;
-        }
-        .day-cell .day-input:focus { outline: 2px solid #1a3b6e; border-color: transparent; background: #f7faff; }
-        .day-cell .day-input.work-day { background: #e8f5e9; border-color: #a5d6a7; }
-        .day-cell .day-input.day-off { background: #f5f5f5; color: #999; border-color: #e0e0e0; }
-        .day-cell .day-input.sick { background: #fef3c7; border-color: #fcd34d; }
-        .day-cell .day-input.vacation { background: #dbeafe; border-color: #93c5fd; }
-
-        .day-cell .day-type-icon {
-            font-size: 14px;
-            cursor: pointer;
-            padding: 2px 4px;
-            border-radius: 4px;
-            transition: background 0.2s;
-            user-select: none;
-        }
-        .day-cell .day-type-icon:hover {
-            background: #e8edf4;
-        }
-        .day-cell .day-type-icon.work { color: #1e7b4c; }
-        .day-cell .day-type-icon.sick { color: #d97706; }
-        .day-cell .day-type-icon.vacation { color: #1e40af; }
-        .day-cell .day-type-icon.dayoff { color: #6b7280; }
-
-        .total-cell { font-weight: 600; background: #f7f9fc; color: #1a2332; min-width: 45px; font-size: 13px; }
-        .salary-cell { font-weight: 600; color: #1e7b4c; background: #f0f7f0; min-width: 85px; font-size: 13px; }
-
-        .stats-row { background: #f7f9fc; border-top: 2px solid #dce3ed; font-weight: 600; }
-        .stats-row td { padding: 10px 3px; font-size: 13px; }
-        .stats-label { text-align: right; padding-right: 14px; color: #1a3b6e; font-size: 13px; }
-
-        .remove-btn { background: none; border: none; color: #b0b8c8; cursor: pointer; font-size: 16px; padding: 0 4px; }
-        .remove-btn:hover { color: #b13e4b; }
-
-        /* ===== ИНФО-БАР ===== */
-        .info-bar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px 24px;
-            margin-top: 16px;
-            padding: 14px 20px;
-            background: #f7f9fc;
-            border-radius: 12px;
-            font-size: 13px;
-            color: #1a2332;
-            align-items: center;
-        }
-        .info-bar strong { color: #1a3b6e; }
-        .info-bar .norm-calc { color: #666; font-size: 12px; }
-        .info-bar .highlight { background: #e8f0fe; padding: 4px 14px; border-radius: 12px; }
 
         /* ===== МОДАЛЬНЫЕ ОКНА ===== */
         .modal-overlay {
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.7);
             z-index: 1000;
             justify-content: center;
             align-items: center;
@@ -291,491 +422,385 @@
         }
         .modal-overlay.active { display: flex; }
         .modal {
-            background: white;
+            background: #131926;
+            border: 1px solid #1e2738;
             border-radius: 16px;
             padding: 24px;
-            max-width: 500px;
+            max-width: 480px;
             width: 100%;
             max-height: 80vh;
             overflow-y: auto;
+            color: #e8edf4;
         }
-        .modal-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; color: #1a2332; }
-        .modal-close { float: right; background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
-        .modal-close:hover { color: #333; }
-        .history-item { padding: 10px 12px; border-bottom: 1px solid #e8edf4; font-size: 13px; }
-        .history-item .time { color: #666; font-size: 11px; }
-        .history-item .action { font-weight: 600; color: #1a3b6e; }
-        .history-item .details { color: #555; font-size: 12px; }
-
+        .modal-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; color: #f0b90b; }
+        .modal-close {
+            float: right;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #5a6a80;
+        }
+        .modal-close:hover { color: #e8edf4; }
         .field-group { margin-bottom: 14px; }
-        .field-group label { display: block; font-size: 13px; font-weight: 600; color: #1a2332; margin-bottom: 4px; }
-        .field-group input[type="number"] {
+        .field-group label { display: block; font-size: 13px; font-weight: 600; color: #8a9bb0; margin-bottom: 4px; }
+        .field-group input, .field-group select {
             width: 100%;
             padding: 10px 12px;
-            border: 1px solid #d0d7e3;
+            border: 1px solid #1e2738;
             border-radius: 8px;
-            font-size: 16px;
-            text-align: center;
+            background: #0b0f1a;
+            color: #e8edf4;
+            font-size: 14px;
         }
-        .field-group input[type="number"]:focus {
-            outline: 2px solid #1a3b6e;
+        .field-group input:focus, .field-group select:focus {
+            outline: 2px solid #f0b90b;
             border-color: transparent;
         }
-
         .type-buttons {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            gap: 6px;
         }
         .type-buttons .btn {
-            padding: 10px;
-            font-size: 14px;
             justify-content: center;
+            padding: 10px;
             border-radius: 8px;
             border: 2px solid transparent;
         }
-        .type-buttons .btn.active {
-            border-color: #1a3b6e;
-            box-shadow: 0 0 0 2px rgba(26, 59, 110, 0.2);
-        }
-
+        .type-buttons .btn.active { border-color: #f0b90b; box-shadow: 0 0 0 2px rgba(240, 185, 11, 0.2); }
         .modal-actions {
             display: flex;
             gap: 10px;
             margin-top: 16px;
             justify-content: flex-end;
         }
-        .modal-actions .btn {
-            padding: 10px 24px;
-            font-size: 14px;
-        }
 
-        /* ===== ПЕЧАТЬ ===== */
-        .print-container {
-            display: none;
-            padding: 40px;
-            background: white;
-            font-family: 'Times New Roman', Times, serif;
-        }
-        .print-container table {
+        .history-item {
+            padding: 10px 12px;
+            border-bottom: 1px solid #1e2738;
             font-size: 13px;
-            border-collapse: collapse;
-            width: 100%;
-            table-layout: fixed;
         }
-        .print-container th, .print-container td {
-            border: 2px solid #000;
-            padding: 12px 3px;
-            text-align: center;
-            vertical-align: middle;
-            height: 48px;
-            min-height: 48px;
-        }
-        .print-container th {
-            background: #f5f5f5;
-            font-weight: 700;
-            font-size: 13px;
-            height: 40px;
-            min-height: 40px;
-        }
-        .print-container .print-title {
-            text-align: center;
-            font-size: 26px;
-            font-weight: 700;
-            margin-bottom: 12px;
-            letter-spacing: 4px;
-        }
-        .print-container .print-subtitle {
-            text-align: center;
-            font-size: 18px;
-            margin-bottom: 16px;
-            font-weight: 500;
-        }
-        .print-container .print-emp-name {
-            font-weight: 700;
-            text-align: left;
-            padding-left: 12px;
-            font-size: 14px;
-        }
-        .print-container .print-day { font-size: 13px; font-weight: 700; }
-        .print-container .print-hour-cell { font-size: 14px; line-height: 1.6; min-height: 48px; font-weight: 500; }
-        .print-container .print-total { font-weight: 700; font-size: 14px; }
-        .print-container .print-stats { font-weight: 700; background: #f5f5f5; }
-        .print-container .print-stats td { font-size: 13px; padding: 12px 3px; height: 48px; min-height: 48px; }
-        .print-container .print-footer { margin-top: 20px; display: flex; justify-content: space-between; font-size: 16px; }
-        .print-container .print-note { margin-top: 8px; font-size: 12px; color: #444; text-align: center; border-top: 1px dashed #999; padding-top: 8px; }
-        .print-container .print-time-row { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; line-height: 1.4; }
+        .history-item .time { color: #5a6a80; font-size: 11px; }
+        .history-item .action { font-weight: 600; color: #f0b90b; }
+        .history-item .details { color: #8a9bb0; font-size: 12px; }
 
-        @media print {
-            @page { size: landscape; margin: 12mm; }
-            body * { visibility: hidden; }
-            .print-container, .print-container * { visibility: visible; }
-            .print-container {
-                display: block !important;
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                padding: 15px 20px;
-            }
-            .print-container table { font-size: 11px; }
-            .print-container th, .print-container td { padding: 8px 2px; height: 36px; min-height: 36px; }
-            .print-container .print-hour-cell { font-size: 11px; min-height: 36px; }
-            .print-container .print-emp-name { font-size: 11px; }
-            .print-container .print-title { font-size: 20px; }
-            .print-container .print-subtitle { font-size: 14px; }
-            .print-container .print-stats td { height: 36px; min-height: 36px; padding: 8px 2px; }
-            .print-container .print-footer { font-size: 13px; }
-        }
-
-        /* ===== TOAST ===== */
+        /* ===== ТОАСТ ===== */
         .toast {
             position: fixed;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: #1a2332;
-            color: white;
-            padding: 12px 24px;
+            background: #131926;
+            border: 1px solid #1e2738;
+            color: #e8edf4;
+            padding: 10px 20px;
             border-radius: 12px;
-            font-size: 14px;
+            font-size: 13px;
             z-index: 999;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            animation: fadeIn 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
             max-width: 90%;
             text-align: center;
         }
-        .toast.success { background: #1e7b4c; }
-        .toast.error { background: #b13e4b; }
-        .toast.warning { background: #d97706; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
-            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.success { border-color: #4ade80; color: #4ade80; }
+        .toast.error { border-color: #f87171; color: #f87171; }
+        .toast.warning { border-color: #fbbf24; color: #fbbf24; }
+
+        /* ===== ПЕЧАТЬ ===== */
+        .print-container {
+            display: none;
+            padding: 30px;
+            background: white;
+            color: #000;
+            font-family: 'Times New Roman', Times, serif;
+        }
+        .print-container table {
+            font-size: 12px;
+            border-collapse: collapse;
+            width: 100%;
+            table-layout: fixed;
+        }
+        .print-container th, .print-container td {
+            border: 1.5px solid #000;
+            padding: 8px 3px;
+            text-align: center;
+            vertical-align: middle;
+            height: 36px;
+        }
+        .print-container th { background: #f0f0f0; font-weight: 700; }
+        .print-container .print-title { text-align: center; font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+        .print-container .print-subtitle { text-align: center; font-size: 14px; margin-bottom: 12px; }
+        .print-container .print-footer { margin-top: 16px; display: flex; justify-content: space-between; font-size: 13px; }
+
+        @media print {
+            @page { size: landscape; margin: 10mm; }
+            body * { visibility: hidden; }
+            .print-container, .print-container * { visibility: visible; }
+            .print-container { display: block !important; position: absolute; left: 0; top: 0; width: 100%; padding: 15px 20px; }
         }
 
-        /* ===== МОБИЛЬНАЯ АДАПТАЦИЯ ===== */
-        @media (max-width: 1024px) {
-            .dashboard { grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px 16px; }
-            .dash-item .value { font-size: 16px; }
-        }
-
+        /* ===== АДАПТАЦИЯ ===== */
         @media (max-width: 768px) {
             body { padding: 8px; }
-            .container { padding: 12px; border-radius: 12px; }
-            h1 { font-size: 20px; }
-            
-            .dashboard {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 6px;
-                padding: 10px;
-                margin-bottom: 12px;
-            }
-            .dash-item .value { font-size: 15px; }
-            .dash-item .label { font-size: 9px; }
-            
-            .header {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 8px;
-                margin-bottom: 12px;
-                padding-bottom: 10px;
-            }
-            .header-left { flex-wrap: wrap; gap: 8px; }
-            .header-left input[type="month"] { flex: 1; min-width: 120px; font-size: 13px; padding: 6px 10px; }
-            .header-right { flex-wrap: wrap; gap: 6px; }
-            .graphic-selector { padding: 2px 8px 2px 12px; }
-            .graphic-selector select { font-size: 12px; padding: 4px 6px; }
-            .cloud-status { font-size: 10px; padding: 3px 10px; }
-
+            .header { padding: 10px 12px; flex-direction: column; align-items: stretch; }
+            .nav { justify-content: center; }
+            .employee-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .emp-card { padding: 12px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .toolbar {
                 display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                gap: 6px;
-                padding: 8px;
-                margin-bottom: 12px;
-            }
-            .btn-group { display: none; }
-            .btn {
-                padding: 10px 6px;
-                font-size: 11px;
-                flex-direction: column;
-                align-items: center;
-                gap: 2px;
-                border-radius: 8px;
-            }
-            .btn .icon { font-size: 18px; }
-            .btn .label { font-size: 10px; }
-            
-            .day-type-actions {
-                padding: 6px 10px;
-                gap: 4px;
-            }
-            .day-type-actions .label {
-                font-size: 10px;
-                width: 100%;
-            }
-            .day-type-actions .btn {
-                font-size: 10px;
-                padding: 4px 10px;
-            }
-            
-            .table-wrap { margin: 0 -6px; border-radius: 0; }
-            table { font-size: 11px; min-width: 700px; }
-            th { font-size: 10px; padding: 6px 2px; }
-            td { padding: 4px 2px; }
-            .emp-name { font-size: 11px; min-width: 80px; padding-left: 6px; }
-            .emp-name input { font-size: 11px; }
-            .salary-input { width: 55px; font-size: 11px; padding: 4px 2px; }
-            .day-cell { min-width: 55px; }
-            .day-cell .day-input { width: 36px; font-size: 11px; padding: 4px 0; }
-            .day-cell .day-type-icon { font-size: 12px; }
-            .total-cell { font-size: 11px; min-width: 35px; }
-            .salary-cell { font-size: 11px; min-width: 60px; }
-            .stats-row td { font-size: 11px; padding: 6px 2px; }
-            .stats-label { font-size: 11px; padding-right: 8px; }
-            
-            .info-bar {
-                font-size: 11px;
-                padding: 10px 12px;
-                gap: 6px 12px;
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .info-bar .norm-calc { font-size: 10px; }
-            
-            .modal { padding: 16px; margin: 10px; }
-            .modal-title { font-size: 17px; }
-            .history-item { font-size: 12px; padding: 8px 10px; }
-            
-            .type-buttons {
-                grid-template-columns: 1fr 1fr;
-            }
-            .modal-actions .btn {
-                padding: 8px 16px;
-                font-size: 13px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .dashboard {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 4px;
-                padding: 8px;
-            }
-            .dash-item .value { font-size: 14px; }
-            .dash-item .label { font-size: 8px; }
-            .toolbar {
                 grid-template-columns: repeat(4, 1fr);
                 gap: 4px;
                 padding: 6px;
             }
-            .btn { padding: 8px 4px; font-size: 10px; }
-            .btn .icon { font-size: 16px; }
-            .btn .label { font-size: 9px; }
+            .toolbar .btn { justify-content: center; font-size: 10px; padding: 6px 4px; }
+            .tabs .btn { font-size: 11px; padding: 8px; }
             table { font-size: 10px; min-width: 600px; }
             .day-cell .day-input { width: 30px; font-size: 10px; }
             .day-cell .day-type-icon { font-size: 10px; }
+            .emp-name { font-size: 10px; min-width: 70px; }
+            .salary-input { width: 50px; font-size: 10px; }
+        }
+        @media (max-width: 480px) {
+            .employee-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
 <body>
-<div class="container" id="app">
-    <h1>🧑‍🏭 Табель цеха</h1>
-
-    <!-- ДАШБОРД -->
-    <div class="dashboard">
-        <div class="dash-item">
-            <div class="label">👥 Сотрудников</div>
-            <div class="value blue">{{ employees.length }}</div>
-        </div>
-        <div class="dash-item">
-            <div class="label">⏱️ Всего часов</div>
-            <div class="value green">{{ totalMonthHours }}</div>
-        </div>
-        <div class="dash-item">
-            <div class="label">💰 Зарплата</div>
-            <div class="value green">{{ formatSalary(totalMonthSalary) }} ₽</div>
-        </div>
-        <div class="dash-item">
-            <div class="label">📅 Норма</div>
-            <div class="value blue">{{ normHours }}ч</div>
-        </div>
-        <div class="dash-item">
-            <div class="label">📊 Переработка</div>
-            <div class="value" :class="overtime > 0 ? 'orange' : 'green'">{{ overtime > 0 ? '+' + overtime : overtime }}</div>
-        </div>
-        <div class="dash-item">
-            <div class="label">📉 Недоработка</div>
-            <div class="value" :class="shortfall > 0 ? 'red' : 'green'">{{ shortfall > 0 ? '-' + shortfall : shortfall }}</div>
-        </div>
-    </div>
-
-    <!-- ХЕДЕР -->
+<div class="app" id="app">
+    <!-- ===== ХЕДЕР ===== -->
     <div class="header">
-        <div class="header-left">
-            <input type="month" v-model="currentMonth" @change="onMonthChange" />
-            <div class="graphic-selector">
-                <span>График:</span>
-                <select v-model="selectedGraphic" @change="onGraphicChange">
-                    <option value="3/3">3/3</option>
-                    <option value="2/2">2/2</option>
-                </select>
-            </div>
+        <div class="logo">
+            🧑‍🏭 <span>Powder Flow OS</span>
+        </div>
+        <div class="nav">
+            <button class="btn active" @click="currentView='dashboard'">📊 Дашборд</button>
+            <button class="btn" @click="currentView='table'">📋 Табель</button>
+            <button class="btn" @click="showHistory">📜 История</button>
         </div>
         <div class="header-right">
-            <span style="background:#eef3fa;padding:4px 12px;border-radius:20px;font-size:12px;">Норма: {{ normHours }}ч</span>
             <span class="cloud-status" :class="syncStatusClass">{{ syncStatusText }}</span>
-            <button class="btn btn-history" style="padding:4px 12px;font-size:11px;" @click="showHistory">📜 История</button>
+            <button class="btn btn-success" @click="saveToCloud" style="padding:4px 12px;font-size:11px;">💾</button>
         </div>
     </div>
 
-    <!-- ТУЛБАР -->
-    <div class="toolbar">
-        <button class="btn btn-success" @click="saveToCloud">
-            <span class="icon">☁️</span>
-            <span class="label">Сохранить</span>
-        </button>
-        <button class="btn btn-primary" @click="addEmployee">
-            <span class="icon">➕</span>
-            <span class="label">Добавить</span>
-        </button>
-        <button class="btn btn-warning" @click="fillByGraphic">
-            <span class="icon">📋</span>
-            <span class="label">Заполнить</span>
-        </button>
-        <button class="btn btn-print" @click="printTable">
-            <span class="icon">🖨️</span>
-            <span class="label">Печать</span>
-        </button>
-        <button class="btn btn-excel" @click="exportExcel">
-            <span class="icon">📊</span>
-            <span class="label">Excel</span>
-        </button>
-        <button class="btn btn-outline" @click="resetMonth">
-            <span class="icon">🔄</span>
-            <span class="label">Сброс</span>
-        </button>
-        <button class="btn btn-danger" @click="deleteMonth">
-            <span class="icon">🗑️</span>
-            <span class="label">Удалить</span>
-        </button>
-        <button class="btn btn-cloud" @click="loadFromCloud">
-            <span class="icon">📥</span>
-            <span class="label">Загрузить</span>
-        </button>
+    <!-- ===== ВКЛАДКИ (мобильные) ===== -->
+    <div class="tabs">
+        <button class="btn" :class="{active: currentView==='dashboard'}" @click="currentView='dashboard'">📊 Дашборд</button>
+        <button class="btn" :class="{active: currentView==='table'}" @click="currentView='table'">📋 Табель</button>
     </div>
 
-    <!-- БЫСТРЫЕ КНОПКИ ТИПОВ ДНЕЙ -->
-    <div class="day-type-actions">
-        <span class="label">📋 Массовое проставление:</span>
-        <button class="btn btn-type-work" @click="openMassModal">📋 Открыть</button>
+    <!-- ============================================================ -->
+    <!-- ===== ДАШБОРД ===== -->
+    <!-- ============================================================ -->
+    <div class="dashboard" :class="{hidden: currentView!=='dashboard'}">
+        <!-- Приветствие -->
+        <div class="greeting">
+            Сегодня, {{ currentDate }}
+            <small>· Смена {{ selectedGraphic }}</small>
+        </div>
+
+        <!-- Карточки сотрудников -->
+        <div class="employee-grid">
+            <div v-for="emp in employees" :key="emp.name" class="emp-card">
+                <div class="top">
+                    <div>
+                        <div class="name">{{ emp.name }}</div>
+                        <div class="role">{{ emp.role || 'Сотрудник' }}</div>
+                    </div>
+                    <span class="badge">{{ getTodayHours(emp) }}ч</span>
+                </div>
+                <div class="progress-wrap">
+                    <div class="fill" :style="{width: getTodayProgress(emp) + '%'}"></div>
+                </div>
+                <div class="bottom">
+                    <span>{{ getTodayProgress(emp) }}%</span>
+                    <span class="hours">{{ getTodayHours(emp) }}ч / {{ getDayNorm }}ч</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Статистика -->
+        <div class="stats-grid">
+            <div class="stat-box"><div class="val">{{ employees.length }}</div><div class="label">👥 Сотрудников</div></div>
+            <div class="stat-box"><div class="val">{{ totalMonthHours }}</div><div class="label">⏱️ Всего часов</div></div>
+            <div class="stat-box"><div class="val">{{ totalMonthSalary.toLocaleString() }}</div><div class="label">💰 Зарплата</div></div>
+            <div class="stat-box"><div class="val">{{ normHours }}</div><div class="label">📅 Норма</div></div>
+        </div>
+
+        <!-- Мини-календарь -->
+        <div class="mini-calendar">
+            <div class="head">
+                <button class="nav-btn" @click="changeMonth(-1)">‹</button>
+                <span class="month">{{ calendarMonthName }} {{ calendarYear }}</span>
+                <button class="nav-btn" @click="changeMonth(1)">›</button>
+            </div>
+            <div class="days">
+                <div v-for="d in weekDays" :key="d" class="dow">{{ d }}</div>
+                <div v-for="day in calendarDays" :key="day.date" 
+                     class="day" 
+                     :class="{
+                         today: day.isToday,
+                         'has-work': day.hasWork,
+                         weekend: day.isWeekend
+                     }">
+                    {{ day.day }}
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- ТАБЛИЦА -->
-    <div class="table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th style="min-width:100px;">Сотрудник</th>
-                    <th style="min-width:60px;">Оклад</th>
-                    <th v-for="(day, i) in days" :key="day" style="min-width:65px;">
-                        {{ day }}<br><span style="font-weight:400;font-size:8px;color:#888;">{{ weekDays[dayOfWeek[i]] }}</span>
-                    </th>
-                    <th>Итого</th>
-                    <th>Зарплата</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="(emp, idx) in employees" :key="idx">
-                    <td class="emp-name">
-                        <input v-model="emp.name" placeholder="Имя" />
-                        <button class="remove-btn" @click="removeEmployee(idx)">✕</button>
-                    </td>
-                    <td><input type="number" class="salary-input" v-model.number="emp.salaryBase" step="1000" @change="autoSave" /></td>
-                    <td v-for="(day, dayIdx) in days" :key="dayIdx">
-                        <div class="day-cell">
-                            <input type="number" class="day-input" 
-                                   :class="getDayClass(dayIdx, emp)"
-                                   v-model.number="emp.hours[dayIdx]" 
-                                   min="0" max="12" step="0.5"
-                                   placeholder="0" 
-                                   @focus="openEditModal(emp, dayIdx)" />
-                            <span class="day-type-icon" 
-                                  :class="getDayTypeIcon(emp.dayType[dayIdx])"
-                                  @click="openEditModal(emp, dayIdx)">
-                                {{ getDayTypeEmoji(emp.dayType[dayIdx]) }}
-                            </span>
-                        </div>
-                    </td>
-                    <td class="total-cell">{{ totalHours(emp.hours) }}</td>
-                    <td class="salary-cell">{{ formatSalary(calcSalary(emp)) }}</td>
-                </tr>
-                <tr class="stats-row">
-                    <td class="stats-label" colspan="2">📊 Итого за месяц</td>
-                    <td v-for="day in days" :key="'stat-'+day">{{ dayStats[day-1] || '' }}</td>
-                    <td class="total-cell">{{ totalMonthHours }}</td>
-                    <td class="salary-cell">{{ formatSalary(totalMonthSalary) }}</td>
-                </tr>
-            </tbody>
-        </table>
+    <!-- ============================================================ -->
+    <!-- ===== ТАБЕЛЬ (таблица) ===== -->
+    <!-- ============================================================ -->
+    <div class="table-view" :class="{active: currentView==='table'}">
+        <!-- Инфо -->
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+            <span style="color:#8a9bb0;font-size:13px;">📅 {{ currentMonthName }} · Норма: {{ normHours }}ч</span>
+            <span style="color:#8a9bb0;font-size:13px;">✏️ Нажми на часы для редактирования</span>
+        </div>
+
+        <!-- Быстрые кнопки -->
+        <div class="day-type-actions">
+            <span class="label">📋 Массовое проставление:</span>
+            <button class="btn" style="background:#1a2a1a;color:#4ade80;border-color:#2a4a2a;" @click="openMassModal">📋 Открыть</button>
+        </div>
+
+        <!-- Тулбар -->
+        <div class="toolbar">
+            <button class="btn btn-primary" @click="addEmployee">➕ Добавить</button>
+            <button class="btn btn-warning" @click="fillByGraphic">📋 Заполнить</button>
+            <button class="btn btn-outline" @click="resetMonth">🔄 Сброс</button>
+            <button class="btn btn-danger" @click="deleteMonth">🗑️ Удалить</button>
+            <button class="btn btn-print" @click="printTable">🖨️ Печать</button>
+            <button class="btn btn-excel" @click="exportExcel">📊 Excel</button>
+            <button class="btn btn-success" @click="loadFromCloud">📥 Загрузить</button>
+        </div>
+
+        <!-- Таблица -->
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="min-width:100px;">Сотрудник</th>
+                        <th style="min-width:55px;">Оклад</th>
+                        <th v-for="(day, i) in days" :key="day" style="min-width:55px;">
+                            {{ day }}<br><span style="font-weight:400;font-size:8px;color:#5a6a80;">{{ weekDays[dayOfWeek[i]] }}</span>
+                        </th>
+                        <th>Итого</th>
+                        <th>Зарплата</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(emp, idx) in employees" :key="idx">
+                        <td class="emp-name">
+                            <input v-model="emp.name" placeholder="Имя" />
+                            <button class="remove-btn" @click="removeEmployee(idx)">✕</button>
+                        </td>
+                        <td><input type="number" class="salary-input" v-model.number="emp.salaryBase" step="1000" @change="autoSave" /></td>
+                        <td v-for="(day, dayIdx) in days" :key="dayIdx">
+                            <div class="day-cell">
+                                <input type="number" class="day-input" 
+                                       :class="getDayClass(dayIdx, emp)"
+                                       v-model.number="emp.hours[dayIdx]" 
+                                       min="0" max="12" step="0.5"
+                                       placeholder="0" 
+                                       @focus="openEditModal(emp, dayIdx)" />
+                                <span class="day-type-icon" 
+                                      :class="getDayTypeIcon(emp.dayType[dayIdx])"
+                                      @click="openEditModal(emp, dayIdx)">
+                                    {{ getDayTypeEmoji(emp.dayType[dayIdx]) }}
+                                </span>
+                            </div>
+                        </td>
+                        <td class="total-cell">{{ totalHours(emp.hours) }}</td>
+                        <td class="salary-cell">{{ formatSalary(calcSalary(emp)) }}</td>
+                    </tr>
+                    <tr class="stats-row">
+                        <td class="stats-label" colspan="2">📊 Итого за месяц</td>
+                        <td v-for="day in days" :key="'stat-'+day">{{ dayStats[day-1] || '' }}</td>
+                        <td class="total-cell">{{ totalMonthHours }}</td>
+                        <td class="salary-cell">{{ formatSalary(totalMonthSalary) }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <!-- ИНФО-БАР -->
-    <div class="info-bar">
-        <span><strong>График:</strong> {{ selectedGraphic }}</span>
-        <span><strong>Норма 5/2:</strong> {{ norm52 }}ч</span>
-        <span><strong>Норма {{ selectedGraphic }}:</strong> {{ normHours }}ч</span>
-        <span class="norm-calc">{{ normCalcText }}</span>
-        <span class="highlight"><strong>Ставка:</strong> оклад / {{ normHours }}ч</span>
-        <span style="color:#888;font-size:11px;margin-left:auto;">✏️ Нажми на часы для редактирования</span>
-    </div>
+    <!-- ============================================================ -->
+    <!-- ===== МОДАЛКИ ===== -->
+    <!-- ============================================================ -->
 
-    <!-- МОДАЛЬНОЕ ОКНО МАССОВОГО ПРОСТАВЛЕНИЯ -->
+    <!-- Массовое проставление -->
     <div class="modal-overlay" :class="{active: massModalVisible}" @click.self="closeMassModal">
-        <div class="modal" style="max-width:450px;">
+        <div class="modal">
             <button class="modal-close" @click="closeMassModal">✕</button>
-            <div class="modal-title" style="font-size:18px;margin-bottom:16px;">📋 Массовое проставление</div>
-            
+            <div class="modal-title">📋 Массовое проставление</div>
             <div class="field-group">
                 <label>👤 Сотрудник</label>
-                <select v-model="massData.employee" style="width:100%;padding:10px;border:1px solid #d0d7e3;border-radius:8px;font-size:14px;background:white;">
+                <select v-model="massData.employee">
                     <option value="all">Все сотрудники</option>
                     <option v-for="(emp, idx) in employees" :key="idx" :value="idx">{{ emp.name }}</option>
                 </select>
             </div>
-            
             <div class="field-group">
                 <label>📅 Диапазон дат</label>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
                     <div>
-                        <label style="font-size:11px;color:#666;">С</label>
-                        <select v-model="massData.dateFrom" style="width:100%;padding:8px;border:1px solid #d0d7e3;border-radius:6px;font-size:13px;background:white;">
+                        <label style="font-size:11px;color:#5a6a80;">С</label>
+                        <select v-model="massData.dateFrom">
                             <option v-for="day in days" :key="'from-'+day" :value="day">{{ day }}</option>
                         </select>
                     </div>
                     <div>
-                        <label style="font-size:11px;color:#666;">По</label>
-                        <select v-model="massData.dateTo" style="width:100%;padding:8px;border:1px solid #d0d7e3;border-radius:6px;font-size:13px;background:white;">
+                        <label style="font-size:11px;color:#5a6a80;">По</label>
+                        <select v-model="massData.dateTo">
                             <option v-for="day in days" :key="'to-'+day" :value="day">{{ day }}</option>
                         </select>
                     </div>
                 </div>
             </div>
-            
-            <div class="field-group" style="margin-bottom:0;">
-                <label style="display:block;font-size:13px;font-weight:600;color:#1a2332;margin-bottom:6px;">📋 Тип дня</label>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-                    <button class="btn btn-type-work" style="padding:10px;font-size:14px;border-radius:8px;border:2px solid transparent;background:#e8f5e9;color:#1e7b4c;border-color:#a5d6a7;cursor:pointer;" @click="applyMassType('work')">✅ Работа</button>
-                    <button class="btn btn-type-sick" style="padding:10px;font-size:14px;border-radius:8px;border:2px solid transparent;background:#fef3c7;color:#92400e;border-color:#fcd34d;cursor:pointer;" @click="applyMassType('sick')">🤒 Больничный</button>
-                    <button class="btn btn-type-vacation" style="padding:10px;font-size:14px;border-radius:8px;border:2px solid transparent;background:#dbeafe;color:#1e40af;border-color:#93c5fd;cursor:pointer;" @click="applyMassType('vacation')">🌴 Отпуск</button>
-                    <button class="btn btn-type-dayoff" style="padding:10px;font-size:14px;border-radius:8px;border:2px solid transparent;background:#f3f4f6;color:#4b5563;border-color:#d1d5db;cursor:pointer;" @click="applyMassType('dayoff')">📅 Выходной</button>
-                    <button class="btn btn-type-reset" style="padding:10px;font-size:14px;border-radius:8px;border:2px solid transparent;background:#fef2f2;color:#991b1b;border-color:#fca5a5;cursor:pointer;grid-column:1/3;" @click="applyMassType('reset')">❌ Сбросить (все станут "Работа")</button>
+            <div class="field-group">
+                <label>📋 Тип дня</label>
+                <div class="type-buttons">
+                    <button class="btn" style="background:#1a2a1a;color:#4ade80;border-color:#2a4a2a;" @click="applyMassType('work')">✅ Работа</button>
+                    <button class="btn" style="background:#2a2a1a;color:#fbbf24;border-color:#4a4a2a;" @click="applyMassType('sick')">🤒 Больничный</button>
+                    <button class="btn" style="background:#1a1a2a;color:#60a5fa;border-color:#2a2a4a;" @click="applyMassType('vacation')">🌴 Отпуск</button>
+                    <button class="btn" style="background:#1a1a1a;color:#6b7280;border-color:#2a2a2a;" @click="applyMassType('dayoff')">📅 Выходной</button>
+                    <button class="btn" style="background:#2a1a1a;color:#f87171;border-color:#4a2a2a;grid-column:1/3;" @click="applyMassType('reset')">❌ Сбросить</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ИСТОРИЯ (МОДАЛЬНОЕ ОКНО) -->
+    <!-- Редактирование дня -->
+    <div class="modal-overlay" :class="{active: editModalVisible}" @click.self="closeEditModal">
+        <div class="modal">
+            <button class="modal-close" @click="closeEditModal">✕</button>
+            <div class="modal-title">✏️ Редактирование дня</div>
+            <div v-if="editModalData">
+                <div class="field-group"><label>👤 Сотрудник</label><div style="font-size:16px;font-weight:500;padding:4px 0;">{{ editModalData.empName }}</div></div>
+                <div class="field-group"><label>📅 Дата</label><div style="font-size:16px;font-weight:500;padding:4px 0;">{{ editModalData.day }} {{ currentMonthName }}</div></div>
+                <div class="field-group"><label>⏱️ Часы</label><input type="number" v-model.number="editModalData.hours" min="0" max="12" step="0.5" /></div>
+                <div class="field-group">
+                    <label>📋 Тип дня</label>
+                    <div class="type-buttons">
+                        <button class="btn" :class="{active: editModalData.dayType === 'work'}" style="background:#1a2a1a;color:#4ade80;border-color:#2a4a2a;" @click="editModalData.dayType = 'work'">✅ Работа</button>
+                        <button class="btn" :class="{active: editModalData.dayType === 'sick'}" style="background:#2a2a1a;color:#fbbf24;border-color:#4a4a2a;" @click="editModalData.dayType = 'sick'">🤒 Больничный</button>
+                        <button class="btn" :class="{active: editModalData.dayType === 'vacation'}" style="background:#1a1a2a;color:#60a5fa;border-color:#2a2a4a;" @click="editModalData.dayType = 'vacation'">🌴 Отпуск</button>
+                        <button class="btn" :class="{active: editModalData.dayType === 'dayoff'}" style="background:#1a1a1a;color:#6b7280;border-color:#2a2a2a;" @click="editModalData.dayType = 'dayoff'">📅 Выходной</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" @click="closeEditModal">Отмена</button>
+                <button class="btn btn-primary" @click="saveEditModal">💾 Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- История -->
     <div class="modal-overlay" :class="{active: historyModalVisible}" @click.self="closeHistory">
         <div class="modal">
             <button class="modal-close" @click="closeHistory">✕</button>
@@ -792,85 +817,26 @@
         </div>
     </div>
 
-    <!-- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ -->
-    <div class="modal-overlay edit-modal" :class="{active: editModalVisible}" @click.self="closeEditModal">
-        <div class="modal">
-            <button class="modal-close" @click="closeEditModal">✕</button>
-            <div class="modal-title">✏️ Редактирование дня</div>
-            <div v-if="editModalData">
-                <div class="field-group">
-                    <label>👤 Сотрудник</label>
-                    <div style="font-size:16px;font-weight:500;padding:4px 0;">{{ editModalData.empName }}</div>
-                </div>
-                <div class="field-group">
-                    <label>📅 Дата</label>
-                    <div style="font-size:16px;font-weight:500;padding:4px 0;">{{ editModalData.day }} {{ currentMonthName }}</div>
-                </div>
-                <div class="field-group">
-                    <label>⏱️ Часы</label>
-                    <input type="number" v-model.number="editModalData.hours" min="0" max="12" step="0.5" />
-                </div>
-                <div class="field-group">
-                    <label>📋 Тип дня</label>
-                    <div class="type-buttons">
-                        <button class="btn btn-type-work" :class="{active: editModalData.dayType === 'work'}" @click="editModalData.dayType = 'work'">✅ Работа</button>
-                        <button class="btn btn-type-sick" :class="{active: editModalData.dayType === 'sick'}" @click="editModalData.dayType = 'sick'">🤒 Больничный</button>
-                        <button class="btn btn-type-vacation" :class="{active: editModalData.dayType === 'vacation'}" @click="editModalData.dayType = 'vacation'">🌴 Отпуск</button>
-                        <button class="btn btn-type-dayoff" :class="{active: editModalData.dayType === 'dayoff'}" @click="editModalData.dayType = 'dayoff'">📅 Выходной</button>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-outline" @click="closeEditModal">Отмена</button>
-                <button class="btn btn-success" @click="saveEditModal">💾 Сохранить</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ПЕЧАТНАЯ ФОРМА -->
+    <!-- Печать -->
     <div class="print-container" id="printContainer">
         <div class="print-title">📋 ТАБЕЛЬ УЧЕТА РАБОЧЕГО ВРЕМЕНИ</div>
-        <div class="print-subtitle">
-            Цех порошковой покраски · {{ currentMonthName }} · График {{ selectedGraphic }}
-        </div>
+        <div class="print-subtitle">Цех порошковой покраски · {{ currentMonthName }} · График {{ selectedGraphic }}</div>
         <table>
-            <thead>
-                <tr>
-                    <th style="width:120px;min-width:100px;">Сотрудник</th>
-                    <th v-for="day in days" :key="'p-'+day" style="width:40px;min-width:32px;">
-                        <span class="print-day">{{ day }}</span>
-                    </th>
-                    <th style="width:50px;min-width:40px;">Итого</th>
-                </tr>
-            </thead>
+            <thead><tr><th>Сотрудник</th><th v-for="day in days" :key="'p-'+day">{{ day }}</th><th>Итого</th></tr></thead>
             <tbody>
-                <tr v-for="(emp, idx) in employees" :key="'p-emp-'+idx">
-                    <td class="print-emp-name">{{ emp.name }}</td>
-                    <td v-for="(day, dayIdx) in days" :key="'p-day-'+dayIdx" class="print-hour-cell">
-                        <div class="print-time-row">
-                            <span>____ / ____</span>
-                        </div>
-                    </td>
-                    <td class="print-total">{{ totalHours(emp.hours) }}</td>
+                <tr v-for="emp in employees" :key="'p-'+emp.name">
+                    <td>{{ emp.name }}</td>
+                    <td v-for="(day, i) in days" :key="'pd-'+i">{{ emp.hours[i] || '' }}</td>
+                    <td>{{ totalHours(emp.hours) }}</td>
                 </tr>
-                <tr class="print-stats">
-                    <td style="text-align:right;padding-right:12px;font-weight:700;">Итого часов:</td>
-                    <td v-for="day in days" :key="'p-stat-'+day" style="font-weight:700;">
-                        {{ dayStats[day-1] || '' }}
-                    </td>
-                    <td style="font-weight:700;">{{ totalMonthHours }}</td>
+                <tr style="font-weight:700;background:#f5f5f5;">
+                    <td>Итого часов:</td>
+                    <td v-for="day in days" :key="'ps-'+day">{{ dayStats[day-1] || '' }}</td>
+                    <td>{{ totalMonthHours }}</td>
                 </tr>
             </tbody>
         </table>
-        <div style="margin-top:16px;display:flex;justify-content:space-between;font-size:15px;">
-            <div>
-                <span>Руководитель: ______________________ / ______________________ /</span>
-            </div>
-            <div>Дата: _______________</div>
-        </div>
-        <div class="print-note">
-            ⚠️ В графах указывается время прихода и ухода (например, 8:00 / 20:00)
-        </div>
+        <div class="print-footer"><div>Руководитель: ______________________ / ______________________ /</div><div>Дата: _______________</div></div>
     </div>
 
     <!-- TOAST -->
@@ -880,29 +846,21 @@
 <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
 <script>
     (function() {
-        // ============================================================
-        // ССЫЛКА НА ФУНКЦИЮ (твоя)
-        // ============================================================
         const API_URL = 'https://functions.yandexcloud.net/d4e18nbmmgli5kcghqrs';
-        // ============================================================
-
         const STORAGE_KEY = 'powder_coating_timesheet_v5';
 
         const DEFAULT_EMPLOYEES = [
-            { name: 'Алексей Смирнов', salaryBase: 90000, hours: [], dayType: [] },
-            { name: 'Мария Петрова', salaryBase: 85000, hours: [], dayType: [] },
-            { name: 'Иван Козлов', salaryBase: 92000, hours: [], dayType: [] },
-            { name: 'Елена Васильева', salaryBase: 88000, hours: [], dayType: [] }
+            { name: 'Иван', role: 'Маляр', salaryBase: 90000, hours: [], dayType: [] },
+            { name: 'Алексей', role: 'Помощник', salaryBase: 85000, hours: [], dayType: [] },
+            { name: 'Сергей', role: 'Руководитель', salaryBase: 92000, hours: [], dayType: [] }
         ];
 
         const WEEKDAYS = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+        const MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 
         function getDaysInMonth(year, month) { return new Date(year, month, 0).getDate(); }
         function getDayOfWeek(year, month, day) { return new Date(year, month - 1, day).getDay(); }
-        function getMonthName(month) {
-            const names = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
-            return names[month - 1];
-        }
+        function getMonthName(month) { return MONTHS[month - 1]; }
         function calculateNorm52(daysCount) { return Math.round((daysCount * 40) / 7); }
         function calculateNormShift(daysCount, graphic) {
             if (graphic === '3/3') {
@@ -926,8 +884,15 @@
             if (monthNum === 0) { monthNum = 12; year--; }
             return `${year}-${String(monthNum).padStart(2, '0')}`;
         }
+        function formatDate(timestamp) {
+            const d = new Date(timestamp);
+            return d.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+        function getDayTypeClass(dayType) {
+            const map = { 'work': 'work-day', 'sick': 'sick', 'vacation': 'vacation', 'dayoff': 'day-off' };
+            return map[dayType] || 'work-day';
+        }
 
-        // ===== API =====
         async function callApi(method, data) {
             try {
                 const response = await fetch(API_URL, {
@@ -935,33 +900,9 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ method, data })
                 });
-                if (!response.ok) {
-                    throw new Error('Ошибка API: ' + response.status);
-                }
+                if (!response.ok) throw new Error('Ошибка API: ' + response.status);
                 return await response.json();
-            } catch (e) {
-                console.error('API ошибка:', e);
-                throw e;
-            }
-        }
-
-        // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
-        function getDayTypeClass(dayType) {
-            const map = {
-                'work': 'work-day',
-                'sick': 'sick',
-                'vacation': 'vacation',
-                'dayoff': 'day-off'
-            };
-            return map[dayType] || 'work-day';
-        }
-
-        function formatDate(timestamp) {
-            const d = new Date(timestamp);
-            return d.toLocaleString('ru-RU', {
-                day: '2-digit', month: '2-digit', year: 'numeric',
-                hour: '2-digit', minute: '2-digit'
-            });
+            } catch (e) { console.error('API ошибка:', e); throw e; }
         }
 
         new Vue({
@@ -986,19 +927,24 @@
                 editModalData: null,
                 editModalEmp: null,
                 editModalIdx: null,
-                // Массовое проставление
                 massModalVisible: false,
-                massData: {
-                    employee: 'all',
-                    dateFrom: 1,
-                    dateTo: 30
-                }
+                massData: { employee: 'all', dateFrom: 1, dateTo: 30 },
+                currentView: 'dashboard',
+                calendarMonthOffset: 0,
             },
             computed: {
                 currentMonthName() {
                     if (!this.currentMonth) return '';
                     const parts = this.currentMonth.split('-');
                     return `${getMonthName(parseInt(parts[1]))} ${parseInt(parts[0])}`;
+                },
+                currentDate() {
+                    const now = new Date();
+                    const days = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+                    return `${now.getDate()} ${getMonthName(now.getMonth()+1)}, ${days[now.getDay()].toLowerCase()}`;
+                },
+                getDayNorm() {
+                    return this.normHours / this.days.length * 7 || 8;
                 },
                 syncStatusText() {
                     if (this.syncStatus === 'synced') return '☁️ Синхронизировано';
@@ -1014,16 +960,12 @@
                 },
                 totalMonthHours() {
                     let total = 0;
-                    this.employees.forEach(emp => {
-                        total += this.totalHours(emp.hours);
-                    });
+                    this.employees.forEach(emp => { total += this.totalHours(emp.hours); });
                     return total;
                 },
                 totalMonthSalary() {
                     let total = 0;
-                    this.employees.forEach(emp => {
-                        total += this.calcSalary(emp);
-                    });
+                    this.employees.forEach(emp => { total += this.calcSalary(emp); });
                     return total;
                 },
                 dayStats() {
@@ -1060,6 +1002,48 @@
                     const total = this.totalMonthHours;
                     const norm = this.normHours;
                     return total < norm ? Math.round((norm - total) * 10) / 10 : 0;
+                },
+                // Календарь
+                calendarMonthName() {
+                    const now = new Date();
+                    const m = now.getMonth() + this.calendarMonthOffset;
+                    const y = now.getFullYear() + Math.floor(m / 12);
+                    const monthIndex = ((m % 12) + 12) % 12;
+                    return MONTHS[monthIndex];
+                },
+                calendarYear() {
+                    const now = new Date();
+                    const m = now.getMonth() + this.calendarMonthOffset;
+                    return now.getFullYear() + Math.floor(m / 12);
+                },
+                calendarDays() {
+                    const now = new Date();
+                    const m = now.getMonth() + this.calendarMonthOffset;
+                    const year = now.getFullYear() + Math.floor(m / 12);
+                    const month = ((m % 12) + 12) % 12;
+                    const daysCount = getDaysInMonth(year, month + 1);
+                    const firstDay = getDayOfWeek(year, month + 1, 1);
+                    const days = [];
+                    const today = new Date();
+                    const todayDate = today.getDate();
+                    const todayMonth = today.getMonth();
+                    const todayYear = today.getFullYear();
+
+                    for (let i = 0; i < firstDay; i++) {
+                        days.push({ day: '', date: null, isToday: false, hasWork: false, isWeekend: false });
+                    }
+                    for (let d = 1; d <= daysCount; d++) {
+                        const isToday = (d === todayDate && month === todayMonth && year === todayYear);
+                        const dow = getDayOfWeek(year, month + 1, d);
+                        const isWeekend = dow === 0 || dow === 6;
+                        // Проверяем, есть ли у кого-то часы в этот день
+                        let hasWork = false;
+                        this.employees.forEach(emp => {
+                            if (emp.hours && emp.hours[d-1] > 0) hasWork = true;
+                        });
+                        days.push({ day: d, date: new Date(year, month, d), isToday, hasWork, isWeekend });
+                    }
+                    return days;
                 }
             },
             methods: {
@@ -1080,7 +1064,6 @@
                     const dayInCycle = dayIdx % (this.selectedGraphic === '3/3' ? 6 : 4);
                     const workDays = this.selectedGraphic === '3/3' ? 3 : 2;
                     const isWorkDay = dayInCycle < workDays;
-                    
                     if (emp && emp.dayType && emp.dayType[dayIdx]) {
                         return getDayTypeClass(emp.dayType[dayIdx]);
                     }
@@ -1088,96 +1071,59 @@
                     if (isWorkDay) return 'work-day';
                     return 'day-off';
                 },
-                formatDate(timestamp) {
-                    return formatDate(timestamp);
-                },
-
-                getDayTypeIcon(type) {
-                    return type || 'work';
-                },
+                getDayTypeIcon(type) { return type || 'work'; },
                 getDayTypeEmoji(type) {
-                    const map = {
-                        'work': '✅',
-                        'sick': '🤒',
-                        'vacation': '🌴',
-                        'dayoff': '📅'
-                    };
+                    const map = { 'work': '✅', 'sick': '🤒', 'vacation': '🌴', 'dayoff': '📅' };
                     return map[type] || '✅';
                 },
                 getDayTypeLabel(type) {
-                    const map = {
-                        'work': 'Работа',
-                        'sick': 'Больничный',
-                        'vacation': 'Отпуск',
-                        'dayoff': 'Выходной',
-                        'reset': 'Сброс'
-                    };
+                    const map = { 'work': 'Работа', 'sick': 'Больничный', 'vacation': 'Отпуск', 'dayoff': 'Выходной', 'reset': 'Сброс' };
                     return map[type] || type;
                 },
+                getTodayHours(emp) {
+                    const now = new Date();
+                    const dayIdx = now.getDate() - 1;
+                    if (dayIdx < 0 || dayIdx >= (emp.hours || []).length) return 0;
+                    return emp.hours[dayIdx] || 0;
+                },
+                getTodayProgress(emp) {
+                    const hours = this.getTodayHours(emp);
+                    const norm = this.getDayNorm || 8.5;
+                    return Math.min(Math.round((hours / norm) * 100), 100);
+                },
 
-                // ===== МАССОВОЕ ПРОСТАВЛЕНИЕ (С МОДАЛКОЙ) =====
+                // ===== МАССОВОЕ ПРОСТАВЛЕНИЕ =====
                 openMassModal() {
                     this.massData.dateFrom = 1;
                     this.massData.dateTo = this.days.length;
                     this.massData.employee = 'all';
                     this.massModalVisible = true;
                 },
-
-                closeMassModal() {
-                    this.massModalVisible = false;
-                },
-
+                closeMassModal() { this.massModalVisible = false; },
                 applyMassType(type) {
-                    // Определяем сотрудников
                     let targetEmployees = [];
                     if (this.massData.employee === 'all') {
                         targetEmployees = this.employees;
                     } else {
                         let idx = parseInt(this.massData.employee);
-                        if (idx >= 0 && idx < this.employees.length) {
-                            targetEmployees = [this.employees[idx]];
-                        } else {
-                            this.showToast('⚠️ Ошибка выбора сотрудника', 'error');
-                            return;
-                        }
+                        if (idx >= 0 && idx < this.employees.length) targetEmployees = [this.employees[idx]];
+                        else { this.showToast('⚠️ Ошибка выбора сотрудника', 'error'); return; }
                     }
-
-                    // Определяем диапазон
                     let startIdx = Math.max(0, this.massData.dateFrom - 1);
                     let endIdx = Math.min(this.days.length - 1, this.massData.dateTo - 1);
-
-                    if (startIdx > endIdx) {
-                        this.showToast('⚠️ Неверный диапазон дат', 'error');
-                        return;
-                    }
-
-                    // Подтверждение
+                    if (startIdx > endIdx) { this.showToast('⚠️ Неверный диапазон дат', 'error'); return; }
                     let employeeNames = targetEmployees.map(e => e.name).join(', ');
                     let typeLabel = this.getDayTypeLabel(type);
-                    let confirmMsg = `Установить "${typeLabel}" для:\n👤 ${employeeNames}\n📅 ${this.massData.dateFrom}-${this.massData.dateTo} числа\n\nПродолжить?`;
-                    
-                    if (!confirm(confirmMsg)) return;
-
-                    // Применяем
+                    if (!confirm(`Установить "${typeLabel}" для:\n👤 ${employeeNames}\n📅 ${this.massData.dateFrom}-${this.massData.dateTo} числа\n\nПродолжить?`)) return;
                     targetEmployees.forEach(emp => {
                         for (let i = startIdx; i <= endIdx; i++) {
-                            if (type === 'reset') {
-                                emp.dayType[i] = 'work';
-                            } else {
-                                emp.dayType[i] = type;
-                                if (type !== 'work') {
-                                    emp.hours[i] = 0;
-                                }
-                            }
+                            if (type === 'reset') { emp.dayType[i] = 'work'; }
+                            else { emp.dayType[i] = type; if (type !== 'work') emp.hours[i] = 0; }
                         }
                     });
-
                     this.autoSave();
                     this.closeMassModal();
-                    this.showToast(
-                        `✅ "${typeLabel}" установлен для ${employeeNames} (${startIdx+1}-${endIdx+1} числа)`,
-                        'success'
-                    );
+                    this.showToast(`✅ "${typeLabel}" установлен для ${employeeNames} (${startIdx+1}-${endIdx+1} числа)`, 'success');
                 },
 
                 // ===== МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ =====
@@ -1215,21 +1161,20 @@
                     try {
                         let history = await callApi('getHistory');
                         this.historyList = history || [];
-                    } catch (e) {
-                        this.showToast('❌ Ошибка загрузки истории', 'error');
-                    }
+                    } catch (e) { this.showToast('❌ Ошибка загрузки истории', 'error'); }
                     this.historyLoading = false;
                 },
-                closeHistory() {
-                    this.historyModalVisible = false;
+                closeHistory() { this.historyModalVisible = false; },
+
+                // ===== КАЛЕНДАРЬ =====
+                changeMonth(delta) {
+                    this.calendarMonthOffset += delta;
                 },
 
                 // ===== АВТОСОХРАНЕНИЕ =====
                 autoSave() {
                     if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
-                    this.autoSaveTimeout = setTimeout(() => {
-                        this.saveToCloud();
-                    }, 2000);
+                    this.autoSaveTimeout = setTimeout(() => { this.saveToCloud(); }, 2000);
                 },
 
                 // ===== ОБЛАКО =====
@@ -1252,16 +1197,14 @@
                         this.showToast('❌ Ошибка сохранения: ' + e.message, 'error');
                     }
                 },
-
                 async loadFromCloud() {
                     try {
                         this.syncStatus = 'loading';
                         let data = await callApi('get');
                         if (data && data.employees) {
                             this.employees = data.employees.map(emp => {
-                                if (!emp.dayType) {
-                                    emp.dayType = Array(this.days.length).fill('work');
-                                }
+                                if (!emp.dayType) emp.dayType = Array(this.days.length).fill('work');
+                                if (!emp.role) emp.role = 'Сотрудник';
                                 return emp;
                             });
                             if (data.norm) this.normHours = data.norm;
@@ -1285,6 +1228,7 @@
                     let daysCount = this.days.length;
                     this.employees.push({
                         name: 'Новый сотрудник',
+                        role: 'Сотрудник',
                         salaryBase: 90000,
                         hours: Array(daysCount).fill(0),
                         dayType: Array(daysCount).fill('work')
@@ -1351,9 +1295,7 @@
                 },
 
                 // ===== ПЕЧАТЬ =====
-                printTable() { 
-                    window.print(); 
-                },
+                printTable() { window.print(); },
 
                 // ===== EXCEL =====
                 exportExcel() {
@@ -1406,9 +1348,8 @@
                             let data = JSON.parse(raw);
                             if (data.employees && Array.isArray(data.employees) && data.employees.length > 0) {
                                 this.employees = data.employees.map(emp => {
-                                    if (!emp.dayType) {
-                                        emp.dayType = Array(this.days.length).fill('work');
-                                    }
+                                    if (!emp.dayType) emp.dayType = Array(this.days.length).fill('work');
+                                    if (!emp.role) emp.role = 'Сотрудник';
                                     return emp;
                                 });
                                 if (data.norm) this.normHours = data.norm;
@@ -1426,6 +1367,7 @@
                                 let daysCount = this.days.length;
                                 this.employees = prevData.employees.map(emp => ({
                                     name: emp.name,
+                                    role: emp.role || 'Сотрудник',
                                     salaryBase: emp.salaryBase || 90000,
                                     hours: Array(daysCount).fill(0),
                                     dayType: Array(daysCount).fill('work')
@@ -1460,7 +1402,6 @@
                     this.dayOfWeek = this.days.map(day => getDayOfWeek(year, month, day));
                     this.norm52 = calculateNorm52(daysCount);
                     this.normHours = calculateNormShift(daysCount, this.selectedGraphic);
-                    // Обновляем dateTo в массовом проставлении
                     this.massData.dateTo = daysCount;
                     this.loadMonthData(monthValue, this.selectedGraphic);
                     await this.loadFromCloud();
