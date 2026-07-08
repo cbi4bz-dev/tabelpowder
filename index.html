@@ -127,7 +127,6 @@
             border-radius: 12px;
             padding: 12px 14px;
             text-align: center;
-            cursor: default;
         }
         .stat-box .val { font-size: 22px; font-weight: 700; color: #f0b90b; }
         .stat-box .label { font-size: 11px; color: #8a9bb0; margin-top: 2px; }
@@ -185,49 +184,6 @@
             background: #f0b90b;
         }
         .mini-calendar .days .day.weekend { color: #5a6a80; }
-
-        /* Модалка дня */
-        .day-detail-modal .modal { max-width: 500px; }
-        .day-detail-modal .emp-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 6px 0;
-            border-bottom: 1px solid #1e2738;
-        }
-        .day-detail-modal .emp-row .name { font-weight: 500; }
-        .day-detail-modal .emp-row .hours { color: #f0b90b; }
-        .day-detail-modal .total-hours { font-size: 18px; font-weight: 700; color: #4ade80; margin-top: 8px; }
-
-        /* Модалка профиля сотрудника */
-        .profile-modal .modal { max-width: 450px; }
-        .profile-modal .profile-header {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-        .profile-modal .profile-header .avatar {
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: #1e2738;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: 700;
-            color: #f0b90b;
-        }
-        .profile-modal .profile-header .info .name { font-size: 20px; font-weight: 600; }
-        .profile-modal .profile-header .info .role { color: #8a9bb0; font-size: 14px; }
-        .profile-modal .stat-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #1a2130;
-        }
-        .profile-modal .stat-row .label { color: #8a9bb0; }
-        .profile-modal .stat-row .value { font-weight: 500; color: #f0b90b; }
 
         .table-view { display: none; }
         .table-view.active { display: block; }
@@ -553,8 +509,8 @@
     <div class="header">
         <div class="logo">🧑‍🏭 <span>Powder Flow OS</span></div>
         <div class="nav">
-            <button class="btn active" @click="switchView('dashboard')">📊 Дашборд</button>
-            <button class="btn" @click="switchView('table')">📋 Табель</button>
+            <button class="btn active" @click="currentView='dashboard'">📊 Дашборд</button>
+            <button class="btn" @click="currentView='table'">📋 Табель</button>
             <button class="btn" @click="showHistory">📜 История</button>
         </div>
         <div class="header-right">
@@ -565,8 +521,8 @@
 
     <!-- ВКЛАДКИ (мобильные) -->
     <div class="tabs">
-        <button class="btn" :class="{active: currentView==='dashboard'}" @click="switchView('dashboard')">📊 Дашборд</button>
-        <button class="btn" :class="{active: currentView==='table'}" @click="switchView('table')">📋 Табель</button>
+        <button class="btn" :class="{active: currentView==='dashboard'}" @click="currentView='dashboard'">📊 Дашборд</button>
+        <button class="btn" :class="{active: currentView==='table'}" @click="currentView='table'">📋 Табель</button>
     </div>
 
     <!-- ===== ДАШБОРД ===== -->
@@ -576,7 +532,6 @@
             <small>· Смена {{ selectedGraphic }}</small>
         </div>
 
-        <!-- Карточки сотрудников (кликабельные) -->
         <div class="employee-grid">
             <div v-for="emp in employees" :key="emp.name" class="emp-card" @click="openProfile(emp)">
                 <div class="top">
@@ -596,7 +551,6 @@
             </div>
         </div>
 
-        <!-- Статистика -->
         <div class="stats-grid">
             <div class="stat-box"><div class="val">{{ employees.length }}</div><div class="label">👥 Сотрудников</div></div>
             <div class="stat-box"><div class="val">{{ totalMonthHours }}</div><div class="label">⏱️ Всего часов</div></div>
@@ -606,7 +560,6 @@
             <div class="stat-box"><div class="val" :style="{color: overtime > 0 ? '#fbbf24' : '#4ade80'}">{{ overtime > 0 ? '+' + overtime : overtime }}</div><div class="label">📈 Переработка</div></div>
         </div>
 
-        <!-- Календарь (кликабельный) -->
         <div class="mini-calendar">
             <div class="head">
                 <button class="nav-btn" @click="changeMonth(-1)">‹</button>
@@ -705,30 +658,25 @@
     <!-- ===== МОДАЛКИ ===== -->
 
     <!-- Профиль сотрудника -->
-    <div class="modal-overlay profile-modal" :class="{active: profileModalVisible}" @click.self="closeProfile">
+    <div class="modal-overlay" :class="{active: profileModalVisible}" @click.self="closeProfile">
         <div class="modal">
             <button class="modal-close" @click="closeProfile">✕</button>
             <div class="modal-title">👤 Профиль сотрудника</div>
             <div v-if="profileData">
-                <div class="profile-header">
-                    <div class="avatar">{{ profileData.name ? profileData.name.charAt(0) : '?' }}</div>
-                    <div class="info">
-                        <div class="name">{{ profileData.name }}</div>
-                        <div class="role">{{ profileData.role || 'Сотрудник' }}</div>
-                    </div>
-                </div>
-                <div class="stat-row"><span class="label">💰 Оклад (5/2)</span><span class="value">{{ formatSalary(profileData.salaryBase) }} ₽</span></div>
-                <div class="stat-row"><span class="label">⏱️ Отработано часов</span><span class="value">{{ totalHours(profileData.hours) }}</span></div>
-                <div class="stat-row"><span class="label">📅 Смен за месяц</span><span class="value">{{ countShifts(profileData) }}</span></div>
-                <div class="stat-row"><span class="label">📈 Среднее в день</span><span class="value">{{ avgHoursPerDay(profileData) }}</span></div>
-                <div class="stat-row"><span class="label">💰 Зарплата за месяц</span><span class="value" style="color:#4ade80;">{{ formatSalary(calcSalary(profileData)) }} ₽</span></div>
-                <div class="stat-row"><span class="label">📊 Загрузка</span><span class="value">{{ Math.round(totalHours(profileData) / normHours * 100) }}%</span></div>
+                <div class="field-group"><label>👤 Имя</label><div style="font-size:16px;font-weight:500;">{{ profileData.name }}</div></div>
+                <div class="field-group"><label>📋 Роль</label><div style="font-size:16px;font-weight:500;">{{ profileData.role || 'Сотрудник' }}</div></div>
+                <div class="field-group"><label>💰 Оклад (5/2)</label><div style="font-size:16px;font-weight:500;color:#4ade80;">{{ formatSalary(profileData.salaryBase) }} ₽</div></div>
+                <div class="field-group"><label>⏱️ Отработано часов</label><div style="font-size:16px;font-weight:500;">{{ totalHours(profileData.hours) }}</div></div>
+                <div class="field-group"><label>📅 Смен за месяц</label><div style="font-size:16px;font-weight:500;">{{ countShifts(profileData) }}</div></div>
+                <div class="field-group"><label>📈 Среднее в день</label><div style="font-size:16px;font-weight:500;">{{ avgHoursPerDay(profileData) }}ч</div></div>
+                <div class="field-group"><label>💰 Зарплата за месяц</label><div style="font-size:18px;font-weight:700;color:#4ade80;">{{ formatSalary(calcSalary(profileData)) }} ₽</div></div>
+                <div class="field-group"><label>📊 Загрузка</label><div style="font-size:16px;font-weight:500;">{{ Math.round(totalHours(profileData) / normHours * 100) }}%</div></div>
             </div>
         </div>
     </div>
 
     <!-- Детали дня -->
-    <div class="modal-overlay day-detail-modal" :class="{active: dayDetailModalVisible}" @click.self="closeDayDetail">
+    <div class="modal-overlay" :class="{active: dayDetailModalVisible}" @click.self="closeDayDetail">
         <div class="modal">
             <button class="modal-close" @click="closeDayDetail">✕</button>
             <div class="modal-title">📅 {{ dayDetailData ? dayDetailData.day + ' ' + currentMonthName : '' }}</div>
@@ -737,11 +685,13 @@
                     В этот день никто не работал
                 </div>
                 <div v-else>
-                    <div v-for="emp in dayDetailData.employees" :key="emp.name" class="emp-row">
-                        <span class="name">{{ emp.name }}</span>
-                        <span class="hours">{{ emp.hours }}ч</span>
+                    <div v-for="emp in dayDetailData.employees" :key="emp.name" class="history-item">
+                        <span style="font-weight:500;">{{ emp.name }}</span>
+                        <span style="float:right;color:#f0b90b;">{{ emp.hours }}ч</span>
                     </div>
-                    <div class="total-hours">Итого: {{ dayDetailData.total }}ч</div>
+                    <div style="margin-top:12px;padding-top:12px;border-top:1px solid #1e2738;font-size:16px;font-weight:700;color:#4ade80;">
+                        Итого: {{ dayDetailData.total }}ч
+                    </div>
                 </div>
             </div>
         </div>
@@ -954,10 +904,8 @@
                 massData: { employee: 'all', dateFrom: 1, dateTo: 30 },
                 currentView: 'dashboard',
                 calendarMonthOffset: 0,
-                // Профиль
                 profileModalVisible: false,
                 profileData: null,
-                // Детали дня
                 dayDetailModalVisible: false,
                 dayDetailData: null
             },
@@ -1094,17 +1042,8 @@
                     return days > 0 ? Math.round(total / days * 10) / 10 : 0;
                 },
 
-                // ===== ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК =====
-                switchView(view) {
-                    this.currentView = view;
-                    const btns = document.querySelectorAll('.nav .btn');
-                    btns.forEach(b => b.classList.remove('active'));
-                    if (view === 'dashboard') btns[0].classList.add('active');
-                    else if (view === 'table') btns[1].classList.add('active');
-                },
-
-                // ===== КАЛЕНДАРЬ =====
                 changeMonth(delta) { this.calendarMonthOffset += delta; },
+
                 openDayDetail(day) {
                     if (!day.day) return;
                     const dayIdx = day.day - 1;
@@ -1124,7 +1063,6 @@
                 },
                 closeDayDetail() { this.dayDetailModalVisible = false; this.dayDetailData = null; },
 
-                // ===== ПРОФИЛЬ =====
                 openProfile(emp) {
                     this.profileData = emp;
                     this.profileModalVisible = true;
@@ -1388,7 +1326,6 @@
                                 return true;
                             }
                         }
-                        // Копируем из прошлого месяца
                         const prev = getPrevMonth(month);
                         const prevKey = getMonthKey(prev, graphic);
                         const prevRaw = localStorage.getItem(prevKey);
@@ -1408,7 +1345,6 @@
                                 return true;
                             }
                         }
-                        // Стандартные
                         const cnt = this.days.length;
                         this.employees = JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES));
                         this.employees.forEach(e => {
