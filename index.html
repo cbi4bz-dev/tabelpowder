@@ -1091,21 +1091,15 @@
                     const hours = (emp.hours && emp.hours[dayIdx]) || 0;
                     const isWorkDay = !isWeekend && this.isWorkDay(dayIdx);
                     
-                    // Проверяем тип дня
                     const dayType = (emp.dayType && emp.dayType[dayIdx]) || 'work';
                     
-                    // Если тип не "работа" — показываем соответствующий цвет
-                    if (dayType === 'sick') {
-                        return 'below'; // жёлтый
-                    }
-                    if (dayType === 'vacation') {
-                        return 'below'; // жёлтый
+                    if (dayType === 'sick' || dayType === 'vacation') {
+                        return 'below';
                     }
                     if (dayType === 'dayoff') {
-                        return 'weekend-cell'; // серый
+                        return 'weekend-cell';
                     }
                     
-                    // Для типа "work" — стандартная логика
                     if (isWeekend || !isWorkDay) return 'weekend-cell';
                     if (hours >= 10) return 'norm';
                     if (hours > 0 && hours < 10) return 'below';
@@ -1178,6 +1172,59 @@
                 },
                 closeProfile() { this.profileModalVisible = false; this.profileData = null; },
 
+                // ===== ИСТОРИЯ =====
+                async loadHistory() {
+                    try {
+                        const data = await callApi('getHistory');
+                        this.historyList = data || [];
+                        console.log('📜 История загружена:', this.historyList.length, 'записей');
+                    } catch (e) {
+                        console.warn('Не удалось загрузить историю:', e);
+                    }
+                },
+
+                async saveHistoryToCloud(entry) {
+                    try {
+                        // Получаем текущую историю
+                        let history = [];
+                        try {
+                            const data = await callApi('getHistory');
+                            history = data || [];
+                        } catch (e) {
+                            console.warn('Не удалось загрузить историю, создаем новую');
+                        }
+                        
+                        // Добавляем новую запись
+                        history.push(entry);
+                        
+                        // Оставляем только последние 200 записей
+                        if (history.length > 200) {
+                            history = history.slice(-200);
+                        }
+                        
+                        // Сохраняем историю
+                        await callApi('saveHistory', history);
+                        
+                        // Обновляем локальный список
+                        this.historyList = history;
+                    } catch (e) {
+                        console.error('Ошибка сохранения истории:', e);
+                    }
+                },
+
+                async showHistory() {
+                    this.historyModalVisible = true;
+                    this.historyLoading = true;
+                    try {
+                        // При открытии истории всегда загружаем свежие данные
+                        await this.loadHistory();
+                    } catch (e) { 
+                        this.showToast('❌ Ошибка загрузки истории', 'error');
+                    }
+                    this.historyLoading = false;
+                },
+                closeHistory() { this.historyModalVisible = false; },
+
                 // ===== РЕДАКТИРОВАНИЕ ДНЯ =====
                 openEditModal(emp, idx) {
                     this.editModalEmp = emp;
@@ -1235,6 +1282,7 @@
                         emp.dayType[idx] = newType;
                         emp.comments[idx] = newComment;
 
+                        // Сохраняем в историю
                         const historyEntry = {
                             timestamp: new Date().toISOString(),
                             action: '✏️ Редактирование',
@@ -1248,39 +1296,6 @@
                         this.showToast('✅ Сохранено!', 'success');
                     }
                 },
-
-                // ===== ИСТОРИЯ =====
-                async saveHistoryToCloud(entry) {
-                    try {
-                        let history = [];
-                        try {
-                            const data = await callApi('getHistory');
-                            history = data || [];
-                        } catch (e) {
-                            console.warn('Не удалось загрузить историю, создаем новую');
-                        }
-                        history.push(entry);
-                        if (history.length > 200) {
-                            history = history.slice(-200);
-                        }
-                        await callApi('saveHistory', history);
-                    } catch (e) {
-                        console.error('Ошибка сохранения истории:', e);
-                    }
-                },
-
-                async showHistory() {
-                    this.historyModalVisible = true;
-                    this.historyLoading = true;
-                    try {
-                        const data = await callApi('getHistory');
-                        this.historyList = data || [];
-                    } catch (e) { 
-                        this.showToast('❌ Ошибка загрузки истории', 'error');
-                    }
-                    this.historyLoading = false;
-                },
-                closeHistory() { this.historyModalVisible = false; },
 
                 // ===== МАССОВОЕ ПРОСТАВЛЕНИЕ =====
                 openMassModal() {
@@ -1616,7 +1631,9 @@
                     this.normHours = calculateNormShift(cnt, this.selectedGraphic);
                     this.massData.dateTo = cnt;
                     this.loadMonthData(month, this.selectedGraphic);
+                    // Загружаем данные и историю
                     await this.loadFromCloud();
+                    await this.loadHistory();
                 }
             },
 
