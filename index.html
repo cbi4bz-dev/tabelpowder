@@ -289,7 +289,6 @@
             cursor: pointer;
         }
         .day-cell .day-input:focus { outline: 2px solid #f0b90b; border-color: transparent; background: #1a2130; }
-
         .day-cell.norm { background: #0f2a0f; border-radius: 4px; }
         .day-cell.norm .day-input { background: #1a3a1a; border-color: #2a5a2a; color: #4ade80; }
         .day-cell.below { background: #2a2a0f; border-radius: 4px; }
@@ -610,8 +609,8 @@
             <div class="stat-box"><div class="val">{{ totalMonthHours }}</div><div class="label">⏱️ Всего часов за месяц</div></div>
             <div class="stat-box"><div class="val">{{ formatSalary(totalMonthSalary) }}</div><div class="label">💰 Зарплата за месяц</div></div>
             <div class="stat-box"><div class="val">{{ normHours }}</div><div class="label">📅 Норма за месяц</div></div>
-            <div class="stat-box"><div class="val" style="color:#4ade80;">{{ Math.round(totalMonthHours / (employees.length || 1) * 10) / 10 }}</div><div class="label">📊 Среднее на сотрудника</div></div>
-            <div class="stat-box"><div class="val" :style="{color: overtime > 0 ? '#fbbf24' : '#4ade80'}">{{ overtime > 0 ? '+' + overtime : overtime }}</div><div class="label">📈 Переработка</div></div>
+            <div class="stat-box"><div class="val" style="color:#60a5fa;">{{ Math.round(totalMonthHours / normHours * 100) || 0 }}%</div><div class="label">📊 Загруженность цеха</div></div>
+            <div class="stat-box"><div class="val" style="color:#4ade80;">{{ employeesInNorm }} / {{ employees.length }}</div><div class="label">✅ Сотрудников в норме</div></div>
         </div>
         <div class="mini-calendar">
             <div class="head">
@@ -637,14 +636,24 @@
 
     <!-- ===== ТАБЕЛЬ ===== -->
     <div class="table-view" :class="{active: currentView==='table'}">
-        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
-            <span style="color:#8a9bb0;font-size:13px;">📅 {{ currentMonthName }} · Норма: {{ normHours }}ч</span>
-            <span style="color:#8a9bb0;font-size:13px;">✏️ Нажми на часы для редактирования</span>
+        <!-- НАВИГАЦИЯ ПО МЕСЯЦАМ -->
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <button class="btn btn-outline" @click="changeMonth(-1)" style="padding:4px 8px;font-size:16px;">‹</button>
+                <input type="month" v-model="currentMonth" @change="onMonthChange" style="padding:6px 10px;border:1px solid #1e2738;border-radius:8px;background:#0b0f1a;color:#e8edf4;font-size:13px;" />
+                <button class="btn btn-outline" @click="changeMonth(1)" style="padding:4px 8px;font-size:16px;">›</button>
+                <span v-if="hasDataForMonth" style="font-size:11px;color:#4ade80;background:#1a2a1a;padding:2px 10px;border-radius:12px;">📅 Есть данные</span>
+                <span v-else style="font-size:11px;color:#8a9bb0;background:#1a1a1a;padding:2px 10px;border-radius:12px;">📅 Новый месяц</span>
+                <button class="btn btn-outline" @click="copyEmployeesFromPrevMonth" style="font-size:10px;padding:4px 10px;">📋 Копировать сотрудников</button>
+            </div>
+            <span style="color:#8a9bb0;font-size:13px;">Норма: {{ normHours }}ч</span>
         </div>
+
         <div class="day-type-actions">
             <span class="label">📋 Массовое проставление:</span>
             <button class="btn" style="background:#1a2a1a;color:#4ade80;border-color:#2a4a2a;" @click="openMassModal">📋 Открыть</button>
         </div>
+
         <div class="toolbar">
             <button class="btn btn-primary" @click="addEmployee">➕ Добавить</button>
             <button class="btn btn-warning" @click="fillByGraphic">📋 Заполнить</button>
@@ -654,6 +663,7 @@
             <button class="btn btn-excel" @click="exportExcel">📊 Excel</button>
             <button class="btn btn-success" @click="loadFromCloud">📥 Загрузить</button>
         </div>
+
         <div class="table-wrap">
             <table>
                 <thead>
@@ -973,7 +983,8 @@
                 profileModalVisible: false,
                 profileData: null,
                 dayDetailModalVisible: false,
-                dayDetailData: null
+                dayDetailData: null,
+                hasDataForMonth: false
             },
             computed: {
                 currentMonthName() {
@@ -1063,6 +1074,16 @@
                         days.push({ day: d, date: new Date(year, month, d), isToday, hasWork, isWeekend });
                     }
                     return days;
+                },
+                employeesInNorm() {
+                    let count = 0;
+                    this.employees.forEach(e => {
+                        const total = this.totalHours(e.hours);
+                        if (total >= this.normHours * 0.85) {
+                            count++;
+                        }
+                    });
+                    return count;
                 }
             },
             methods: {
@@ -1140,7 +1161,49 @@
                     return days > 0 ? Math.round(total / days * 10) / 10 : 0;
                 },
 
-                changeMonth(delta) { this.calendarMonthOffset += delta; },
+                // ===== НАВИГАЦИЯ ПО МЕСЯЦАМ =====
+                changeMonth(delta) {
+                    const parts = this.currentMonth.split('-');
+                    let year = parseInt(parts[0]);
+                    let month = parseInt(parts[1]);
+                    month += delta;
+                    if (month > 12) { month = 1; year++; }
+                    if (month < 1) { month = 12; year--; }
+                    this.currentMonth = `${year}-${String(month).padStart(2, '0')}`;
+                    this.updateDays(this.currentMonth);
+                },
+
+                copyEmployeesFromPrevMonth() {
+                    const prevMonth = getPrevMonth(this.currentMonth);
+                    const prevKey = getMonthKey(prevMonth, this.selectedGraphic);
+                    const raw = localStorage.getItem(prevKey);
+                    if (!raw) {
+                        this.showToast('⚠️ Нет данных за предыдущий месяц', 'warning');
+                        return;
+                    }
+                    try {
+                        const data = JSON.parse(raw);
+                        if (!data.employees || data.employees.length === 0) {
+                            this.showToast('⚠️ В предыдущем месяце нет сотрудников', 'warning');
+                            return;
+                        }
+                        if (!confirm(`Скопировать ${data.employees.length} сотрудников из ${prevMonth} в ${this.currentMonth}?`)) return;
+                        
+                        const cnt = this.days.length;
+                        this.employees = data.employees.map(e => ({
+                            name: e.name,
+                            role: e.role || 'Сотрудник',
+                            salaryBase: e.salaryBase || 90000,
+                            hours: Array(cnt).fill(0),
+                            dayType: Array(cnt).fill('work'),
+                            comments: Array(cnt).fill('')
+                        }));
+                        this.autoSave();
+                        this.showToast(`✅ Скопировано ${this.employees.length} сотрудников`, 'success');
+                    } catch (e) {
+                        this.showToast('❌ Ошибка копирования: ' + e.message, 'error');
+                    }
+                },
 
                 openDayDetail(day) {
                     if (!day.day) return;
@@ -1185,7 +1248,6 @@
 
                 async saveHistoryToCloud(entry) {
                     try {
-                        // Получаем текущую историю
                         let history = [];
                         try {
                             const data = await callApi('getHistory');
@@ -1194,18 +1256,11 @@
                             console.warn('Не удалось загрузить историю, создаем новую');
                         }
                         
-                        // Добавляем новую запись
                         history.push(entry);
-                        
-                        // Оставляем только последние 200 записей
                         if (history.length > 200) {
                             history = history.slice(-200);
                         }
-                        
-                        // Сохраняем историю
                         await callApi('saveHistory', history);
-                        
-                        // Обновляем локальный список
                         this.historyList = history;
                     } catch (e) {
                         console.error('Ошибка сохранения истории:', e);
@@ -1216,7 +1271,6 @@
                     this.historyModalVisible = true;
                     this.historyLoading = true;
                     try {
-                        // При открытии истории всегда загружаем свежие данные
                         await this.loadHistory();
                     } catch (e) { 
                         this.showToast('❌ Ошибка загрузки истории', 'error');
@@ -1282,7 +1336,6 @@
                         emp.dayType[idx] = newType;
                         emp.comments[idx] = newComment;
 
-                        // Сохраняем в историю
                         const historyEntry = {
                             timestamp: new Date().toISOString(),
                             action: '✏️ Редактирование',
@@ -1631,9 +1684,23 @@
                     this.normHours = calculateNormShift(cnt, this.selectedGraphic);
                     this.massData.dateTo = cnt;
                     this.loadMonthData(month, this.selectedGraphic);
-                    // Загружаем данные и историю
                     await this.loadFromCloud();
                     await this.loadHistory();
+                    
+                    // Проверяем наличие данных за месяц
+                    const key = getMonthKey(month, this.selectedGraphic);
+                    this.hasDataForMonth = !!localStorage.getItem(key);
+                },
+
+                onMonthChange() {
+                    this.updateDays(this.currentMonth);
+                },
+
+                onGraphicChange() {
+                    const daysCount = this.days.length;
+                    this.normHours = calculateNormShift(daysCount, this.selectedGraphic);
+                    this.loadMonthData(this.currentMonth, this.selectedGraphic);
+                    this.loadFromCloud();
                 }
             },
 
