@@ -944,6 +944,10 @@
             if (m === 0) { m = 12; y--; }
             return `${y}-${String(m).padStart(2, '0')}`;
         }
+        function saveToLocal(month, graphic, data) {
+            const key = getMonthKey(month, graphic);
+            localStorage.setItem(key, JSON.stringify(data));
+        }
 
         async function callApi(method, data) {
             try {
@@ -1115,6 +1119,20 @@
                 },
                 formatSalary(v) { return v.toLocaleString('ru-RU'); },
 
+                saveToLocal() {
+                    const key = getMonthKey(this.currentMonth, this.selectedGraphic);
+                    const data = {
+                        employees: this.employees,
+                        month: this.currentMonth,
+                        norm: this.normHours,
+                        norm52: this.norm52,
+                        graphic: this.selectedGraphic,
+                        overtimeRate: this.overtimeRate,
+                        savedAt: new Date().toISOString()
+                    };
+                    localStorage.setItem(key, JSON.stringify(data));
+                },
+
                 getMonthProgress(emp) {
                     const total = this.totalHours(emp.hours);
                     const norm = this.normHours;
@@ -1218,6 +1236,66 @@
                     } catch (e) {
                         this.showToast('❌ Ошибка копирования: ' + e.message, 'error');
                     }
+                },
+
+                // ===== ИСПРАВЛЕННЫЙ СБРОС МЕСЯЦА =====
+                resetMonth() {
+                    const monthName = this.currentMonthName;
+                    if (!confirm(`⚠️ Вы уверены? Это удалит все часы за ${monthName}!`)) return;
+                    
+                    this.employees.forEach(e => {
+                        e.hours = Array(this.days.length).fill(0);
+                        e.dayType = Array(this.days.length).fill('work');
+                        e.comments = Array(this.days.length).fill('');
+                    });
+                    
+                    this.saveToLocal();
+                    this.autoSave();
+                    
+                    const historyEntry = {
+                        timestamp: new Date().toISOString(),
+                        action: '🔄 Сброс месяца',
+                        user: 'Пользователь',
+                        details: `Сброшены все часы за ${monthName}`
+                    };
+                    this.saveHistoryToCloud(historyEntry);
+                    
+                    this.showToast(`🔄 Часы за ${monthName} сброшены`, 'success');
+                },
+
+                // ===== ИСПРАВЛЕННОЕ УДАЛЕНИЕ МЕСЯЦА =====
+                deleteMonth() {
+                    const monthName = this.currentMonthName;
+                    if (!confirm(`⚠️ Удалить все данные за ${monthName}? Это действие НЕЛЬЗЯ отменить!`)) return;
+                    
+                    // Удаляем данные из localStorage
+                    const key = getMonthKey(this.currentMonth, this.selectedGraphic);
+                    localStorage.removeItem(key);
+                    
+                    // Создаем пустых сотрудников для текущего месяца
+                    const cnt = this.days.length;
+                    this.employees = JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES));
+                    this.employees.forEach(e => {
+                        e.hours = Array(cnt).fill(0);
+                        e.dayType = Array(cnt).fill('work');
+                        e.comments = Array(cnt).fill('');
+                    });
+                    
+                    this.norm52 = calculateNorm52(cnt);
+                    this.normHours = calculateNormShift(cnt, this.selectedGraphic);
+                    
+                    this.saveToLocal();
+                    this.autoSave();
+                    
+                    const historyEntry = {
+                        timestamp: new Date().toISOString(),
+                        action: '🗑️ Удаление месяца',
+                        user: 'Пользователь',
+                        details: `Удалены все данные за ${monthName}`
+                    };
+                    this.saveHistoryToCloud(historyEntry);
+                    
+                    this.showToast(`🗑️ Данные за ${monthName} удалены`, 'success');
                 },
 
                 openDayDetail(day) {
@@ -1520,24 +1598,6 @@
                 },
 
                 // ===== ТАБЕЛЬ =====
-                resetMonth() {
-                    if (!confirm('⚠️ Вы уверены? Это удалит все часы за месяц!')) return;
-                    this.employees.forEach(e => {
-                        e.hours = Array(this.days.length).fill(0);
-                        e.dayType = Array(this.days.length).fill('work');
-                        e.comments = Array(this.days.length).fill('');
-                    });
-                    
-                    const historyEntry = {
-                        timestamp: new Date().toISOString(),
-                        action: '🔄 Сброс месяца',
-                        user: 'Пользователь',
-                        details: `Сброшены все часы за ${this.currentMonthName}`
-                    };
-                    this.saveHistoryToCloud(historyEntry);
-                    this.autoSave();
-                    this.showToast('🔄 Часы сброшены', 'success');
-                },
                 fillByGraphic() {
                     if (!confirm('Заполнить по графику ' + this.selectedGraphic + '?')) return;
                     const cycle = this.selectedGraphic === '3/3' ? 6 : 4;
@@ -1567,28 +1627,6 @@
                     this.saveHistoryToCloud(historyEntry);
                     this.autoSave();
                     this.showToast('✅ Табель заполнен', 'success');
-                },
-                deleteMonth() {
-                    if (!confirm(`⚠️ Удалить все данные за ${this.currentMonthName}? Это действие НЕЛЬЗЯ отменить!`)) return;
-                    const cnt = this.days.length;
-                    this.employees = JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES));
-                    this.employees.forEach(e => {
-                        e.hours = Array(cnt).fill(0);
-                        e.dayType = Array(cnt).fill('work');
-                        e.comments = Array(cnt).fill('');
-                    });
-                    this.norm52 = calculateNorm52(cnt);
-                    this.normHours = calculateNormShift(cnt, this.selectedGraphic);
-                    
-                    const historyEntry = {
-                        timestamp: new Date().toISOString(),
-                        action: '🗑️ Удаление месяца',
-                        user: 'Пользователь',
-                        details: `Удалены все данные за ${this.currentMonthName}`
-                    };
-                    this.saveHistoryToCloud(historyEntry);
-                    this.autoSave();
-                    this.showToast('🗑️ Данные удалены', 'success');
                 },
 
                 // ===== ПЕЧАТЬ =====
