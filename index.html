@@ -565,6 +565,13 @@
             <button class="btn" @click="showHistory">📜 История</button>
         </div>
         <div class="header-right">
+            <div style="display:flex;align-items:center;gap:6px;background:#1a2130;padding:4px 10px;border-radius:20px;">
+                <span style="font-size:11px;color:#8a9bb0;">⚡ Переработка:</span>
+                <input type="number" v-model.number="overtimeRate" step="0.1" min="1" max="3" 
+                       style="width:45px;padding:2px 4px;border:1px solid #2a3a4a;border-radius:4px;background:#0b0f1a;color:#f0b90b;font-size:13px;font-weight:600;text-align:center;" 
+                       @change="autoSave" />
+                <span style="font-size:11px;color:#8a9bb0;">x</span>
+            </div>
             <span class="save-indicator" :class="saveStatus">
                 <span v-if="saveStatus === 'saving'">⏳</span>
                 <span v-else-if="saveStatus === 'saved'" class="check">✅</span>
@@ -636,7 +643,6 @@
 
     <!-- ===== ТАБЕЛЬ ===== -->
     <div class="table-view" :class="{active: currentView==='table'}">
-        <!-- НАВИГАЦИЯ ПО МЕСЯЦАМ -->
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                 <button class="btn btn-outline" @click="changeMonth(-1)" style="padding:4px 8px;font-size:16px;">‹</button>
@@ -735,8 +741,11 @@
                 <div class="field-group"><label>⏱️ Отработано часов</label><div style="font-size:16px;font-weight:500;">{{ totalHours(profileData.hours) }}</div></div>
                 <div class="field-group"><label>📅 Смен за месяц</label><div style="font-size:16px;font-weight:500;">{{ countShifts(profileData) }}</div></div>
                 <div class="field-group"><label>📈 Среднее в день</label><div style="font-size:16px;font-weight:500;">{{ avgHoursPerDay(profileData) }}ч</div></div>
-                <div class="field-group"><label>💰 Зарплата за месяц</label><div style="font-size:18px;font-weight:700;color:#4ade80;">{{ formatSalary(calcSalary(profileData)) }} ₽</div></div>
+                <div class="field-group"><label>💰 Зарплата за месяц (с переработкой)</label><div style="font-size:18px;font-weight:700;color:#4ade80;">{{ formatSalary(calcSalary(profileData)) }} ₽</div></div>
                 <div class="field-group"><label>📊 Загрузка</label><div style="font-size:16px;font-weight:500;">{{ Math.round(totalHours(profileData) / normHours * 100) }}%</div></div>
+                <div class="field-group" style="background:#1a2130;padding:8px 12px;border-radius:8px;margin-top:4px;">
+                    <label style="color:#8a9bb0;font-size:11px;">⚡ Коэффициент переработки: {{ overtimeRate }}x</label>
+                </div>
             </div>
         </div>
     </div>
@@ -984,7 +993,8 @@
                 profileData: null,
                 dayDetailModalVisible: false,
                 dayDetailData: null,
-                hasDataForMonth: false
+                hasDataForMonth: false,
+                overtimeRate: 1.5
             },
             computed: {
                 currentMonthName() {
@@ -1095,7 +1105,13 @@
                     const total = this.totalHours(emp.hours);
                     const base = emp.salaryBase || 0;
                     if (base === 0 || this.normHours === 0) return 0;
-                    return Math.round((total * base) / this.normHours);
+                    
+                    const hourlyRate = base / this.normHours;
+                    const normalHours = Math.min(total, this.normHours);
+                    const overtimeHours = Math.max(0, total - this.normHours);
+                    
+                    const salary = (normalHours * hourlyRate) + (overtimeHours * hourlyRate * this.overtimeRate);
+                    return Math.round(salary);
                 },
                 formatSalary(v) { return v.toLocaleString('ru-RU'); },
 
@@ -1161,7 +1177,6 @@
                     return days > 0 ? Math.round(total / days * 10) / 10 : 0;
                 },
 
-                // ===== НАВИГАЦИЯ ПО МЕСЯЦАМ =====
                 changeMonth(delta) {
                     const parts = this.currentMonth.split('-');
                     let year = parseInt(parts[0]);
@@ -1419,6 +1434,7 @@
                             norm: this.normHours,
                             norm52: this.norm52,
                             graphic: this.selectedGraphic,
+                            overtimeRate: this.overtimeRate,
                             savedAt: new Date().toISOString()
                         };
                         await callApi('save', data);
@@ -1446,6 +1462,7 @@
                             if (data.norm) this.normHours = data.norm;
                             if (data.norm52) this.norm52 = data.norm52;
                             if (data.graphic) this.selectedGraphic = data.graphic;
+                            if (data.overtimeRate) this.overtimeRate = data.overtimeRate;
                             this.syncStatus = 'synced';
                             this.showToast('☁️ Данные загружены', 'success');
                             return true;
@@ -1637,6 +1654,7 @@
                                 if (data.norm) this.normHours = data.norm;
                                 if (data.norm52) this.norm52 = data.norm52;
                                 if (data.graphic) this.selectedGraphic = data.graphic;
+                                if (data.overtimeRate) this.overtimeRate = data.overtimeRate;
                                 return true;
                             }
                         }
@@ -1657,6 +1675,7 @@
                                 }));
                                 this.norm52 = calculateNorm52(cnt);
                                 this.normHours = calculateNormShift(cnt, this.selectedGraphic);
+                                if (prevData.overtimeRate) this.overtimeRate = prevData.overtimeRate;
                                 return true;
                             }
                         }
@@ -1687,7 +1706,6 @@
                     await this.loadFromCloud();
                     await this.loadHistory();
                     
-                    // Проверяем наличие данных за месяц
                     const key = getMonthKey(month, this.selectedGraphic);
                     this.hasDataForMonth = !!localStorage.getItem(key);
                 },
