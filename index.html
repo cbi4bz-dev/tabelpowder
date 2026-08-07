@@ -201,6 +201,103 @@
         }
         .mini-calendar .days .day.weekend { color: #5a6a80; }
 
+        .attendance-view { display: none; }
+        .attendance-view.active { display: block; }
+
+        .attendance-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 12px 0 16px;
+        }
+        .attendance-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            background: #131926;
+            border: 1px solid #1e2738;
+            border-radius: 12px;
+            padding: 12px 16px;
+            transition: 0.2s;
+        }
+        .attendance-item:hover { border-color: #2a3a4a; }
+        .attendance-item .emp-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 150px;
+        }
+        .attendance-item .emp-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #1e2738;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            color: #f0b90b;
+        }
+        .attendance-item .emp-name { font-weight: 600; font-size: 14px; }
+        .attendance-item .emp-role { font-size: 12px; color: #8a9bb0; }
+
+        .attendance-item .emp-status {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 120px;
+        }
+        .attendance-item .status-badge {
+            font-size: 12px;
+            padding: 2px 12px;
+            border-radius: 12px;
+        }
+        .status-badge.working { background: #1a2a1a; color: #4ade80; }
+        .status-badge.done { background: #2a1a1a; color: #f87171; }
+        .status-badge.absent { background: #1a1a1a; color: #6b7280; }
+        .attendance-item .emp-time {
+            font-size: 11px;
+            color: #8a9bb0;
+            margin-top: 2px;
+        }
+
+        .attendance-item .emp-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .attendance-item .emp-actions .btn {
+            padding: 4px 12px;
+            font-size: 11px;
+            border-radius: 6px;
+        }
+        .attendance-item .emp-actions .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .attendance-summary {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px 24px;
+            padding: 12px 16px;
+            background: #131926;
+            border-radius: 12px;
+            border: 1px solid #1e2738;
+            margin-top: 8px;
+        }
+        .attendance-summary .summary-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+        .attendance-summary .summary-item .label { color: #8a9bb0; }
+        .attendance-summary .summary-item .value { font-weight: 600; color: #f0b90b; }
+
         .table-view { display: none; }
         .table-view.active { display: block; }
         .table-wrap { overflow-x: auto; margin-top: 8px; }
@@ -525,6 +622,19 @@
             .employee-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
             .emp-card { padding: 12px; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .attendance-item {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 6px;
+            }
+            .attendance-item .emp-status {
+                flex-direction: row;
+                justify-content: space-between;
+                min-width: unset;
+            }
+            .attendance-item .emp-actions {
+                justify-content: center;
+            }
             table { font-size: 11px; min-width: 500px; }
             .day-cell .day-input { width: 28px; font-size: 9px; padding: 2px 0; }
             .day-cell .day-type-icon { font-size: 9px; }
@@ -549,6 +659,7 @@
         @media (max-width: 480px) {
             .employee-grid { grid-template-columns: 1fr; }
             .stats-grid { grid-template-columns: 1fr 1fr; }
+            .attendance-item .emp-actions .btn { font-size: 10px; padding: 4px 8px; }
             .day-cell .day-input { width: 24px; font-size: 8px; }
             table { font-size: 9px; min-width: 400px; }
         }
@@ -560,8 +671,9 @@
     <div class="header">
         <div class="logo">🧑‍🏭 <span>Powder Flow OS</span></div>
         <div class="nav">
-            <button class="btn active" @click="currentView='dashboard'">📊 Дашборд</button>
-            <button class="btn" @click="currentView='table'">📋 Табель</button>
+            <button class="btn active" @click="switchView('dashboard')">📊 Дашборд</button>
+            <button class="btn" @click="switchView('attendance')">📋 Отметки</button>
+            <button class="btn" @click="switchView('table')">📋 Табель</button>
             <button class="btn" @click="showHistory">📜 История</button>
         </div>
         <div class="header-right">
@@ -584,17 +696,18 @@
         </div>
     </div>
 
-    <!-- ВКЛАДКИ -->
+    <!-- ВКЛАДКИ (мобильные) -->
     <div class="tabs">
-        <button class="btn" :class="{active: currentView==='dashboard'}" @click="currentView='dashboard'">📊 Дашборд</button>
-        <button class="btn" :class="{active: currentView==='table'}" @click="currentView='table'">📋 Табель</button>
+        <button class="btn" :class="{active: currentView==='dashboard'}" @click="switchView('dashboard')">📊 Дашборд</button>
+        <button class="btn" :class="{active: currentView==='attendance'}" @click="switchView('attendance')">📋 Отметки</button>
+        <button class="btn" :class="{active: currentView==='table'}" @click="switchView('table')">📋 Табель</button>
     </div>
 
     <!-- ===== ДАШБОРД ===== -->
     <div class="dashboard" :class="{hidden: currentView!=='dashboard'}">
         <div class="greeting">Сегодня, {{ currentDate }} <small>· Смена {{ selectedGraphic }}</small></div>
         <div class="employee-grid">
-            <div v-for="emp in employees" :key="emp.name" class="emp-card" @click="openProfile(emp)">
+            <div v-for="(emp, index) in employees" :key="index" class="emp-card" @click="openProfile(emp)">
                 <div class="top">
                     <div>
                         <div class="name">{{ emp.name }}</div>
@@ -627,7 +740,7 @@
             </div>
             <div class="days">
                 <div v-for="d in weekDays" :key="d" class="dow">{{ d }}</div>
-                <div v-for="day in calendarDays" :key="day.day" 
+                <div v-for="(day, index) in calendarDays" :key="index" 
                      class="day" 
                      :class="{
                          today: day.isToday,
@@ -637,6 +750,56 @@
                      @click="openDayDetail(day)">
                     {{ day.day }}
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== СТРАНИЦА ОТМЕТОК ===== -->
+    <div class="attendance-view" :class="{active: currentView==='attendance'}">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+            <h2 style="font-size:18px;color:#f0b90b;">📋 Отметки сотрудников</h2>
+            <span style="color:#8a9bb0;font-size:13px;">Сегодня, {{ currentDate }}</span>
+        </div>
+
+        <div class="attendance-list">
+            <div v-for="(emp, index) in employees" :key="index" class="attendance-item">
+                <div class="emp-info">
+                    <div class="emp-avatar">{{ emp.name.charAt(0) }}</div>
+                    <div>
+                        <div class="emp-name">{{ emp.name }}</div>
+                        <div class="emp-role">{{ emp.role || 'Сотрудник' }}</div>
+                    </div>
+                </div>
+                <div class="emp-status">
+                    <span class="status-badge" :class="getAttendanceStatus(emp)">
+                        {{ getAttendanceStatusText(emp) }}
+                    </span>
+                    <span class="emp-time" v-if="getTodayStart(emp)">
+                        🟢 {{ getTodayStart(emp) }} 
+                        <span v-if="getTodayEnd(emp)">— 🔴 {{ getTodayEnd(emp) }}</span>
+                        <span v-else style="color:#fbbf24;">(в работе)</span>
+                    </span>
+                    <span class="emp-time" v-else style="color:#5a6a80;">—</span>
+                </div>
+                <div class="emp-actions">
+                    <button class="btn btn-success" @click="attendanceCheckIn(emp)" :disabled="!!getTodayStart(emp)">✅ Пришел</button>
+                    <button class="btn btn-danger" @click="attendanceCheckOut(emp)" :disabled="!getTodayStart(emp) || !!getTodayEnd(emp)">🔴 Ушел</button>
+                    <button class="btn btn-outline" @click="openAttendanceEdit(emp)">✏️ Правка</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="attendance-summary">
+            <div class="summary-item">
+                <span class="label">👥 В смене:</span>
+                <span class="value">{{ employeesInShift }} / {{ employees.length }}</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">⏱️ Отработано сегодня:</span>
+                <span class="value">{{ todayTotalHours }}ч</span>
+            </div>
+            <div class="summary-item" style="color:#8a9bb0;font-size:12px;">
+                💡 Нажмите "✏️ Правка" чтобы исправить время
             </div>
         </div>
     </div>
@@ -677,7 +840,7 @@
                         <th style="min-width:100px;">Сотрудник</th>
                         <th style="min-width:55px;">Роль</th>
                         <th style="min-width:55px;">Оклад</th>
-                        <th v-for="(day, i) in days" :key="i" style="min-width:45px;">
+                        <th v-for="(day, i) in days" :key="'day-'+i" style="min-width:45px;">
                             {{ day }}<br><span style="font-weight:400;font-size:8px;color:#5a6a80;">{{ weekDays[dayOfWeek[i]] }}</span>
                         </th>
                         <th>Итого</th>
@@ -717,7 +880,7 @@
                     </tr>
                     <tr class="stats-row">
                         <td class="stats-label" colspan="3">📊 Итого за месяц</td>
-                        <td v-for="(day, i) in days" :key="i">{{ dayStats[i] || '' }}</td>
+                        <td v-for="(day, i) in days" :key="'stat-'+i">{{ dayStats[i] || '' }}</td>
                         <td class="total-cell">{{ totalMonthHours }}</td>
                         <td class="salary-cell">{{ formatSalary(totalMonthSalary) }}</td>
                     </tr>
@@ -866,16 +1029,16 @@
         <div class="print-title">📋 ТАБЕЛЬ УЧЕТА РАБОЧЕГО ВРЕМЕНИ</div>
         <div class="print-subtitle">Цех порошковой покраски · {{ currentMonthName }} · График {{ selectedGraphic }}</div>
         <table>
-            <thead><tr><th>Сотрудник</th><th v-for="(day, i) in days" :key="i">{{ day }}</th><th>Итого</th></tr></thead>
+            <thead><tr><th>Сотрудник</th><th v-for="(day, i) in days" :key="'print-'+i">{{ day }}</th><th>Итого</th></tr></thead>
             <tbody>
                 <tr v-for="emp in employees" :key="emp.name">
                     <td>{{ emp.name }}</td>
-                    <td v-for="(day, i) in days" :key="i">{{ emp.hours[i] || '' }}</td>
+                    <td v-for="(day, i) in days" :key="'print-cell-'+i">{{ emp.hours[i] || '' }}</td>
                     <td>{{ totalHours(emp.hours) }}</td>
                 </tr>
                 <tr style="font-weight:700;background:#f5f5f5;">
                     <td>Итого часов:</td>
-                    <td v-for="(day, i) in days" :key="i">{{ dayStats[i] || '' }}</td>
+                    <td v-for="(day, i) in days" :key="'print-stat-'+i">{{ dayStats[i] || '' }}</td>
                     <td>{{ totalMonthHours }}</td>
                 </tr>
             </tbody>
@@ -944,10 +1107,6 @@
             if (m === 0) { m = 12; y--; }
             return `${y}-${String(m).padStart(2, '0')}`;
         }
-        function saveToLocal(month, graphic, data) {
-            const key = getMonthKey(month, graphic);
-            localStorage.setItem(key, JSON.stringify(data));
-        }
 
         async function callApi(method, data) {
             try {
@@ -998,7 +1157,8 @@
                 dayDetailModalVisible: false,
                 dayDetailData: null,
                 hasDataForMonth: false,
-                overtimeRate: 1.5
+                overtimeRate: 1.5,
+                attendanceLog: []
             },
             computed: {
                 currentMonthName() {
@@ -1098,9 +1258,26 @@
                         }
                     });
                     return count;
+                },
+                employeesInShift() {
+                    const today = this.getTodayDate();
+                    return this.attendanceLog.filter(l => l.date === today && l.start && !l.end).length;
+                },
+                todayTotalHours() {
+                    const today = this.getTodayDate();
+                    const logs = this.attendanceLog.filter(l => l.date === today && l.hours);
+                    return Math.round(logs.reduce((sum, l) => sum + (l.hours || 0), 0) * 10) / 10;
                 }
             },
             methods: {
+                switchView(view) {
+                    this.currentView = view;
+                    const btns = document.querySelectorAll('.nav .btn');
+                    btns.forEach(b => b.classList.remove('active'));
+                    const idx = view === 'dashboard' ? 0 : view === 'attendance' ? 1 : 2;
+                    if (btns[idx]) btns[idx].classList.add('active');
+                },
+
                 totalHours(arr) {
                     const safe = ensureArray(arr);
                     return safe.reduce((a, v) => a + (v || 0), 0);
@@ -1238,20 +1415,167 @@
                     }
                 },
 
-                // ===== ИСПРАВЛЕННЫЙ СБРОС МЕСЯЦА =====
+                getTodayDate() {
+                    const now = new Date();
+                    return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+                },
+                getAttendanceStatus(emp) {
+                    const today = this.getTodayDate();
+                    const log = this.attendanceLog.find(l => l.employee === emp.name && l.date === today);
+                    if (!log) return 'absent';
+                    if (log.start && !log.end) return 'working';
+                    if (log.start && log.end) return 'done';
+                    return 'absent';
+                },
+                getAttendanceStatusText(emp) {
+                    const status = this.getAttendanceStatus(emp);
+                    const map = {
+                        'absent': '⚪ Не отметился',
+                        'working': '🟢 Работает',
+                        'done': '🔴 Ушел'
+                    };
+                    return map[status] || '⚪ Не отметился';
+                },
+                getTodayStart(emp) {
+                    const today = this.getTodayDate();
+                    const log = this.attendanceLog.find(l => l.employee === emp.name && l.date === today);
+                    return log ? log.start : null;
+                },
+                getTodayEnd(emp) {
+                    const today = this.getTodayDate();
+                    const log = this.attendanceLog.find(l => l.employee === emp.name && l.date === today);
+                    return log ? log.end : null;
+                },
+                attendanceCheckIn(emp) {
+                    if (this.getTodayStart(emp)) {
+                        this.showToast(`⚠️ ${emp.name} уже отметился`, 'warning');
+                        return;
+                    }
+                    const now = new Date();
+                    const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+                    const today = this.getTodayDate();
+                    
+                    this.attendanceLog.push({
+                        employee: emp.name,
+                        date: today,
+                        start: time,
+                        end: null,
+                        hours: 0
+                    });
+                    
+                    this.saveAttendanceLog();
+                    this.showToast(`✅ ${emp.name} пришел в ${time}`, 'success');
+                },
+                attendanceCheckOut(emp) {
+                    const start = this.getTodayStart(emp);
+                    if (!start) {
+                        this.showToast(`⚠️ ${emp.name} не отметился`, 'warning');
+                        return;
+                    }
+                    if (this.getTodayEnd(emp)) {
+                        this.showToast(`⚠️ ${emp.name} уже ушел`, 'warning');
+                        return;
+                    }
+                    const now = new Date();
+                    const end = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+                    const today = this.getTodayDate();
+                    
+                    const log = this.attendanceLog.find(l => l.employee === emp.name && l.date === today);
+                    if (log) {
+                        log.end = end;
+                        const startH = parseInt(start.split(':')[0]) + parseInt(start.split(':')[1])/60;
+                        const endH = parseInt(end.split(':')[0]) + parseInt(end.split(':')[1])/60;
+                        let hours = Math.round((endH - startH) * 10) / 10;
+                        if (hours >= 6) hours -= 1;
+                        log.hours = Math.max(0, hours);
+                        
+                        const dayIdx = now.getDate() - 1;
+                        const empObj = this.employees.find(e => e.name === emp.name);
+                        if (empObj && dayIdx >= 0 && dayIdx < empObj.hours.length) {
+                            empObj.hours[dayIdx] = log.hours;
+                            empObj.dayType[dayIdx] = 'work';
+                        }
+                        
+                        this.saveAttendanceLog();
+                        this.autoSave();
+                        this.showToast(`✅ ${emp.name} ушел в ${end} (${log.hours}ч)`, 'success');
+                    }
+                },
+                openAttendanceEdit(emp) {
+                    const today = this.getTodayDate();
+                    const log = this.attendanceLog.find(l => l.employee === emp.name && l.date === today);
+                    if (!log) {
+                        this.showToast('⚠️ Нет отметок для редактирования', 'warning');
+                        return;
+                    }
+                    const start = prompt('Изменить время прихода (ЧЧ:ММ):', log.start || '09:00');
+                    if (start !== null && start.trim()) {
+                        log.start = start.trim();
+                        const end = prompt('Изменить время ухода (ЧЧ:ММ):', log.end || '17:00');
+                        if (end !== null && end.trim()) {
+                            log.end = end.trim();
+                            const startH = parseInt(log.start.split(':')[0]) + parseInt(log.start.split(':')[1])/60;
+                            const endH = parseInt(log.end.split(':')[0]) + parseInt(log.end.split(':')[1])/60;
+                            let hours = Math.round((endH - startH) * 10) / 10;
+                            if (hours >= 6) hours -= 1;
+                            log.hours = Math.max(0, hours);
+                            
+                            const now = new Date();
+                            const dayIdx = now.getDate() - 1;
+                            const empObj = this.employees.find(e => e.name === emp.name);
+                            if (empObj && dayIdx >= 0 && dayIdx < empObj.hours.length) {
+                                empObj.hours[dayIdx] = log.hours;
+                                empObj.dayType[dayIdx] = 'work';
+                            }
+                            this.saveAttendanceLog();
+                            this.autoSave();
+                            this.showToast(`✅ Время обновлено: ${log.start} — ${log.end} (${log.hours}ч)`, 'success');
+                        }
+                    }
+                },
+                saveAttendanceLog() {
+                    localStorage.setItem('attendance_log', JSON.stringify(this.attendanceLog));
+                },
+                loadAttendanceLog() {
+                    const raw = localStorage.getItem('attendance_log');
+                    if (raw) {
+                        try {
+                            this.attendanceLog = JSON.parse(raw);
+                        } catch (e) {
+                            this.attendanceLog = [];
+                        }
+                    }
+                },
+
+                // ===== ИСПРАВЛЕННЫЙ СБРОС МЕСЯЦА (БЕЗОПАСНЫЙ) =====
                 resetMonth() {
                     const monthName = this.currentMonthName;
                     if (!confirm(`⚠️ Вы уверены? Это удалит все часы за ${monthName}!`)) return;
                     
-                    this.employees.forEach(e => {
-                        e.hours = Array(this.days.length).fill(0);
-                        e.dayType = Array(this.days.length).fill('work');
-                        e.comments = Array(this.days.length).fill('');
-                    });
+                    // Проверяем, что сотрудники есть
+                    if (!this.employees || this.employees.length === 0) {
+                        this.showToast('⚠️ Нет сотрудников для сброса', 'warning');
+                        return;
+                    }
                     
+                    // Создаем глубокую копию и обнуляем часы
+                    const resetEmployees = this.employees.map(e => ({
+                        ...e,
+                        hours: Array(this.days.length).fill(0),
+                        dayType: Array(this.days.length).fill('work'),
+                        comments: Array(this.days.length).fill('')
+                    }));
+                    
+                    // Применяем изменения
+                    this.employees = resetEmployees;
+                    
+                    // Сохраняем в локальное хранилище
                     this.saveToLocal();
+                    
+                    // Сохраняем в облако
                     this.autoSave();
                     
+                    // Логируем в историю
                     const historyEntry = {
                         timestamp: new Date().toISOString(),
                         action: '🔄 Сброс месяца',
@@ -1263,30 +1587,35 @@
                     this.showToast(`🔄 Часы за ${monthName} сброшены`, 'success');
                 },
 
-                // ===== ИСПРАВЛЕННОЕ УДАЛЕНИЕ МЕСЯЦА =====
+                // ===== ИСПРАВЛЕННОЕ УДАЛЕНИЕ МЕСЯЦА (БЕЗОПАСНОЕ) =====
                 deleteMonth() {
                     const monthName = this.currentMonthName;
                     if (!confirm(`⚠️ Удалить все данные за ${monthName}? Это действие НЕЛЬЗЯ отменить!`)) return;
                     
-                    // Удаляем данные из localStorage
+                    // Удаляем только данные этого месяца из localStorage
                     const key = getMonthKey(this.currentMonth, this.selectedGraphic);
                     localStorage.removeItem(key);
                     
-                    // Создаем пустых сотрудников для текущего месяца
+                    // Загружаем стандартных сотрудников для этого месяца
                     const cnt = this.days.length;
-                    this.employees = JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES));
-                    this.employees.forEach(e => {
+                    const defaultEmps = JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES));
+                    defaultEmps.forEach(e => {
                         e.hours = Array(cnt).fill(0);
                         e.dayType = Array(cnt).fill('work');
                         e.comments = Array(cnt).fill('');
                     });
                     
+                    this.employees = defaultEmps;
+                    
+                    // Пересчитываем норму
                     this.norm52 = calculateNorm52(cnt);
                     this.normHours = calculateNormShift(cnt, this.selectedGraphic);
                     
+                    // Сохраняем изменения
                     this.saveToLocal();
                     this.autoSave();
                     
+                    // Логируем в историю
                     const historyEntry = {
                         timestamp: new Date().toISOString(),
                         action: '🗑️ Удаление месяца',
@@ -1328,7 +1657,6 @@
                 },
                 closeProfile() { this.profileModalVisible = false; this.profileData = null; },
 
-                // ===== ИСТОРИЯ =====
                 async loadHistory() {
                     try {
                         const data = await callApi('getHistory');
@@ -1372,7 +1700,6 @@
                 },
                 closeHistory() { this.historyModalVisible = false; },
 
-                // ===== РЕДАКТИРОВАНИЕ ДНЯ =====
                 openEditModal(emp, idx) {
                     this.editModalEmp = emp;
                     this.editModalIdx = idx;
@@ -1443,7 +1770,6 @@
                     }
                 },
 
-                // ===== МАССОВОЕ ПРОСТАВЛЕНИЕ =====
                 openMassModal() {
                     this.massData.dateFrom = 1;
                     this.massData.dateTo = this.days.length;
@@ -1495,13 +1821,11 @@
                     this.showToast(`✅ "${label}" установлен для ${names}`, 'success');
                 },
 
-                // ===== АВТОСОХРАНЕНИЕ =====
                 autoSave() {
                     if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
                     this.autoSaveTimeout = setTimeout(() => { this.saveToCloud(); }, 1500);
                 },
 
-                // ===== ОБЛАКО =====
                 async saveToCloud() {
                     try {
                         this.saveStatus = 'saving';
@@ -1554,7 +1878,6 @@
                     }
                 },
 
-                // ===== СОТРУДНИКИ =====
                 addEmployee() {
                     const cnt = this.days.length;
                     const name = 'Новый сотрудник';
@@ -1597,7 +1920,6 @@
                     }
                 },
 
-                // ===== ТАБЕЛЬ =====
                 fillByGraphic() {
                     if (!confirm('Заполнить по графику ' + this.selectedGraphic + '?')) return;
                     const cycle = this.selectedGraphic === '3/3' ? 6 : 4;
@@ -1629,10 +1951,8 @@
                     this.showToast('✅ Табель заполнен', 'success');
                 },
 
-                // ===== ПЕЧАТЬ =====
                 printTable() { window.print(); },
 
-                // ===== EXCEL =====
                 exportExcel() {
                     try {
                         let html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
@@ -1667,14 +1987,12 @@
                     }
                 },
 
-                // ===== TOAST =====
                 showToast(msg, type = 'success') {
                     if (this.toastTimeout) clearTimeout(this.toastTimeout);
                     this.toast = { show: true, message: msg, type };
                     this.toastTimeout = setTimeout(() => { this.toast.show = false; }, 3000);
                 },
 
-                // ===== ЗАГРУЗКА ДАННЫХ =====
                 loadMonthData(month, graphic) {
                     try {
                         const key = getMonthKey(month, graphic);
@@ -1743,6 +2061,7 @@
                     this.loadMonthData(month, this.selectedGraphic);
                     await this.loadFromCloud();
                     await this.loadHistory();
+                    this.loadAttendanceLog();
                     
                     const key = getMonthKey(month, this.selectedGraphic);
                     this.hasDataForMonth = !!localStorage.getItem(key);
@@ -1766,6 +2085,7 @@
                 const m = String(now.getMonth() + 1).padStart(2, '0');
                 this.currentMonth = `${y}-${m}`;
                 await this.updateDays(this.currentMonth);
+                this.loadAttendanceLog();
             }
         });
     })();
