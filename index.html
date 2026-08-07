@@ -1113,7 +1113,6 @@
                 });
                 if (!res.ok) throw new Error('Ошибка загрузки из облака: ' + res.status);
                 const data = await res.json();
-                console.log('☁️ Загружено из облака:', Object.keys(data).length, 'месяцев');
                 return data;
             } catch (e) {
                 console.error('Ошибка загрузки из облака:', e);
@@ -1129,7 +1128,6 @@
                     body: JSON.stringify({ method: 'save', data: data })
                 });
                 if (!res.ok) throw new Error('Ошибка сохранения в облако: ' + res.status);
-                console.log('☁️ Сохранено в облако:', Object.keys(data).length, 'месяцев');
                 return true;
             } catch (e) {
                 console.error('Ошибка сохранения в облако:', e);
@@ -1386,11 +1384,167 @@
                     this.loadMonth(this.currentMonth);
                 },
 
+                // ===== СОХРАНЕНИЕ ТЕКУЩЕГО МЕСЯЦА =====
+                saveCurrentMonth() {
+                    const key = getMonthKey(this.currentMonth, this.selectedGraphic);
+                    const data = {
+                        employees: this.employees,
+                        month: this.currentMonth,
+                        norm: this.normHours,
+                        norm52: this.norm52,
+                        graphic: this.selectedGraphic,
+                        overtimeRate: this.overtimeRate,
+                        savedAt: new Date().toISOString()
+                    };
+                    localStorage.setItem(key, JSON.stringify(data));
+                    this.syncCloud();
+                    this.hasDataForMonth = true;
+                    return true;
+                },
+
+                // ===== СИНХРОНИЗАЦИЯ С ОБЛАКОМ =====
+                async syncCloud() {
+                    try {
+                        const allData = {};
+                        for (let i = 0; i < localStorage.length; i++) {
+                            const key = localStorage.key(i);
+                            if (key && key.startsWith('tabel_')) {
+                                const raw = localStorage.getItem(key);
+                                try {
+                                    allData[key] = JSON.parse(raw);
+                                } catch (e) {}
+                            }
+                        }
+                        if (Object.keys(allData).length > 0) {
+                            await cloudSaveAll(allData);
+                        }
+                        this.syncStatus = 'synced';
+                        return true;
+                    } catch (e) {
+                        this.syncStatus = 'error';
+                        return false;
+                    }
+                },
+
+                // ===== ЗАГРУЗКА МЕСЯЦА =====
+                async loadMonth(month) {
+                    this.syncStatus = 'loading';
+                    const key = getMonthKey(month, this.selectedGraphic);
+                    
+                    // Пробуем из localStorage
+                    let raw = localStorage.getItem(key);
+                    let data = null;
+                    
+                    if (raw) {
+                        try {
+                            data = JSON.parse(raw);
+                        } catch (e) {}
+                    }
+                    
+                    // Если нет — из облака
+                    if (!data) {
+                        try {
+                            const cloudData = await cloudGetAll();
+                            if (cloudData && cloudData[key]) {
+                                data = cloudData[key];
+                                localStorage.setItem(key, JSON.stringify(data));
+                            }
+                        } catch (e) {}
+                    }
+                    
+                    if (data && data.employees) {
+                        this.employees = data.employees.map(e => {
+                            if (!e.dayType) e.dayType = Array(this.days.length).fill('work');
+                            if (!e.role) e.role = 'Сотрудник';
+                            if (!Array.isArray(e.hours)) e.hours = Array(this.days.length).fill(0);
+                            if (!e.comments) e.comments = Array(this.days.length).fill('');
+                            return e;
+                        });
+                        if (data.norm) this.normHours = data.norm;
+                        if (data.norm52) this.norm52 = data.norm52;
+                        if (data.graphic) this.selectedGraphic = data.graphic;
+                        if (data.overtimeRate) this.overtimeRate = data.overtimeRate;
+                        this.hasDataForMonth = true;
+                        this.syncStatus = 'synced';
+                        return true;
+                    }
+                    
+                    // Новый месяц — копируем из предыдущего
+                    const prevMonth = getPrevMonth(month);
+                    const prevKey = getMonthKey(prevMonth, this.selectedGraphic);
+                    const prevRaw = localStorage.getItem(prevKey);
+                    
+                    if (prevRaw) {
+                        try {
+                            const prevData = JSON.parse(prevRaw);
+                            if (prevData.employees && prevData.employees.length > 0) {
+                                const cnt = this.days.length;
+                                this.employees = prevData.employees.map(e => ({
+                                    name: e.name,
+                                    role: e.role || 'Сотрудник',
+                                    salaryBase: e.salaryBase || 90000,
+                                    hours: Array(cnt).fill(0),
+                                    dayType: Array(cnt).fill('work'),
+                                    comments: Array(cnt).fill('')
+                                }));
+                                this.norm52 = calculateNorm52(cnt);
+                                this.normHours = calculateNormShift(cnt, this.selectedGraphic);
+                                this.hasDataForMonth = false;
+                                this.saveCurrentMonth();
+                                this.syncStatus = 'synced';
+                                return true;
+                            }
+                        } catch (e) {}
+                    }
+                    
+                    // Стандартные сотрудники
+                    const cnt = this.days.length;
+                    this.employees = JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES));
+                    this.employees.forEach(e => {
+                        e.hours = Array(cnt).fill(0);
+                        e.dayType = Array(cnt).fill('work');
+                        e.comments = Array(cnt).fill('');
+                    });
+                    this.norm52 = calculateNorm52(cnt);
+                    this.normHours = calculateNormShift(cnt, this.selectedGraphic);
+                    this.hasDataForMonth = false;
+                    this.saveCurrentMonth();
+                    this.syncStatus = 'synced';
+                    return false;
+                },
+
+                // ===== ЗАГРУЗКА ИЗ ОБЛАКА (для кнопки) =====
+                async loadFromCloud() {
+                    this.syncStatus = 'loading';
+                    try {
+                        const cloudData = await cloudGetAll();
+                        if (Object.keys(cloudData).length === 0) {
+                            this.showToast('☁️ В облаке нет данных', 'warning');
+                            this.syncStatus = 'idle';
+                            return;
+                        }
+                        // Сохраняем всё в localStorage
+                        let loaded = 0;
+                        for (const [key, value] of Object.entries(cloudData)) {
+                            if (key.startsWith('tabel_')) {
+                                localStorage.setItem(key, JSON.stringify(value));
+                                loaded++;
+                            }
+                        }
+                        // Перезагружаем текущий месяц
+                        await this.loadMonth(this.currentMonth);
+                        this.syncStatus = 'synced';
+                        this.showToast(`☁️ Загружено ${loaded} месяцев из облака`, 'success');
+                    } catch (e) {
+                        this.syncStatus = 'error';
+                        this.showToast('❌ Ошибка загрузки из облака', 'error');
+                    }
+                },
+
                 copyEmployeesFromPrevMonth() {
-                    // Копируем сотрудников из предыдущего месяца
                     const prevMonth = getPrevMonth(this.currentMonth);
-                    const key = getMonthKey(prevMonth, this.selectedGraphic);
-                    const raw = localStorage.getItem(key);
+                    const prevKey = getMonthKey(prevMonth, this.selectedGraphic);
+                    const raw = localStorage.getItem(prevKey);
                     if (!raw) {
                         this.showToast('⚠️ Нет данных за предыдущий месяц', 'warning');
                         return;
@@ -1540,193 +1694,37 @@
                     }
                 },
 
-                // ===== ОСНОВНЫЕ МЕТОДЫ РАБОТЫ С ДАННЫМИ =====
-
-                // Сохранить текущий месяц в localStorage и облако
-                async saveCurrentMonth() {
-                    const key = getMonthKey(this.currentMonth, this.selectedGraphic);
-                    const data = {
-                        employees: this.employees,
-                        month: this.currentMonth,
-                        norm: this.normHours,
-                        norm52: this.norm52,
-                        graphic: this.selectedGraphic,
-                        overtimeRate: this.overtimeRate,
-                        savedAt: new Date().toISOString()
-                    };
-                    
-                    // Сохраняем в localStorage
-                    localStorage.setItem(key, JSON.stringify(data));
-                    
-                    // Сохраняем в облако (все месяцы)
-                    await this.syncCloud();
-                    
-                    console.log(`💾 Сохранен месяц ${this.currentMonth}`);
-                    return true;
-                },
-
-                // Синхронизация всех месяцев с облаком
-                async syncCloud() {
-                    try {
-                        // Собираем все месяцы из localStorage
-                        const allData = {};
-                        for (let i = 0; i < localStorage.length; i++) {
-                            const key = localStorage.key(i);
-                            if (key && key.startsWith('tabel_')) {
-                                const raw = localStorage.getItem(key);
-                                try {
-                                    const data = JSON.parse(raw);
-                                    allData[key] = data;
-                                } catch (e) {}
-                            }
-                        }
-                        
-                        // Сохраняем в облако
-                        if (Object.keys(allData).length > 0) {
-                            await cloudSaveAll(allData);
-                        }
-                        return true;
-                    } catch (e) {
-                        console.error('Ошибка синхронизации с облаком:', e);
-                        return false;
-                    }
-                },
-
-                // Загрузить месяц из localStorage или облака
-                async loadMonth(month) {
-                    this.syncStatus = 'loading';
-                    const key = getMonthKey(month, this.selectedGraphic);
-                    
-                    // Проверяем localStorage
-                    let raw = localStorage.getItem(key);
-                    let data = null;
-                    
-                    if (raw) {
-                        try {
-                            data = JSON.parse(raw);
-                            console.log(`📂 Загружен ${month} из localStorage`);
-                        } catch (e) {}
-                    }
-                    
-                    // Если в localStorage нет — пробуем облако
-                    if (!data) {
-                        try {
-                            const cloudData = await cloudGetAll();
-                            if (cloudData && cloudData[key]) {
-                                data = cloudData[key];
-                                // Сохраняем в localStorage для кеша
-                                localStorage.setItem(key, JSON.stringify(data));
-                                console.log(`☁️ Загружен ${month} из облака`);
-                            }
-                        } catch (e) {
-                            console.warn('Ошибка загрузки из облака:', e);
-                        }
-                    }
-                    
-                    if (data && data.employees) {
-                        this.employees = data.employees.map(e => {
-                            if (!e.dayType) e.dayType = Array(this.days.length).fill('work');
-                            if (!e.role) e.role = 'Сотрудник';
-                            if (!Array.isArray(e.hours)) e.hours = Array(this.days.length).fill(0);
-                            if (!e.comments) e.comments = Array(this.days.length).fill('');
-                            return e;
-                        });
-                        if (data.norm) this.normHours = data.norm;
-                        if (data.norm52) this.norm52 = data.norm52;
-                        if (data.graphic) this.selectedGraphic = data.graphic;
-                        if (data.overtimeRate) this.overtimeRate = data.overtimeRate;
-                        this.hasDataForMonth = true;
-                        this.syncStatus = 'synced';
-                        this.showToast(`📅 Данные за ${month} загружены (${this.employees.length} сотрудников)`, 'success');
-                        return true;
-                    }
-                    
-                    // Если данных нет — создаём новый месяц с сотрудниками из предыдущего
-                    const prevMonth = getPrevMonth(month);
-                    const prevKey = getMonthKey(prevMonth, this.selectedGraphic);
-                    const prevRaw = localStorage.getItem(prevKey);
-                    
-                    if (prevRaw) {
-                        try {
-                            const prevData = JSON.parse(prevRaw);
-                            if (prevData.employees && prevData.employees.length > 0) {
-                                const cnt = this.days.length;
-                                this.employees = prevData.employees.map(e => ({
-                                    name: e.name,
-                                    role: e.role || 'Сотрудник',
-                                    salaryBase: e.salaryBase || 90000,
-                                    hours: Array(cnt).fill(0),
-                                    dayType: Array(cnt).fill('work'),
-                                    comments: Array(cnt).fill('')
-                                }));
-                                this.norm52 = calculateNorm52(cnt);
-                                this.normHours = calculateNormShift(cnt, this.selectedGraphic);
-                                this.hasDataForMonth = false;
-                                this.saveCurrentMonth();
-                                this.syncStatus = 'synced';
-                                this.showToast(`📝 Создан новый месяц ${month} (скопированы сотрудники из ${prevMonth})`, 'warning');
-                                return true;
-                            }
-                        } catch (e) {}
-                    }
-                    
-                    // Совсем нет данных — создаём стандартных сотрудников
-                    const cnt = this.days.length;
-                    this.employees = JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES));
-                    this.employees.forEach(e => {
-                        e.hours = Array(cnt).fill(0);
-                        e.dayType = Array(cnt).fill('work');
-                        e.comments = Array(cnt).fill('');
-                    });
-                    this.norm52 = calculateNorm52(cnt);
-                    this.normHours = calculateNormShift(cnt, this.selectedGraphic);
-                    this.hasDataForMonth = false;
-                    this.saveCurrentMonth();
-                    this.syncStatus = 'synced';
-                    this.showToast(`📝 Создан новый месяц ${month}`, 'warning');
-                    return false;
-                },
-
-                // ===== ОБНОВЛЁННЫЙ СБРОС МЕСЯЦА =====
+                // ===== СБРОС МЕСЯЦА (только текущий) =====
                 resetMonth() {
                     const monthName = this.currentMonthName;
                     if (!confirm(`⚠️ Вы уверены? Это удалит все часы за ${monthName}!`)) return;
                     
-                    // Обнуляем часы у текущих сотрудников
                     this.employees.forEach(e => {
                         e.hours = Array(this.days.length).fill(0);
                         e.dayType = Array(this.days.length).fill('work');
                         e.comments = Array(this.days.length).fill('');
                     });
                     
-                    // Сохраняем текущий месяц
                     this.saveCurrentMonth();
-                    
                     this.showToast(`🔄 Часы за ${monthName} сброшены`, 'success');
                 },
 
-                // ===== ОБНОВЛЁННОЕ УДАЛЕНИЕ МЕСЯЦА =====
+                // ===== УДАЛЕНИЕ МЕСЯЦА (только текущий) =====
                 async deleteMonth() {
                     const monthName = this.currentMonthName;
                     if (!confirm(`⚠️ Удалить все данные за ${monthName}? Это действие НЕЛЬЗЯ отменить!`)) return;
                     
                     const key = getMonthKey(this.currentMonth, this.selectedGraphic);
-                    
-                    // Удаляем из localStorage
                     localStorage.removeItem(key);
                     
-                    // Удаляем из облака
                     try {
                         const cloudData = await cloudGetAll();
                         if (cloudData && cloudData[key]) {
                             delete cloudData[key];
                             await cloudSaveAll(cloudData);
                         }
-                    } catch (e) {
-                        console.warn('Ошибка удаления из облака:', e);
-                    }
+                    } catch (e) {}
                     
-                    // Загружаем стандартных сотрудников
                     const cnt = this.days.length;
                     this.employees = JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES));
                     this.employees.forEach(e => {
@@ -1737,7 +1735,6 @@
                     this.norm52 = calculateNorm52(cnt);
                     this.normHours = calculateNormShift(cnt, this.selectedGraphic);
                     this.hasDataForMonth = false;
-                    
                     this.showToast(`🗑️ Данные за ${monthName} удалены`, 'success');
                 },
 
@@ -1774,11 +1771,8 @@
                 async loadHistory() {
                     try {
                         const data = await cloudGetAll();
-                        // История пока не реализована
                         this.historyList = [];
-                    } catch (e) {
-                        console.warn('Не удалось загрузить историю:', e);
-                    }
+                    } catch (e) {}
                 },
 
                 async showHistory() {
@@ -1902,7 +1896,6 @@
                     if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
                     this.autoSaveTimeout = setTimeout(() => { 
                         this.saveCurrentMonth();
-                        this.showToast('💾 Автосохранение', 'success');
                     }, 2000);
                 },
 
@@ -1998,7 +1991,6 @@
                     this.toastTimeout = setTimeout(() => { this.toast.show = false; }, 3000);
                 },
 
-                // ===== ЗАГРУЗКА ПРИ СТАРТЕ =====
                 async updateDays(month) {
                     if (!month) return;
                     const parts = month.split('-');
