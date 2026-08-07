@@ -724,17 +724,7 @@
             <div class="stat-box"><div class="val">{{ employees.length }}</div><div class="label">👥 Сотрудников</div></div>
             <div class="stat-box"><div class="val">{{ totalMonthHours }}</div><div class="label">⏱️ Всего часов за месяц</div></div>
             <div class="stat-box"><div class="val">{{ formatSalary(totalMonthSalary) }}</div><div class="label">💰 Зарплата за месяц</div></div>
-            <!-- НОВОЕ: ручной ввод нормы -->
-            <div class="stat-box" style="position:relative;">
-                <div class="val" style="font-size:18px;display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <span v-if="manualNorm !== null" style="color:#f0b90b;">✏️</span>
-                    <span>{{ displayNorm }}</span>
-                </div>
-                <div class="label" style="display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;">
-                    <span>📅 Норма за месяц</span>
-                    <button class="btn btn-outline" @click="openNormEditor" style="padding:2px 8px;font-size:10px;">✏️</button>
-                </div>
-            </div>
+            <div class="stat-box"><div class="val">{{ normHours }}</div><div class="label">📅 Норма за месяц</div></div>
             <div class="stat-box"><div class="val" style="color:#60a5fa;">{{ Math.round(totalMonthHours / normHours * 100) || 0 }}%</div><div class="label">📊 Загруженность цеха</div></div>
             <div class="stat-box"><div class="val" style="color:#4ade80;">{{ employeesInNorm }} / {{ employees.length }}</div><div class="label">✅ Сотрудников в норме</div></div>
         </div>
@@ -810,7 +800,7 @@
         </div>
     </div>
 
-    <!-- ===== ТАБЕЛЬ ===== -->
+    <!-- ===== ТАБЕЛЬ (с редактированием нормы) ===== -->
     <div class="table-view" :class="{active: currentView==='table'}">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
@@ -821,7 +811,15 @@
                 <span v-else style="font-size:11px;color:#8a9bb0;background:#1a1a1a;padding:2px 10px;border-radius:12px;">📅 Новый месяц</span>
                 <button class="btn btn-outline" @click="copyEmployeesFromPrevMonth" style="font-size:10px;padding:4px 10px;">📋 Копировать сотрудников</button>
             </div>
-            <span style="color:#8a9bb0;font-size:13px;">Норма: {{ normHours }}ч</span>
+            <!-- НОВОЕ: редактирование нормы в табеле -->
+            <div style="display:flex;align-items:center;gap:6px;background:#1a2130;padding:4px 12px;border-radius:20px;">
+                <span style="font-size:11px;color:#8a9bb0;">📅 Норма:</span>
+                <input type="number" v-model.number="normHours" step="0.5" min="0" max="300" 
+                       style="width:55px;padding:2px 4px;border:1px solid #2a3a4a;border-radius:4px;background:#0b0f1a;color:#f0b90b;font-size:13px;font-weight:600;text-align:center;" 
+                       @change="saveMonthNorm" />
+                <span style="font-size:11px;color:#8a9bb0;">ч</span>
+                <button class="btn btn-outline" @click="resetMonthNorm" style="padding:2px 6px;font-size:10px;" title="Вернуть авторасчет">↺</button>
+            </div>
         </div>
 
         <div class="day-type-actions">
@@ -1030,32 +1028,6 @@
         </div>
     </div>
 
-    <!-- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ НОРМЫ -->
-    <div class="modal-overlay" :class="{active: normEditorVisible}" @click.self="normEditorVisible = false">
-        <div class="modal" style="max-width:400px;">
-            <button class="modal-close" @click="normEditorVisible = false">✕</button>
-            <div class="modal-title">📅 Редактирование нормы</div>
-            <div class="field-group">
-                <label>Текущая норма: {{ normHours }}ч</label>
-                <div style="font-size:13px;color:#8a9bb0;margin-bottom:8px;">
-                    {{ normCalcText }}
-                </div>
-            </div>
-            <div class="field-group">
-                <label>Установить норму вручную</label>
-                <input type="number" v-model.number="manualNormInput" min="0" max="300" step="0.5" 
-                       style="width:100%;padding:10px;border:1px solid #1e2738;border-radius:8px;background:#0b0f1a;color:#e8edf4;font-size:16px;text-align:center;" />
-            </div>
-            <div class="field-group" style="display:flex;gap:8px;flex-wrap:wrap;">
-                <button class="btn btn-success" @click="applyManualNorm" style="flex:1;">✅ Применить</button>
-                <button class="btn btn-outline" @click="resetNorm" style="flex:1;">🔄 Вернуть авторасчет</button>
-            </div>
-            <div style="margin-top:12px;padding-top:12px;border-top:1px solid #1e2738;font-size:12px;color:#5a6a80;text-align:center;">
-                💡 Введите 0 чтобы обнулить норму, или оставьте пустым для авторасчета
-            </div>
-        </div>
-    </div>
-
     <!-- Печать -->
     <div class="print-container" id="printContainer">
         <div class="print-title">📋 ТАБЕЛЬ УЧЕТА РАБОЧЕГО ВРЕМЕНИ</div>
@@ -1207,11 +1179,7 @@
                 dayDetailData: null,
                 hasDataForMonth: false,
                 overtimeRate: 1.5,
-                attendanceLog: [],
-                // Норма
-                manualNorm: null,
-                normEditorVisible: false,
-                manualNormInput: null
+                attendanceLog: []
             },
             computed: {
                 currentMonthName() {
@@ -1320,29 +1288,6 @@
                     const today = this.getTodayDate();
                     const logs = this.attendanceLog.filter(l => l.date === today && l.hours);
                     return Math.round(logs.reduce((sum, l) => sum + (l.hours || 0), 0) * 10) / 10;
-                },
-                // Норма
-                displayNorm() {
-                    if (this.manualNorm !== null) {
-                        return this.manualNorm + 'ч ✏️';
-                    }
-                    return this.normHours + 'ч';
-                },
-                normCalcText() {
-                    const days = this.days.length;
-                    let workDays = 0, cycleText = '';
-                    if (this.selectedGraphic === '3/3') {
-                        const fullCycles = Math.floor(days / 6);
-                        const rem = days % 6;
-                        workDays = fullCycles * 3 + Math.min(rem, 3);
-                        cycleText = '3/3';
-                    } else if (this.selectedGraphic === '2/2') {
-                        const fullCycles = Math.floor(days / 4);
-                        const rem = days % 4;
-                        workDays = fullCycles * 2 + Math.min(rem, 2);
-                        cycleText = '2/2';
-                    }
-                    return `${days}дн → ${workDays} смен × 11ч = ${this.normHours}ч`;
                 }
             },
             methods: {
@@ -1434,6 +1379,7 @@
                     return days > 0 ? Math.round(total / days * 10) / 10 : 0;
                 },
 
+                // ===== НАВИГАЦИЯ ПО МЕСЯЦАМ =====
                 changeMonth(delta) {
                     const parts = this.currentMonth.split('-');
                     let year = parseInt(parts[0]);
@@ -1445,6 +1391,7 @@
                     this.loadMonth(this.currentMonth);
                 },
 
+                // ===== СОХРАНЕНИЕ ТЕКУЩЕГО МЕСЯЦА =====
                 saveCurrentMonth() {
                     const key = getMonthKey(this.currentMonth, this.selectedGraphic);
                     const data = {
@@ -1454,7 +1401,6 @@
                         norm52: this.norm52,
                         graphic: this.selectedGraphic,
                         overtimeRate: this.overtimeRate,
-                        manualNorm: this.manualNorm,
                         savedAt: new Date().toISOString()
                     };
                     localStorage.setItem(key, JSON.stringify(data));
@@ -1463,6 +1409,21 @@
                     return true;
                 },
 
+                // ===== РЕДАКТИРОВАНИЕ НОРМЫ =====
+                saveMonthNorm() {
+                    if (this.normHours !== null && this.normHours >= 0) {
+                        this.saveCurrentMonth();
+                        this.showToast(`✅ Норма установлена: ${this.normHours}ч`, 'success');
+                    }
+                },
+                resetMonthNorm() {
+                    const cnt = this.days.length;
+                    this.normHours = calculateNormShift(cnt, this.selectedGraphic);
+                    this.saveCurrentMonth();
+                    this.showToast(`🔄 Норма восстановлена: ${this.normHours}ч`, 'success');
+                },
+
+                // ===== СИНХРОНИЗАЦИЯ С ОБЛАКОМ =====
                 async syncCloud() {
                     try {
                         const allData = {};
@@ -1486,6 +1447,7 @@
                     }
                 },
 
+                // ===== ЗАГРУЗКА МЕСЯЦА =====
                 async loadMonth(month) {
                     this.syncStatus = 'loading';
                     const key = getMonthKey(month, this.selectedGraphic);
@@ -1521,7 +1483,6 @@
                         if (data.norm52) this.norm52 = data.norm52;
                         if (data.graphic) this.selectedGraphic = data.graphic;
                         if (data.overtimeRate) this.overtimeRate = data.overtimeRate;
-                        if (data.manualNorm !== undefined) this.manualNorm = data.manualNorm;
                         this.hasDataForMonth = true;
                         this.syncStatus = 'synced';
                         return true;
@@ -1546,7 +1507,7 @@
                                 }));
                                 this.norm52 = calculateNorm52(cnt);
                                 this.normHours = calculateNormShift(cnt, this.selectedGraphic);
-                                if (prevData.manualNorm !== undefined) this.manualNorm = prevData.manualNorm;
+                                if (prevData.overtimeRate) this.overtimeRate = prevData.overtimeRate;
                                 this.hasDataForMonth = false;
                                 this.saveCurrentMonth();
                                 this.syncStatus = 'synced';
@@ -1570,6 +1531,7 @@
                     return false;
                 },
 
+                // ===== ЗАГРУЗКА ИЗ ОБЛАКА (кнопка) =====
                 async loadFromCloud() {
                     this.syncStatus = 'loading';
                     try {
@@ -1595,6 +1557,7 @@
                     }
                 },
 
+                // ===== КОПИРОВАНИЕ СОТРУДНИКОВ =====
                 copyEmployeesFromPrevMonth() {
                     const prevMonth = getPrevMonth(this.currentMonth);
                     const prevKey = getMonthKey(prevMonth, this.selectedGraphic);
@@ -1622,7 +1585,7 @@
                         }));
                         this.norm52 = calculateNorm52(cnt);
                         this.normHours = calculateNormShift(cnt, this.selectedGraphic);
-                        if (data.manualNorm !== undefined) this.manualNorm = data.manualNorm;
+                        if (data.overtimeRate) this.overtimeRate = data.overtimeRate;
                         this.saveCurrentMonth();
                         this.showToast(`✅ Скопировано ${this.employees.length} сотрудников`, 'success');
                     } catch (e) {
@@ -1630,6 +1593,7 @@
                     }
                 },
 
+                // ===== ОТМЕТКИ =====
                 getTodayDate() {
                     const now = new Date();
                     return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
@@ -1749,31 +1713,7 @@
                     }
                 },
 
-                // ===== УПРАВЛЕНИЕ НОРМОЙ =====
-                openNormEditor() {
-                    this.manualNormInput = this.manualNorm !== null ? this.manualNorm : this.normHours;
-                    this.normEditorVisible = true;
-                },
-                applyManualNorm() {
-                    if (this.manualNormInput !== null && this.manualNormInput >= 0) {
-                        this.manualNorm = this.manualNormInput;
-                        this.normHours = this.manualNormInput;
-                        this.normEditorVisible = false;
-                        this.saveCurrentMonth();
-                        this.showToast(`✅ Норма установлена: ${this.normHours}ч`, 'success');
-                    } else {
-                        this.showToast('⚠️ Введите корректное значение', 'warning');
-                    }
-                },
-                resetNorm() {
-                    this.manualNorm = null;
-                    const cnt = this.days.length;
-                    this.normHours = calculateNormShift(cnt, this.selectedGraphic);
-                    this.normEditorVisible = false;
-                    this.saveCurrentMonth();
-                    this.showToast(`🔄 Норма восстановлена: ${this.normHours}ч`, 'success');
-                },
-
+                // ===== СБРОС МЕСЯЦА =====
                 resetMonth() {
                     const monthName = this.currentMonthName;
                     if (!confirm(`⚠️ Вы уверены? Это удалит все часы за ${monthName}!`)) return;
@@ -1788,6 +1728,7 @@
                     this.showToast(`🔄 Часы за ${monthName} сброшены`, 'success');
                 },
 
+                // ===== УДАЛЕНИЕ МЕСЯЦА =====
                 async deleteMonth() {
                     const monthName = this.currentMonthName;
                     if (!confirm(`⚠️ Удалить все данные за ${monthName}? Это действие НЕЛЬЗЯ отменить!`)) return;
@@ -2076,17 +2017,8 @@
                     const cnt = getDaysInMonth(year, monthNum);
                     this.days = Array.from({ length: cnt }, (_, i) => i + 1);
                     this.dayOfWeek = this.days.map(d => getDayOfWeek(year, monthNum, d));
-                    
-                    // Проверяем, есть ли ручная норма
-                    if (this.manualNorm === null) {
-                        this.norm52 = calculateNorm52(cnt);
-                        this.normHours = calculateNormShift(cnt, this.selectedGraphic);
-                    } else {
-                        this.norm52 = calculateNorm52(cnt);
-                        // Если ручная норма установлена, не пересчитываем normHours
-                        // normHours уже равна manualNorm
-                    }
-                    
+                    this.norm52 = calculateNorm52(cnt);
+                    this.normHours = calculateNormShift(cnt, this.selectedGraphic);
                     this.massData.dateTo = cnt;
                     await this.loadMonth(month);
                 },
@@ -2097,9 +2029,7 @@
 
                 onGraphicChange() {
                     const daysCount = this.days.length;
-                    if (this.manualNorm === null) {
-                        this.normHours = calculateNormShift(daysCount, this.selectedGraphic);
-                    }
+                    this.normHours = calculateNormShift(daysCount, this.selectedGraphic);
                     this.loadMonth(this.currentMonth);
                 }
             },
