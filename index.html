@@ -1060,6 +1060,7 @@
             { name: 'Сергей', role: 'Руководитель', salaryBase: 92000, hours: [], dayType: [], comments: [] }
         ];
 
+        // ===== ИСПРАВЛЕННАЯ ФУНКЦИЯ ДНЯ НЕДЕЛИ =====
         function getDaysInMonth(year, month) { return new Date(year, month, 0).getDate(); }
         function getDayOfWeek(year, month, day) { return new Date(year, month - 1, day).getDay(); }
         function getMonthName(m) { return MONTHS[m - 1] || ''; }
@@ -1103,7 +1104,6 @@
             return `${y}-${String(m).padStart(2, '0')}`;
         }
 
-        // ===== РАБОТА С ОБЛАКОМ (ПОМЕСЯЧНО) =====
         async function cloudGetAll() {
             try {
                 const res = await fetch(API_URL, {
@@ -1112,8 +1112,7 @@
                     body: JSON.stringify({ method: 'get' })
                 });
                 if (!res.ok) throw new Error('Ошибка загрузки из облака: ' + res.status);
-                const data = await res.json();
-                return data;
+                return await res.json();
             } catch (e) {
                 console.error('Ошибка загрузки из облака:', e);
                 return {};
@@ -1248,6 +1247,7 @@
                     const today = new Date();
                     const td = today.getDate(), tm = today.getMonth(), ty = today.getFullYear();
 
+                    // Заполняем пустые дни до первого дня месяца
                     for (let i = 0; i < firstDay; i++) {
                         days.push({ day: '', date: null, isToday: false, hasWork: false, isWeekend: false });
                     }
@@ -1384,7 +1384,6 @@
                     this.loadMonth(this.currentMonth);
                 },
 
-                // ===== СОХРАНЕНИЕ ТЕКУЩЕГО МЕСЯЦА =====
                 saveCurrentMonth() {
                     const key = getMonthKey(this.currentMonth, this.selectedGraphic);
                     const data = {
@@ -1402,7 +1401,6 @@
                     return true;
                 },
 
-                // ===== СИНХРОНИЗАЦИЯ С ОБЛАКОМ =====
                 async syncCloud() {
                     try {
                         const allData = {};
@@ -1426,12 +1424,10 @@
                     }
                 },
 
-                // ===== ЗАГРУЗКА МЕСЯЦА =====
                 async loadMonth(month) {
                     this.syncStatus = 'loading';
                     const key = getMonthKey(month, this.selectedGraphic);
                     
-                    // Пробуем из localStorage
                     let raw = localStorage.getItem(key);
                     let data = null;
                     
@@ -1441,7 +1437,6 @@
                         } catch (e) {}
                     }
                     
-                    // Если нет — из облака
                     if (!data) {
                         try {
                             const cloudData = await cloudGetAll();
@@ -1469,7 +1464,6 @@
                         return true;
                     }
                     
-                    // Новый месяц — копируем из предыдущего
                     const prevMonth = getPrevMonth(month);
                     const prevKey = getMonthKey(prevMonth, this.selectedGraphic);
                     const prevRaw = localStorage.getItem(prevKey);
@@ -1497,7 +1491,6 @@
                         } catch (e) {}
                     }
                     
-                    // Стандартные сотрудники
                     const cnt = this.days.length;
                     this.employees = JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES));
                     this.employees.forEach(e => {
@@ -1513,7 +1506,6 @@
                     return false;
                 },
 
-                // ===== ЗАГРУЗКА ИЗ ОБЛАКА (для кнопки) =====
                 async loadFromCloud() {
                     this.syncStatus = 'loading';
                     try {
@@ -1523,7 +1515,6 @@
                             this.syncStatus = 'idle';
                             return;
                         }
-                        // Сохраняем всё в localStorage
                         let loaded = 0;
                         for (const [key, value] of Object.entries(cloudData)) {
                             if (key.startsWith('tabel_')) {
@@ -1531,7 +1522,6 @@
                                 loaded++;
                             }
                         }
-                        // Перезагружаем текущий месяц
                         await this.loadMonth(this.currentMonth);
                         this.syncStatus = 'synced';
                         this.showToast(`☁️ Загружено ${loaded} месяцев из облака`, 'success');
@@ -1694,7 +1684,6 @@
                     }
                 },
 
-                // ===== СБРОС МЕСЯЦА (только текущий) =====
                 resetMonth() {
                     const monthName = this.currentMonthName;
                     if (!confirm(`⚠️ Вы уверены? Это удалит все часы за ${monthName}!`)) return;
@@ -1709,7 +1698,6 @@
                     this.showToast(`🔄 Часы за ${monthName} сброшены`, 'success');
                 },
 
-                // ===== УДАЛЕНИЕ МЕСЯЦА (только текущий) =====
                 async deleteMonth() {
                     const monthName = this.currentMonthName;
                     if (!confirm(`⚠️ Удалить все данные за ${monthName}? Это действие НЕЛЬЗЯ отменить!`)) return;
@@ -1997,6 +1985,7 @@
                     const year = parseInt(parts[0]), monthNum = parseInt(parts[1]);
                     const cnt = getDaysInMonth(year, monthNum);
                     this.days = Array.from({ length: cnt }, (_, i) => i + 1);
+                    // ИСПРАВЛЕНО: правильное определение дня недели
                     this.dayOfWeek = this.days.map(d => getDayOfWeek(year, monthNum, d));
                     this.norm52 = calculateNorm52(cnt);
                     this.normHours = calculateNormShift(cnt, this.selectedGraphic);
