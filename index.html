@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Powder Flow OS — Табель цеха покраски</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -27,9 +26,7 @@
             }
         }
     </script>
-    <!-- Vue 3 CDN -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .sticky-col-1 { 
@@ -74,10 +71,12 @@
         
         .day-cell {
             min-height: 32px;
+            min-width: 42px;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.2s;
+            cursor: pointer;
         }
         .day-cell:hover {
             transform: scale(1.05);
@@ -301,7 +300,7 @@
             </div>
         </section>
 
-        <!-- TABEL -->
+        <!-- TABEL - ИСПРАВЛЕННАЯ ВЕРСИЯ -->
         <section v-if="currentTab === 'tabel'" class="space-y-4">
             <div class="bg-cardbg p-4 rounded-2xl border border-bordercolor flex flex-wrap items-center justify-between gap-4">
                 <div class="flex items-center space-x-3">
@@ -349,7 +348,8 @@
                                 <th class="p-3 sticky-col-2 th-sticky border-b border-bordercolor font-bold text-left" style="min-width:100px;background-color:#0f172a;">
                                     Должность
                                 </th>
-                                <th v-for="d in daysInMonth" :key="d" 
+                                <!-- ИСПРАВЛЕНО: используем массив дней -->
+                                <th v-for="d in dayNumbers" :key="d" 
                                     :class="d === todayDayNumber ? 'bg-brand-900/50 text-brand-300 font-black' : ''" 
                                     class="p-2 text-center min-w-[42px] border-b border-bordercolor border-l border-slate-800">
                                     <div>{{ d }}</div>
@@ -367,8 +367,8 @@
                                 <td class="p-3 sticky-col-2 text-slate-400 truncate border-r border-bordercolor" style="min-width:100px;background-color:#1e293b;">
                                     {{ emp.role }}
                                 </td>
-                                <!-- FIX: Используем emp.days[d] напрямую, так как все дни инициализированы -->
-                                <td v-for="d in daysInMonth" :key="d" 
+                                <!-- ИСПРАВЛЕНО: используем массив дней -->
+                                <td v-for="d in dayNumbers" :key="d" 
                                     @click="openEditModal(emp, d)"
                                     :class="[
                                         getDayClass(emp.days[d]),
@@ -386,7 +386,7 @@
                             </tr>
                             <tr class="bg-slate-900/50 border-t-2 border-brand-500/30">
                                 <td colspan="2" class="p-3 font-bold text-brand-400">Итого за месяц</td>
-                                <td v-for="d in daysInMonth" :key="'sum-'+d" class="p-2 text-center font-bold text-amber-400">
+                                <td v-for="d in dayNumbers" :key="'sum-'+d" class="p-2 text-center font-bold text-amber-400">
                                     {{ getDayTotal(d) }}
                                 </td>
                                 <td class="p-3 text-center font-bold text-brand-400">{{ totalMonthHours }}ч</td>
@@ -549,6 +549,12 @@
             // Month norm
             const monthNorm = ref(168);
 
+            // ===== КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: массив дней =====
+            const dayNumbers = computed(() => {
+                const count = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
+                return Array.from({ length: count }, (_, i) => i + 1);
+            });
+
             const initialEmployees = [
                 { id: 1, name: 'Иванов С.В.', role: 'Маляр порошковой окраски', monthlySalary: 90000, shiftType: '2/2 День' },
                 { id: 2, name: 'Петров А.А.', role: 'Подготовщик', monthlySalary: 85000, shiftType: '2/2 Ночь' },
@@ -559,16 +565,14 @@
 
             const employees = ref([]);
 
-            // ===== KEY: Инициализация дней для месяца =====
+            // ===== Инициализация дней для месяца =====
             const initDaysForMonth = (emp, year, month) => {
                 const daysCount = new Date(year, month + 1, 0).getDate();
                 const newDays = {};
                 for (let d = 1; d <= daysCount; d++) {
-                    // Если день уже есть в emp.days - сохраняем его, иначе ставим undefined
                     if (emp.days && emp.days[d] !== undefined) {
                         newDays[d] = emp.days[d];
                     }
-                    // иначе оставляем undefined (в таблице будет отображаться как '—')
                 }
                 return newDays;
             };
@@ -605,7 +609,6 @@
                 }
 
                 if (data && data.employees) {
-                    // Восстанавливаем сотрудников с инициализацией дней для текущего месяца
                     employees.value = data.employees.map(e => {
                         const days = initDaysForMonth(e, year, month);
                         return {
@@ -619,14 +622,9 @@
                 }
 
                 // Нет данных - создаем пустые
-                const daysCount = new Date(year, month + 1, 0).getDate();
                 employees.value = JSON.parse(JSON.stringify(initialEmployees));
                 employees.value.forEach(e => {
                     e.days = {};
-                    // Инициализируем все дни как undefined
-                    for (let d = 1; d <= daysCount; d++) {
-                        e.days[d] = undefined;
-                    }
                 });
                 monthNorm.value = getProductionCalendarNorm();
                 syncStatus.value = 'synced';
@@ -697,10 +695,6 @@
             }, { deep: true });
 
             // ===== Computed =====
-            const daysInMonth = computed(() => {
-                return new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
-            });
-
             const editModal = ref({ show: false, empId: null, empName: '', day: null, value: '' });
             const normModal = ref({ show: false, value: 168 });
 
@@ -751,8 +745,8 @@
 
             const calculateTotalHours = (emp) => {
                 let total = 0;
-                const days = daysInMonth.value;
-                for (let d = 1; d <= days; d++) {
+                const days = dayNumbers.value;
+                for (let d of days) {
                     total += parseHours(emp.days[d]);
                 }
                 return total;
@@ -879,24 +873,15 @@
                         showToast('⚠️ В предыдущем месяце нет сотрудников', 'warning');
                         return;
                     }
-
-                    const daysCount = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
                     
-                    // Копируем сотрудников, сбрасываем дни
-                    employees.value = data.employees.map(e => {
-                        const days = {};
-                        for (let d = 1; d <= daysCount; d++) {
-                            days[d] = undefined;
-                        }
-                        return {
-                            id: e.id || Date.now() + Math.random(),
-                            name: e.name,
-                            role: e.role || 'Рабочий цеха',
-                            monthlySalary: e.monthlySalary || 90000,
-                            shiftType: e.shiftType || '2/2 День',
-                            days: days
-                        };
-                    });
+                    employees.value = data.employees.map(e => ({
+                        id: e.id || Date.now() + Math.random(),
+                        name: e.name,
+                        role: e.role || 'Рабочий цеха',
+                        monthlySalary: e.monthlySalary || 90000,
+                        shiftType: e.shiftType || '2/2 День',
+                        days: {}
+                    }));
 
                     if (data.norm) monthNorm.value = data.norm;
                     showToast(`✅ Скопировано ${employees.value.length} сотрудников`, 'success');
@@ -907,14 +892,14 @@
 
             const fillByGraphic = () => {
                 if (!confirm('Заполнить табель по графикам?')) return;
-                const days = daysInMonth.value;
+                const days = dayNumbers.value;
                 employees.value.forEach(emp => {
                     const cycle = emp.shiftType.includes('2/2') ? 4 : emp.shiftType === '3/3' ? 6 : 7;
                     const workDays = emp.shiftType.includes('2/2') ? 2 : emp.shiftType === '3/3' ? 3 : 5;
                     const isNight = emp.shiftType.includes('Ночь');
                     const hours = emp.shiftType.includes('5/2') ? '8ч' : isNight ? '11ч Н' : '11ч';
                     
-                    for (let d = 1; d <= days; d++) {
+                    for (let d of days) {
                         const date = new Date(currentYear.value, currentMonth.value, d);
                         const dow = date.getDay();
                         const isWeekend = dow === 0 || dow === 6;
@@ -936,19 +921,13 @@
                 const role = prompt('Введите должность:', 'Рабочий цеха');
                 const salary = prompt('Введите оклад (месяц):', '90000');
                 
-                const daysCount = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
-                const days = {};
-                for (let d = 1; d <= daysCount; d++) {
-                    days[d] = undefined;
-                }
-                
                 employees.value.push({
                     id: Date.now() + Math.random(),
                     name: name,
                     role: role || 'Рабочий цеха',
                     monthlySalary: parseInt(salary) || 90000,
                     shiftType: '2/2 День',
-                    days: days
+                    days: {}
                 });
                 showToast(`✅ Добавлен ${name}`, 'success');
             };
@@ -1037,7 +1016,7 @@
                 todayDayNumber,
                 currentMonthName,
                 currentDateFormatted,
-                daysInMonth,
+                dayNumbers,
                 employees,
                 editModal,
                 normModal,
