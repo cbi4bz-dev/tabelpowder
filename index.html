@@ -77,9 +77,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.2s;
+        }
+        .day-cell:hover {
+            transform: scale(1.05);
+            z-index: 10;
         }
 
-        /* Toast animation */
         .toast-enter-active, .toast-leave-active {
             transition: all 0.3s ease;
         }
@@ -363,6 +367,7 @@
                                 <td class="p-3 sticky-col-2 text-slate-400 truncate border-r border-bordercolor" style="min-width:100px;background-color:#1e293b;">
                                     {{ emp.role }}
                                 </td>
+                                <!-- FIX: Используем emp.days[d] напрямую, так как все дни инициализированы -->
                                 <td v-for="d in daysInMonth" :key="d" 
                                     @click="openEditModal(emp, d)"
                                     :class="[
@@ -525,7 +530,6 @@
 <script>
     const { createApp, ref, computed, onMounted, watch } = Vue;
 
-    // Yandex Cloud API
     const API_URL = 'https://functions.yandexcloud.net/d4e18nbmmgli5kcghqrs';
 
     createApp({
@@ -546,16 +550,30 @@
             const monthNorm = ref(168);
 
             const initialEmployees = [
-                { id: 1, name: 'Иванов С.В.', role: 'Маляр порошковой окраски', monthlySalary: 90000, shiftType: '2/2 День', days: {} },
-                { id: 2, name: 'Петров А.А.', role: 'Подготовщик', monthlySalary: 85000, shiftType: '2/2 Ночь', days: {} },
-                { id: 3, name: 'Сидоров К.М.', role: 'Комплектовщик', monthlySalary: 80000, shiftType: '5/2', days: {} },
-                { id: 4, name: 'Смирнов Д.И.', role: 'Маляр', monthlySalary: 90000, shiftType: '2/2 День', days: {} },
-                { id: 5, name: 'Ковалев Е.П.', role: 'Оператор печи', monthlySalary: 88000, shiftType: '2/2 Ночь', days: {} }
+                { id: 1, name: 'Иванов С.В.', role: 'Маляр порошковой окраски', monthlySalary: 90000, shiftType: '2/2 День' },
+                { id: 2, name: 'Петров А.А.', role: 'Подготовщик', monthlySalary: 85000, shiftType: '2/2 Ночь' },
+                { id: 3, name: 'Сидоров К.М.', role: 'Комплектовщик', monthlySalary: 80000, shiftType: '5/2' },
+                { id: 4, name: 'Смирнов Д.И.', role: 'Маляр', monthlySalary: 90000, shiftType: '2/2 День' },
+                { id: 5, name: 'Ковалев Е.П.', role: 'Оператор печи', monthlySalary: 88000, shiftType: '2/2 Ночь' }
             ];
 
             const employees = ref([]);
 
-            // ===== KEY: Get month key for storage =====
+            // ===== KEY: Инициализация дней для месяца =====
+            const initDaysForMonth = (emp, year, month) => {
+                const daysCount = new Date(year, month + 1, 0).getDate();
+                const newDays = {};
+                for (let d = 1; d <= daysCount; d++) {
+                    // Если день уже есть в emp.days - сохраняем его, иначе ставим undefined
+                    if (emp.days && emp.days[d] !== undefined) {
+                        newDays[d] = emp.days[d];
+                    }
+                    // иначе оставляем undefined (в таблице будет отображаться как '—')
+                }
+                return newDays;
+            };
+
+            // ===== Get month key =====
             const getMonthKey = (year, month) => {
                 return `tabel_${year}-${String(month + 1).padStart(2, '0')}`;
             };
@@ -565,7 +583,6 @@
                 const key = getMonthKey(year, month);
                 syncStatus.value = 'loading';
 
-                // Try localStorage first
                 let saved = localStorage.getItem(key);
                 let data = null;
 
@@ -575,7 +592,6 @@
                     } catch (e) {}
                 }
 
-                // If not in localStorage, try cloud
                 if (!data) {
                     try {
                         const cloudData = await cloudGetAll();
@@ -589,21 +605,28 @@
                 }
 
                 if (data && data.employees) {
-                    // Restore employees with days for this month
-                    employees.value = data.employees.map(e => ({
-                        ...e,
-                        days: e.days || {}
-                    }));
+                    // Восстанавливаем сотрудников с инициализацией дней для текущего месяца
+                    employees.value = data.employees.map(e => {
+                        const days = initDaysForMonth(e, year, month);
+                        return {
+                            ...e,
+                            days: days
+                        };
+                    });
                     if (data.norm) monthNorm.value = data.norm;
                     syncStatus.value = 'synced';
                     return true;
                 }
 
-                // No data - create empty
+                // Нет данных - создаем пустые
                 const daysCount = new Date(year, month + 1, 0).getDate();
                 employees.value = JSON.parse(JSON.stringify(initialEmployees));
                 employees.value.forEach(e => {
                     e.days = {};
+                    // Инициализируем все дни как undefined
+                    for (let d = 1; d <= daysCount; d++) {
+                        e.days[d] = undefined;
+                    }
                 });
                 monthNorm.value = getProductionCalendarNorm();
                 syncStatus.value = 'synced';
@@ -620,10 +643,8 @@
                     savedAt: new Date().toISOString()
                 };
 
-                // Save to localStorage
                 localStorage.setItem(key, JSON.stringify(data));
 
-                // Auto-save to cloud
                 syncStatus.value = 'saving';
                 try {
                     const allData = await cloudGetAll();
@@ -729,7 +750,12 @@
             };
 
             const calculateTotalHours = (emp) => {
-                return Object.values(emp.days).reduce((acc, curr) => acc + parseHours(curr), 0);
+                let total = 0;
+                const days = daysInMonth.value;
+                for (let d = 1; d <= days; d++) {
+                    total += parseHours(emp.days[d]);
+                }
+                return total;
             };
 
             const calculateHourlyRate = (emp) => {
@@ -813,7 +839,7 @@
                 const emp = employees.value.find(e => e.id === editModal.value.empId);
                 if (emp) {
                     if (editModal.value.value.trim() === '') {
-                        delete emp.days[editModal.value.day];
+                        emp.days[editModal.value.day] = undefined;
                     } else {
                         emp.days[editModal.value.day] = editModal.value.value.trim();
                     }
@@ -832,7 +858,6 @@
                 showToast(`✅ Норма установлена: ${monthNorm.value}ч`, 'success');
             };
 
-            // ===== Copy from previous month =====
             const copyFromPrevMonth = async () => {
                 const prevMonth = currentMonth.value - 1;
                 const prevYear = prevMonth < 0 ? currentYear.value - 1 : currentYear.value;
@@ -855,15 +880,23 @@
                         return;
                     }
 
-                    // Copy employees but reset days
-                    employees.value = data.employees.map(e => ({
-                        id: e.id || Date.now() + Math.random(),
-                        name: e.name,
-                        role: e.role || 'Рабочий цеха',
-                        monthlySalary: e.monthlySalary || 90000,
-                        shiftType: e.shiftType || '2/2 День',
-                        days: {}
-                    }));
+                    const daysCount = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
+                    
+                    // Копируем сотрудников, сбрасываем дни
+                    employees.value = data.employees.map(e => {
+                        const days = {};
+                        for (let d = 1; d <= daysCount; d++) {
+                            days[d] = undefined;
+                        }
+                        return {
+                            id: e.id || Date.now() + Math.random(),
+                            name: e.name,
+                            role: e.role || 'Рабочий цеха',
+                            monthlySalary: e.monthlySalary || 90000,
+                            shiftType: e.shiftType || '2/2 День',
+                            days: days
+                        };
+                    });
 
                     if (data.norm) monthNorm.value = data.norm;
                     showToast(`✅ Скопировано ${employees.value.length} сотрудников`, 'success');
@@ -872,7 +905,6 @@
                 }
             };
 
-            // ===== Fill by graphic =====
             const fillByGraphic = () => {
                 if (!confirm('Заполнить табель по графикам?')) return;
                 const days = daysInMonth.value;
@@ -898,19 +930,25 @@
                 showToast('✅ Табель заполнен по графикам', 'success');
             };
 
-            // ===== Employees CRUD =====
             const addNewEmployee = () => {
                 const name = prompt('Введите ФИО сотрудника:');
                 if (!name) return;
                 const role = prompt('Введите должность:', 'Рабочий цеха');
                 const salary = prompt('Введите оклад (месяц):', '90000');
+                
+                const daysCount = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
+                const days = {};
+                for (let d = 1; d <= daysCount; d++) {
+                    days[d] = undefined;
+                }
+                
                 employees.value.push({
                     id: Date.now() + Math.random(),
                     name: name,
                     role: role || 'Рабочий цеха',
                     monthlySalary: parseInt(salary) || 90000,
                     shiftType: '2/2 День',
-                    days: {}
+                    days: days
                 });
                 showToast(`✅ Добавлен ${name}`, 'success');
             };
@@ -927,7 +965,6 @@
                 showToast(`📊 ${emp.name}: ${calculateTotalHours(emp)}ч, ${formatSalary(calculateSalary(emp))} ₽`, 'success');
             };
 
-            // ===== Cloud sync =====
             const syncToCloud = async () => {
                 syncStatus.value = 'saving';
                 try {
@@ -963,7 +1000,6 @@
                 }
             };
 
-            // ===== Export =====
             const exportData = () => {
                 const data = {
                     employees: employees.value,
@@ -981,7 +1017,6 @@
                 showToast('📥 Данные экспортированы', 'success');
             };
 
-            // ===== Toast =====
             const showToast = (message, type = 'success') => {
                 toast.value = { show: true, message, type };
                 clearTimeout(toastTimeout);
