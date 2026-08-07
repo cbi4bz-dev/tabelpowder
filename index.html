@@ -287,20 +287,20 @@
                         </div>
 
                         <div class="flex items-center space-x-1 flex-shrink-0 flex-wrap gap-1">
-                            <button @click="setShiftStatus(emp.id, '11ч')" :class="emp.days[todayDayNumber] === '11ч' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition">11ч</button>
-                            <button @click="setShiftStatus(emp.id, '8ч')" :class="emp.days[todayDayNumber] === '8ч' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition">8ч</button>
-                            <button @click="setShiftStatus(emp.id, '11ч Н')" :class="emp.days[todayDayNumber] === '11ч Н' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition">Н</button>
-                            <button @click="setShiftStatus(emp.id, 'В')" :class="emp.days[todayDayNumber] === 'В' ? 'bg-slate-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2 py-1.5 rounded-lg text-xs font-bold transition">В</button>
-                            <button @click="setShiftStatus(emp.id, 'ОТ')" :class="emp.days[todayDayNumber] === 'ОТ' ? 'bg-amber-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2 py-1.5 rounded-lg text-xs font-bold transition">ОТ</button>
-                            <button @click="setShiftStatus(emp.id, 'Б')" :class="emp.days[todayDayNumber] === 'Б' ? 'bg-amber-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2 py-1.5 rounded-lg text-xs font-bold transition">Б</button>
-                            <button @click="setShiftStatus(emp.id, 'ПР')" :class="emp.days[todayDayNumber] === 'ПР' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2 py-1.5 rounded-lg text-xs font-bold transition">ПР</button>
+                            <button @click="setShiftStatus(emp.id, 0, '11ч')" :class="getDayValue(emp, 0) === '11ч' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition">11ч</button>
+                            <button @click="setShiftStatus(emp.id, 0, '8ч')" :class="getDayValue(emp, 0) === '8ч' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition">8ч</button>
+                            <button @click="setShiftStatus(emp.id, 0, '11ч Н')" :class="getDayValue(emp, 0) === '11ч Н' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition">Н</button>
+                            <button @click="setShiftStatus(emp.id, 0, 'В')" :class="getDayValue(emp, 0) === 'В' ? 'bg-slate-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2 py-1.5 rounded-lg text-xs font-bold transition">В</button>
+                            <button @click="setShiftStatus(emp.id, 0, 'ОТ')" :class="getDayValue(emp, 0) === 'ОТ' ? 'bg-amber-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2 py-1.5 rounded-lg text-xs font-bold transition">ОТ</button>
+                            <button @click="setShiftStatus(emp.id, 0, 'Б')" :class="getDayValue(emp, 0) === 'Б' ? 'bg-amber-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2 py-1.5 rounded-lg text-xs font-bold transition">Б</button>
+                            <button @click="setShiftStatus(emp.id, 0, 'ПР')" :class="getDayValue(emp, 0) === 'ПР' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2 py-1.5 rounded-lg text-xs font-bold transition">ПР</button>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- TABEL - ИСПРАВЛЕННАЯ ВЕРСИЯ -->
+        <!-- TABEL - ИСПРАВЛЕННАЯ ВЕРСИЯ С МАССИВОМ -->
         <section v-if="currentTab === 'tabel'" class="space-y-4">
             <div class="bg-cardbg p-4 rounded-2xl border border-bordercolor flex flex-wrap items-center justify-between gap-4">
                 <div class="flex items-center space-x-3">
@@ -348,8 +348,8 @@
                                 <th class="p-3 sticky-col-2 th-sticky border-b border-bordercolor font-bold text-left" style="min-width:100px;background-color:#0f172a;">
                                     Должность
                                 </th>
-                                <!-- ИСПРАВЛЕНО: используем массив дней -->
-                                <th v-for="d in dayNumbers" :key="d" 
+                                <!-- Заголовки дней из массива dayNumbers -->
+                                <th v-for="(d, idx) in dayNumbers" :key="'header-'+idx" 
                                     :class="d === todayDayNumber ? 'bg-brand-900/50 text-brand-300 font-black' : ''" 
                                     class="p-2 text-center min-w-[42px] border-b border-bordercolor border-l border-slate-800">
                                     <div>{{ d }}</div>
@@ -367,15 +367,15 @@
                                 <td class="p-3 sticky-col-2 text-slate-400 truncate border-r border-bordercolor" style="min-width:100px;background-color:#1e293b;">
                                     {{ emp.role }}
                                 </td>
-                                <!-- ИСПРАВЛЕНО: используем массив дней -->
-                                <td v-for="d in dayNumbers" :key="d" 
-                                    @click="openEditModal(emp, d)"
+                                <!-- Ячейки дней - используем emp.days[индекс] -->
+                                <td v-for="(d, idx) in dayNumbers" :key="'cell-'+emp.id+'-'+idx" 
+                                    @click="openEditModal(emp, idx)"
                                     :class="[
-                                        getDayClass(emp.days[d]),
+                                        getDayClass(emp.days[idx]),
                                         d === todayDayNumber ? 'ring-1 ring-brand-500/50' : ''
                                     ]"
                                     class="p-1 text-center font-bold cursor-pointer border-r border-slate-800/50 hover:scale-105 transition rounded-sm select-none day-cell">
-                                    {{ emp.days[d] || '—' }}
+                                    {{ emp.days[idx] || '—' }}
                                 </td>
                                 <td class="p-3 text-center font-bold text-white bg-slate-900/30 border-l border-bordercolor">
                                     {{ calculateTotalHours(emp) }}ч
@@ -384,10 +384,11 @@
                                     {{ formatSalary(calculateSalary(emp)) }} ₽
                                 </td>
                             </tr>
+                            <!-- Итоговая строка -->
                             <tr class="bg-slate-900/50 border-t-2 border-brand-500/30">
                                 <td colspan="2" class="p-3 font-bold text-brand-400">Итого за месяц</td>
-                                <td v-for="d in dayNumbers" :key="'sum-'+d" class="p-2 text-center font-bold text-amber-400">
-                                    {{ getDayTotal(d) }}
+                                <td v-for="(d, idx) in dayNumbers" :key="'sum-'+idx" class="p-2 text-center font-bold text-amber-400">
+                                    {{ getDayTotal(idx) }}
                                 </td>
                                 <td class="p-3 text-center font-bold text-brand-400">{{ totalMonthHours }}ч</td>
                                 <td class="p-3 text-center font-bold text-emerald-400">{{ formatSalary(totalMonthSalary) }} ₽</td>
@@ -465,7 +466,7 @@
             <div class="flex justify-between items-center border-b border-bordercolor pb-3">
                 <div>
                     <h3 class="text-lg font-bold text-white">{{ editModal.empName }}</h3>
-                    <p class="text-xs text-slate-400">Редактирование: {{ editModal.day }} {{ currentMonthName }}</p>
+                    <p class="text-xs text-slate-400">Редактирование: {{ dayNumbers[editModal.dayIdx] || editModal.dayIdx+1 }} {{ currentMonthName }}</p>
                 </div>
                 <button @click="editModal.show = false" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
             </div>
@@ -549,32 +550,26 @@
             // Month norm
             const monthNorm = ref(168);
 
-            // ===== КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: массив дней =====
+            // ===== МАССИВ ДНЕЙ =====
             const dayNumbers = computed(() => {
                 const count = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
                 return Array.from({ length: count }, (_, i) => i + 1);
             });
 
             const initialEmployees = [
-                { id: 1, name: 'Иванов С.В.', role: 'Маляр порошковой окраски', monthlySalary: 90000, shiftType: '2/2 День' },
-                { id: 2, name: 'Петров А.А.', role: 'Подготовщик', monthlySalary: 85000, shiftType: '2/2 Ночь' },
-                { id: 3, name: 'Сидоров К.М.', role: 'Комплектовщик', monthlySalary: 80000, shiftType: '5/2' },
-                { id: 4, name: 'Смирнов Д.И.', role: 'Маляр', monthlySalary: 90000, shiftType: '2/2 День' },
-                { id: 5, name: 'Ковалев Е.П.', role: 'Оператор печи', monthlySalary: 88000, shiftType: '2/2 Ночь' }
+                { id: 1, name: 'Иванов С.В.', role: 'Маляр порошковой окраски', monthlySalary: 90000, shiftType: '2/2 День', days: [] },
+                { id: 2, name: 'Петров А.А.', role: 'Подготовщик', monthlySalary: 85000, shiftType: '2/2 Ночь', days: [] },
+                { id: 3, name: 'Сидоров К.М.', role: 'Комплектовщик', monthlySalary: 80000, shiftType: '5/2', days: [] },
+                { id: 4, name: 'Смирнов Д.И.', role: 'Маляр', monthlySalary: 90000, shiftType: '2/2 День', days: [] },
+                { id: 5, name: 'Ковалев Е.П.', role: 'Оператор печи', monthlySalary: 88000, shiftType: '2/2 Ночь', days: [] }
             ];
 
             const employees = ref([]);
 
-            // ===== Инициализация дней для месяца =====
-            const initDaysForMonth = (emp, year, month) => {
-                const daysCount = new Date(year, month + 1, 0).getDate();
-                const newDays = {};
-                for (let d = 1; d <= daysCount; d++) {
-                    if (emp.days && emp.days[d] !== undefined) {
-                        newDays[d] = emp.days[d];
-                    }
-                }
-                return newDays;
+            // ===== Инициализация массива дней =====
+            const initDaysArray = (year, month) => {
+                const count = new Date(year, month + 1, 0).getDate();
+                return Array(count).fill(undefined);
             };
 
             // ===== Get month key =====
@@ -608,9 +603,16 @@
                     }
                 }
 
+                const daysCount = new Date(year, month + 1, 0).getDate();
+
                 if (data && data.employees) {
                     employees.value = data.employees.map(e => {
-                        const days = initDaysForMonth(e, year, month);
+                        // Если days - массив, используем его, иначе создаем новый
+                        let days = Array.isArray(e.days) ? [...e.days] : [];
+                        // Дополняем до нужной длины
+                        while (days.length < daysCount) {
+                            days.push(undefined);
+                        }
                         return {
                             ...e,
                             days: days
@@ -624,7 +626,7 @@
                 // Нет данных - создаем пустые
                 employees.value = JSON.parse(JSON.stringify(initialEmployees));
                 employees.value.forEach(e => {
-                    e.days = {};
+                    e.days = initDaysArray(year, month);
                 });
                 monthNorm.value = getProductionCalendarNorm();
                 syncStatus.value = 'synced';
@@ -695,7 +697,7 @@
             }, { deep: true });
 
             // ===== Computed =====
-            const editModal = ref({ show: false, empId: null, empName: '', day: null, value: '' });
+            const editModal = ref({ show: false, empId: null, empName: '', dayIdx: null, value: '' });
             const normModal = ref({ show: false, value: 168 });
 
             const getProductionCalendarNorm = () => {
@@ -711,8 +713,9 @@
 
             const stats = computed(() => {
                 let inShift = 0, absent = 0, todayHours = 0;
+                const todayIdx = todayDayNumber.value - 1;
                 employees.value.forEach(e => {
-                    const status = e.days[todayDayNumber.value];
+                    const status = e.days[todayIdx];
                     if (status && (status.includes('ч') || status.includes('Н'))) {
                         inShift++;
                         todayHours += parseHours(status);
@@ -743,13 +746,13 @@
                 return match ? parseInt(match[0]) : 0;
             };
 
+            const getDayValue = (emp, idx) => {
+                return emp.days && emp.days[idx] ? emp.days[idx] : '';
+            };
+
             const calculateTotalHours = (emp) => {
-                let total = 0;
-                const days = dayNumbers.value;
-                for (let d of days) {
-                    total += parseHours(emp.days[d]);
-                }
-                return total;
+                if (!emp.days || !Array.isArray(emp.days)) return 0;
+                return emp.days.reduce((sum, val) => sum + parseHours(val), 0);
             };
 
             const calculateHourlyRate = (emp) => {
@@ -790,10 +793,10 @@
                 return 'bg-rose-500';
             };
 
-            const getDayTotal = (day) => {
+            const getDayTotal = (idx) => {
                 let total = 0;
                 employees.value.forEach(e => {
-                    const val = e.days[day];
+                    const val = e.days && e.days[idx];
                     if (val && (val.includes('ч') || val.includes('Н'))) {
                         total += parseHours(val);
                     }
@@ -811,31 +814,33 @@
                 await loadMonth(currentYear.value, currentMonth.value);
             };
 
-            const setShiftStatus = (empId, status) => {
+            const setShiftStatus = (empId, idx, status) => {
                 const emp = employees.value.find(e => e.id === empId);
                 if (emp) {
-                    emp.days[todayDayNumber.value] = status;
+                    if (!emp.days) emp.days = [];
+                    emp.days[idx] = status;
                     showToast(`✅ ${emp.name}: ${status}`, 'success');
                 }
             };
 
-            const openEditModal = (emp, day) => {
+            const openEditModal = (emp, idx) => {
                 editModal.value = {
                     show: true,
                     empId: emp.id,
                     empName: emp.name,
-                    day: day,
-                    value: emp.days[day] || ''
+                    dayIdx: idx,
+                    value: emp.days && emp.days[idx] ? emp.days[idx] : ''
                 };
             };
 
             const saveModalValue = () => {
                 const emp = employees.value.find(e => e.id === editModal.value.empId);
                 if (emp) {
+                    if (!emp.days) emp.days = [];
                     if (editModal.value.value.trim() === '') {
-                        emp.days[editModal.value.day] = undefined;
+                        emp.days[editModal.value.dayIdx] = undefined;
                     } else {
-                        emp.days[editModal.value.day] = editModal.value.value.trim();
+                        emp.days[editModal.value.dayIdx] = editModal.value.value.trim();
                     }
                     showToast(`✅ Сохранено для ${emp.name}`, 'success');
                 }
@@ -874,13 +879,15 @@
                         return;
                     }
                     
+                    const daysCount = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
+                    
                     employees.value = data.employees.map(e => ({
                         id: e.id || Date.now() + Math.random(),
                         name: e.name,
                         role: e.role || 'Рабочий цеха',
                         monthlySalary: e.monthlySalary || 90000,
                         shiftType: e.shiftType || '2/2 День',
-                        days: {}
+                        days: Array(daysCount).fill(undefined)
                     }));
 
                     if (data.norm) monthNorm.value = data.norm;
@@ -899,16 +906,19 @@
                     const isNight = emp.shiftType.includes('Ночь');
                     const hours = emp.shiftType.includes('5/2') ? '8ч' : isNight ? '11ч Н' : '11ч';
                     
-                    for (let d of days) {
+                    if (!emp.days) emp.days = [];
+                    
+                    for (let i = 0; i < days.length; i++) {
+                        const d = days[i];
                         const date = new Date(currentYear.value, currentMonth.value, d);
                         const dow = date.getDay();
                         const isWeekend = dow === 0 || dow === 6;
                         
                         if (emp.shiftType === '5/2') {
-                            emp.days[d] = !isWeekend ? '8ч' : 'В';
+                            emp.days[i] = !isWeekend ? '8ч' : 'В';
                         } else {
                             const dayInCycle = (d - 1) % cycle;
-                            emp.days[d] = dayInCycle < workDays ? hours : 'В';
+                            emp.days[i] = dayInCycle < workDays ? hours : 'В';
                         }
                     }
                 });
@@ -921,13 +931,15 @@
                 const role = prompt('Введите должность:', 'Рабочий цеха');
                 const salary = prompt('Введите оклад (месяц):', '90000');
                 
+                const daysCount = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
+                
                 employees.value.push({
                     id: Date.now() + Math.random(),
                     name: name,
                     role: role || 'Рабочий цеха',
                     monthlySalary: parseInt(salary) || 90000,
                     shiftType: '2/2 День',
-                    days: {}
+                    days: Array(daysCount).fill(undefined)
                 });
                 showToast(`✅ Добавлен ${name}`, 'success');
             };
@@ -1027,6 +1039,7 @@
                 syncStatus,
                 toast,
                 getInitials,
+                getDayValue,
                 calculateTotalHours,
                 calculateSalary,
                 calculateHourlyRate,
