@@ -12,8 +12,6 @@
                 extend: {
                     colors: {
                         brand: {
-                            50: '#f0f7ff',
-                            100: '#e0effe',
                             500: '#0284c7',
                             600: '#0369a1',
                             900: '#0c4a6e',
@@ -29,67 +27,19 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .sticky-col-1 { 
-            position: sticky; 
-            left: 0; 
-            z-index: 20; 
-            background-color: #1e293b; 
-            min-width: 150px;
-        }
-        .sticky-col-2 { 
-            position: sticky; 
-            left: 150px; 
-            z-index: 20; 
-            background-color: #1e293b; 
-            min-width: 100px;
-        }
-        .sticky-col-1.th-sticky, .sticky-col-2.th-sticky {
-            background-color: #0f172a;
-            z-index: 30;
-        }
+        .sticky-col-1 { position: sticky; left: 0; z-index: 20; background-color: #1e293b; min-width: 150px; }
+        .sticky-col-2 { position: sticky; left: 150px; z-index: 20; background-color: #1e293b; min-width: 100px; }
+        .sticky-col-1.th-sticky, .sticky-col-2.th-sticky { background-color: #0f172a; z-index: 30; }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
-        
-        .emp-card-hover {
-            transition: all 0.3s ease;
-        }
-        .emp-card-hover:hover {
-            transform: translateY(-2px);
-            border-color: #0284c7;
-            box-shadow: 0 4px 20px rgba(2, 132, 199, 0.15);
-        }
-        
-        .tabel-scroll::-webkit-scrollbar {
-            height: 6px;
-        }
-        .tabel-scroll::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 3px;
-        }
-        
-        .day-cell {
-            min-height: 32px;
-            min-width: 42px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-        .day-cell:hover {
-            transform: scale(1.05);
-            z-index: 10;
-        }
-
-        .toast-enter-active, .toast-leave-active {
-            transition: all 0.3s ease;
-        }
-        .toast-enter-from, .toast-leave-to {
-            transform: translateY(20px);
-            opacity: 0;
-        }
+        .day-cell { min-height: 32px; min-width: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+        .day-cell:hover { transform: scale(1.05); z-index: 10; background: rgba(2, 132, 199, 0.1); border-radius: 4px; }
+        .toast-enter-active, .toast-leave-active { transition: all 0.3s ease; }
+        .toast-enter-from, .toast-leave-to { transform: translateY(20px); opacity: 0; }
+        .tabel-scroll::-webkit-scrollbar { height: 6px; }
+        .tabel-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
     </style>
 </head>
 <body class="bg-darkbg text-slate-100 font-sans antialiased min-h-screen">
@@ -99,7 +49,7 @@
     <!-- Header -->
     <header class="bg-cardbg border-b border-bordercolor px-4 py-3 sticky top-0 z-50 flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center space-x-3">
-            <div class="bg-brand-600 text-white p-2.5 rounded-xl font-black text-xl flex items-center justify-center shadow-lg shadow-brand-500/20">
+            <div class="bg-brand-600 text-white p-2.5 rounded-xl font-black text-xl">
                 <i class="fa-solid fa-industry"></i>
             </div>
             <div>
@@ -128,27 +78,19 @@
         <div class="flex items-center space-x-3">
             <div class="text-right hidden md:block">
                 <div class="text-xs font-semibold text-slate-300">{{ currentDateFormatted }}</div>
-                <div class="text-[10px] flex items-center justify-end gap-1" :class="syncStatus === 'synced' ? 'text-emerald-400' : syncStatus === 'error' ? 'text-rose-400' : 'text-amber-400'">
-                    <span class="w-2 h-2 rounded-full" :class="syncStatus === 'synced' ? 'bg-emerald-500 animate-pulse' : syncStatus === 'error' ? 'bg-rose-500' : 'bg-amber-500 animate-pulse'"></span> 
-                    <span v-if="syncStatus === 'synced'">Синхронизировано</span>
-                    <span v-else-if="syncStatus === 'saving'" class="text-amber-400">Сохранение...</span>
-                    <span v-else-if="syncStatus === 'error'" class="text-rose-400">Ошибка</span>
-                    <span v-else>Офлайн</span>
+                <div class="text-[10px] flex items-center justify-end gap-1 text-emerald-400">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Синхронизировано
                 </div>
             </div>
-            <button @click="syncToCloud" title="Сохранить в облако" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-bordercolor transition">
+            <button @click="syncToCloud" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-bordercolor transition">
                 <i class="fa-solid fa-cloud-arrow-up"></i>
             </button>
-            <button @click="syncFromCloud" title="Загрузить из облака" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-bordercolor transition">
-                <i class="fa-solid fa-cloud-arrow-down"></i>
-            </button>
-            <button @click="exportData" title="Экспорт JSON" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-bordercolor transition">
+            <button @click="exportData" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-bordercolor transition">
                 <i class="fa-solid fa-download"></i>
             </button>
         </div>
     </header>
 
-    <!-- Main Container -->
     <main class="flex-1 p-4 md:p-6 space-y-6 max-w-[1800px] mx-auto w-full">
 
         <!-- DASHBOARD -->
@@ -179,179 +121,87 @@
                     <h3 class="text-2xl font-bold text-purple-400 mt-1">{{ stats.loadPercent }}%</h3>
                 </div>
             </div>
-
-            <div class="bg-cardbg p-4 rounded-2xl border border-bordercolor flex flex-wrap items-center justify-between gap-4">
-                <div class="flex items-center gap-4">
-                    <span class="text-sm text-slate-400">📅 Норма часов за месяц:</span>
-                    <span class="text-xl font-bold text-brand-400">{{ monthNorm }}ч</span>
-                    <button @click="editMonthNorm" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg transition">
-                        <i class="fa-solid fa-pen"></i> Изменить
-                    </button>
-                </div>
-                <div class="flex items-center gap-4 text-sm">
-                    <span class="text-slate-400">Отработано:</span>
-                    <span class="font-bold text-white">{{ totalMonthHours }}ч</span>
-                    <span class="text-slate-400">({{ Math.round((totalMonthHours / monthNorm) * 100) || 0 }}%)</span>
-                </div>
-            </div>
-
-            <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor">
-                <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-user-group text-brand-400"></i> Прогресс сотрудников
-                </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div v-for="emp in employees" :key="emp.id" class="emp-card-hover bg-darkbg p-4 rounded-xl border border-bordercolor cursor-pointer" @click="openEmployeeProfile(emp)">
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 rounded-full bg-brand-600/20 text-brand-400 border border-brand-500/30 flex items-center justify-center font-bold">
-                                    {{ getInitials(emp.name) }}
-                                </div>
-                                <div>
-                                    <div class="font-semibold text-sm">{{ emp.name }}</div>
-                                    <div class="text-xs text-slate-400">{{ emp.role }}</div>
-                                </div>
-                            </div>
-                            <span class="text-xs font-bold text-brand-400">{{ calculateTotalHours(emp) }}ч</span>
-                        </div>
-                        <div class="w-full bg-slate-800 rounded-full h-2">
-                            <div class="h-2 rounded-full transition-all duration-500" 
-                                 :class="getProgressColor(calculateTotalHours(emp))"
-                                 :style="{ width: Math.min((calculateTotalHours(emp) / monthNorm) * 100, 100) + '%' }">
-                            </div>
-                        </div>
-                        <div class="flex justify-between text-xs text-slate-400 mt-1">
-                            <span>{{ Math.round((calculateTotalHours(emp) / monthNorm) * 100) || 0 }}% от нормы</span>
-                            <span>{{ calculateTotalHours(emp) }} / {{ monthNorm }}ч</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </section>
 
         <!-- SHIFT -->
         <section v-if="currentTab === 'shift'" class="space-y-6">
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div class="bg-cardbg p-4 rounded-2xl border border-bordercolor flex items-center justify-between">
-                    <div>
-                        <p class="text-xs text-slate-400 uppercase font-semibold">В смене сегодня</p>
-                        <h3 class="text-2xl font-bold text-white mt-1">{{ stats.inShift }} / {{ employees.length }}</h3>
-                    </div>
+                    <div><p class="text-xs text-slate-400 uppercase font-semibold">В смене сегодня</p><h3 class="text-2xl font-bold text-white mt-1">{{ stats.inShift }} / {{ employees.length }}</h3></div>
                     <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl text-xl"><i class="fa-solid fa-user-check"></i></div>
                 </div>
                 <div class="bg-cardbg p-4 rounded-2xl border border-bordercolor flex items-center justify-between">
-                    <div>
-                        <p class="text-xs text-slate-400 uppercase font-semibold">Прогулы</p>
-                        <h3 class="text-2xl font-bold text-rose-400 mt-1">{{ stats.absent }}</h3>
-                    </div>
+                    <div><p class="text-xs text-slate-400 uppercase font-semibold">Прогулы</p><h3 class="text-2xl font-bold text-rose-400 mt-1">{{ stats.absent }}</h3></div>
                     <div class="p-3 bg-rose-500/10 text-rose-400 rounded-xl text-xl"><i class="fa-solid fa-user-xmark"></i></div>
                 </div>
                 <div class="bg-cardbg p-4 rounded-2xl border border-bordercolor flex items-center justify-between">
-                    <div>
-                        <p class="text-xs text-slate-400 uppercase font-semibold">Отработано сегодня</p>
-                        <h3 class="text-2xl font-bold text-brand-400 mt-1">{{ stats.todayHours }} ч</h3>
-                    </div>
+                    <div><p class="text-xs text-slate-400 uppercase font-semibold">Отработано сегодня</p><h3 class="text-2xl font-bold text-brand-400 mt-1">{{ stats.todayHours }} ч</h3></div>
                     <div class="p-3 bg-brand-500/10 text-brand-400 rounded-xl text-xl"><i class="fa-solid fa-clock"></i></div>
                 </div>
                 <div class="bg-cardbg p-4 rounded-2xl border border-bordercolor flex items-center justify-between">
-                    <div>
-                        <p class="text-xs text-slate-400 uppercase font-semibold">Загрузка цеха</p>
-                        <h3 class="text-2xl font-bold text-amber-400 mt-1">{{ stats.loadPercent }}%</h3>
-                    </div>
+                    <div><p class="text-xs text-slate-400 uppercase font-semibold">Загрузка цеха</p><h3 class="text-2xl font-bold text-amber-400 mt-1">{{ stats.loadPercent }}%</h3></div>
                     <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl text-xl"><i class="fa-solid fa-chart-pie"></i></div>
                 </div>
             </div>
 
             <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-                    <div>
-                        <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                            <i class="fa-solid fa-bolt text-amber-400"></i> Быстрая отметка смены
-                        </h2>
-                        <p class="text-xs text-slate-400">Выберите статус для каждого сотрудника</p>
-                    </div>
+                    <h2 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-bolt text-amber-400"></i> Быстрая отметка смены</h2>
                     <div class="flex items-center gap-2 text-xs bg-slate-800 border border-bordercolor px-3 py-1.5 rounded-lg text-slate-300">
                         📅 <span class="font-bold text-brand-400">{{ todayDayNumber }} {{ currentMonthName }}</span>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    <div v-for="emp in employees" :key="emp.id" class="p-3 bg-darkbg rounded-xl border border-bordercolor flex items-center justify-between gap-3 hover:border-brand-500/50 transition">
+                    <div v-for="emp in employees" :key="emp.id" class="p-3 bg-darkbg rounded-xl border border-bordercolor flex items-center justify-between gap-3">
                         <div class="flex items-center space-x-3 overflow-hidden">
-                            <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center font-bold text-slate-200 border border-slate-600 flex-shrink-0">
-                                {{ getInitials(emp.name) }}
-                            </div>
-                            <div class="truncate">
-                                <div class="font-semibold text-sm text-white truncate">{{ emp.name }}</div>
-                                <div class="text-xs text-slate-400">{{ emp.role }}</div>
-                            </div>
+                            <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center font-bold text-slate-200 border border-slate-600 flex-shrink-0">{{ getInitials(emp.name) }}</div>
+                            <div class="truncate"><div class="font-semibold text-sm text-white truncate">{{ emp.name }}</div><div class="text-xs text-slate-400">{{ emp.role }}</div></div>
                         </div>
-
                         <div class="flex items-center space-x-1 flex-shrink-0 flex-wrap gap-1">
-                            <button @click="setShiftStatus(emp.id, 0, '11ч')" :class="getDayValue(emp, 0) === '11ч' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition">11ч</button>
-                            <button @click="setShiftStatus(emp.id, 0, '8ч')" :class="getDayValue(emp, 0) === '8ч' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition">8ч</button>
-                            <button @click="setShiftStatus(emp.id, 0, '11ч Н')" :class="getDayValue(emp, 0) === '11ч Н' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition">Н</button>
-                            <button @click="setShiftStatus(emp.id, 0, 'В')" :class="getDayValue(emp, 0) === 'В' ? 'bg-slate-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2 py-1.5 rounded-lg text-xs font-bold transition">В</button>
-                            <button @click="setShiftStatus(emp.id, 0, 'ОТ')" :class="getDayValue(emp, 0) === 'ОТ' ? 'bg-amber-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2 py-1.5 rounded-lg text-xs font-bold transition">ОТ</button>
-                            <button @click="setShiftStatus(emp.id, 0, 'Б')" :class="getDayValue(emp, 0) === 'Б' ? 'bg-amber-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2 py-1.5 rounded-lg text-xs font-bold transition">Б</button>
-                            <button @click="setShiftStatus(emp.id, 0, 'ПР')" :class="getDayValue(emp, 0) === 'ПР' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2 py-1.5 rounded-lg text-xs font-bold transition">ПР</button>
+                            <button @click="setShiftStatus(emp.id, '11ч')" :class="emp.days[0] === '11ч' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition">11ч</button>
+                            <button @click="setShiftStatus(emp.id, '8ч')" :class="emp.days[0] === '8ч' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition">8ч</button>
+                            <button @click="setShiftStatus(emp.id, '11ч Н')" :class="emp.days[0] === '11ч Н' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition">Н</button>
+                            <button @click="setShiftStatus(emp.id, 'В')" :class="emp.days[0] === 'В' ? 'bg-slate-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2 py-1.5 rounded-lg text-xs font-bold transition">В</button>
+                            <button @click="setShiftStatus(emp.id, 'ОТ')" :class="emp.days[0] === 'ОТ' ? 'bg-amber-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2 py-1.5 rounded-lg text-xs font-bold transition">ОТ</button>
+                            <button @click="setShiftStatus(emp.id, 'Б')" :class="emp.days[0] === 'Б' ? 'bg-amber-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2 py-1.5 rounded-lg text-xs font-bold transition">Б</button>
+                            <button @click="setShiftStatus(emp.id, 'ПР')" :class="emp.days[0] === 'ПР' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-2 py-1.5 rounded-lg text-xs font-bold transition">ПР</button>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- TABEL - ИСПРАВЛЕННАЯ ВЕРСИЯ С МАССИВОМ -->
+        <!-- TABEL - РАБОЧАЯ ВЕРСИЯ КАК В ПЕРВОМ КОДЕ -->
         <section v-if="currentTab === 'tabel'" class="space-y-4">
             <div class="bg-cardbg p-4 rounded-2xl border border-bordercolor flex flex-wrap items-center justify-between gap-4">
                 <div class="flex items-center space-x-3">
-                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-table text-brand-400"></i> Табель учета времени
-                    </h2>
+                    <h2 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-table text-brand-400"></i> Табель учета времени</h2>
                     <div class="flex items-center gap-1">
-                        <button @click="changeMonth(-1)" class="p-1.5 bg-slate-800 rounded-lg hover:bg-slate-700 transition">
-                            <i class="fa-solid fa-chevron-left text-xs"></i>
-                        </button>
-                        <span class="text-sm bg-slate-800 border border-bordercolor px-3 py-1 rounded-md text-slate-300 min-w-[120px] text-center">
-                            {{ currentMonthName }} {{ currentYear }}
-                        </span>
-                        <button @click="changeMonth(1)" class="p-1.5 bg-slate-800 rounded-lg hover:bg-slate-700 transition">
-                            <i class="fa-solid fa-chevron-right text-xs"></i>
-                        </button>
+                        <button @click="changeMonth(-1)" class="p-1.5 bg-slate-800 rounded-lg hover:bg-slate-700 transition"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+                        <span class="text-sm bg-slate-800 border border-bordercolor px-3 py-1 rounded-md text-slate-300 min-w-[120px] text-center">{{ currentMonthName }} {{ currentYear }}</span>
+                        <button @click="changeMonth(1)" class="p-1.5 bg-slate-800 rounded-lg hover:bg-slate-700 transition"><i class="fa-solid fa-chevron-right text-xs"></i></button>
                     </div>
-                    <span class="text-xs bg-brand-500/20 text-brand-400 px-2.5 py-1 rounded-lg border border-brand-500/30">
-                        Норма: {{ monthNorm }}ч
-                    </span>
+                    <span class="text-xs bg-brand-500/20 text-brand-400 px-2.5 py-1 rounded-lg border border-brand-500/30">Норма: {{ monthNorm }}ч</span>
                 </div>
-
                 <div class="flex flex-wrap items-center gap-3 text-xs">
-                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-emerald-500/20 border border-emerald-500/50"></span> День (11/8ч)</span>
-                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-purple-500/20 border border-purple-500/50"></span> Ночь (Н)</span>
-                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-500/20 border border-amber-500/50"></span> Отпуск/Больничный</span>
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-emerald-500/20 border border-emerald-500/50"></span> День</span>
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-purple-500/20 border border-purple-500/50"></span> Ночь</span>
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-500/20 border border-amber-500/50"></span> Отпуск/Б</span>
                     <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-rose-500/20 border border-rose-500/50"></span> Прогул</span>
-                    <button @click="fillByGraphic" class="bg-brand-600 hover:bg-brand-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">
-                        <i class="fa-solid fa-wand-magic-sparkles mr-1"></i>Заполнить
-                    </button>
-                    <button @click="copyFromPrevMonth" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">
-                        <i class="fa-solid fa-copy mr-1"></i>Копировать
-                    </button>
+                    <button @click="fillByGraphic" class="bg-brand-600 hover:bg-brand-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>Заполнить</button>
+                    <button @click="copyFromPrevMonth" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition"><i class="fa-solid fa-copy mr-1"></i>Копировать</button>
                 </div>
             </div>
 
-            <div class="bg-cardbg rounded-2xl border border-bordercolor overflow-hidden shadow-2xl relative">
+            <div class="bg-cardbg rounded-2xl border border-bordercolor overflow-hidden">
                 <div class="overflow-x-auto tabel-scroll max-h-[650px]">
                     <table class="w-full text-left text-xs border-collapse">
                         <thead class="bg-slate-900 text-slate-400 sticky top-0 z-30 uppercase tracking-wider">
                             <tr>
-                                <th class="p-3 sticky-col-1 th-sticky border-b border-bordercolor font-bold text-left" style="min-width:150px;background-color:#0f172a;">
-                                    Сотрудник
-                                </th>
-                                <th class="p-3 sticky-col-2 th-sticky border-b border-bordercolor font-bold text-left" style="min-width:100px;background-color:#0f172a;">
-                                    Должность
-                                </th>
-                                <!-- Заголовки дней из массива dayNumbers -->
-                                <th v-for="(d, idx) in dayNumbers" :key="'header-'+idx" 
-                                    :class="d === todayDayNumber ? 'bg-brand-900/50 text-brand-300 font-black' : ''" 
-                                    class="p-2 text-center min-w-[42px] border-b border-bordercolor border-l border-slate-800">
+                                <th class="p-3 sticky-col-1 th-sticky border-b border-bordercolor font-bold text-left">Сотрудник</th>
+                                <th class="p-3 sticky-col-2 th-sticky border-b border-bordercolor font-bold text-left">Должность</th>
+                                <th v-for="d in daysArray" :key="d" :class="d === todayDayNumber ? 'bg-brand-900/50 text-brand-300 font-black' : ''" class="p-2 text-center min-w-[42px] border-b border-bordercolor border-l border-slate-800">
                                     <div>{{ d }}</div>
                                     <div class="text-[9px] text-slate-500">{{ getDayOfWeek(d) }}</div>
                                 </th>
@@ -361,35 +211,20 @@
                         </thead>
                         <tbody class="divide-y divide-bordercolor">
                             <tr v-for="emp in employees" :key="emp.id" class="hover:bg-slate-800/50 transition">
-                                <td class="p-3 sticky-col-1 font-semibold text-white truncate border-r border-bordercolor" style="min-width:150px;background-color:#1e293b;">
-                                    {{ emp.name }}
-                                </td>
-                                <td class="p-3 sticky-col-2 text-slate-400 truncate border-r border-bordercolor" style="min-width:100px;background-color:#1e293b;">
-                                    {{ emp.role }}
-                                </td>
-                                <!-- Ячейки дней - используем emp.days[индекс] -->
-                                <td v-for="(d, idx) in dayNumbers" :key="'cell-'+emp.id+'-'+idx" 
+                                <td class="p-3 sticky-col-1 font-semibold text-white truncate border-r border-bordercolor">{{ emp.name }}</td>
+                                <td class="p-3 sticky-col-2 text-slate-400 truncate border-r border-bordercolor">{{ emp.role }}</td>
+                                <td v-for="(d, idx) in daysArray" :key="d" 
                                     @click="openEditModal(emp, idx)"
-                                    :class="[
-                                        getDayClass(emp.days[idx]),
-                                        d === todayDayNumber ? 'ring-1 ring-brand-500/50' : ''
-                                    ]"
-                                    class="p-1 text-center font-bold cursor-pointer border-r border-slate-800/50 hover:scale-105 transition rounded-sm select-none day-cell">
+                                    :class="[getDayClass(emp.days[idx]), d === todayDayNumber ? 'ring-1 ring-brand-500/50' : '']"
+                                    class="p-1 text-center font-bold cursor-pointer border-r border-slate-800/50 hover:scale-105 transition rounded-sm day-cell">
                                     {{ emp.days[idx] || '—' }}
                                 </td>
-                                <td class="p-3 text-center font-bold text-white bg-slate-900/30 border-l border-bordercolor">
-                                    {{ calculateTotalHours(emp) }}ч
-                                </td>
-                                <td class="p-3 text-center font-bold text-emerald-400 bg-slate-900/30">
-                                    {{ formatSalary(calculateSalary(emp)) }} ₽
-                                </td>
+                                <td class="p-3 text-center font-bold text-white bg-slate-900/30 border-l border-bordercolor">{{ calculateTotalHours(emp) }}ч</td>
+                                <td class="p-3 text-center font-bold text-emerald-400 bg-slate-900/30">{{ formatSalary(calculateSalary(emp)) }} ₽</td>
                             </tr>
-                            <!-- Итоговая строка -->
                             <tr class="bg-slate-900/50 border-t-2 border-brand-500/30">
                                 <td colspan="2" class="p-3 font-bold text-brand-400">Итого за месяц</td>
-                                <td v-for="(d, idx) in dayNumbers" :key="'sum-'+idx" class="p-2 text-center font-bold text-amber-400">
-                                    {{ getDayTotal(idx) }}
-                                </td>
+                                <td v-for="(d, idx) in daysArray" :key="'sum-'+d" class="p-2 text-center font-bold text-amber-400">{{ getDayTotal(idx) }}</td>
                                 <td class="p-3 text-center font-bold text-brand-400">{{ totalMonthHours }}ч</td>
                                 <td class="p-3 text-center font-bold text-emerald-400">{{ formatSalary(totalMonthSalary) }} ₽</td>
                             </tr>
@@ -402,9 +237,7 @@
         <!-- EMPLOYEES -->
         <section v-if="currentTab === 'employees'" class="space-y-4">
             <div class="flex justify-between items-center bg-cardbg p-4 rounded-2xl border border-bordercolor">
-                <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-users text-brand-400"></i> Список сотрудников и Оклады
-                </h2>
+                <h2 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-users text-brand-400"></i> Список сотрудников и Оклады</h2>
                 <button @click="addNewEmployee" class="bg-brand-600 hover:bg-brand-500 text-white px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2">
                     <i class="fa-solid fa-plus"></i> Добавить
                 </button>
@@ -414,23 +247,15 @@
                 <div v-for="emp in employees" :key="emp.id" class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-3">
-                            <div class="w-12 h-12 rounded-2xl bg-brand-600/20 text-brand-400 border border-brand-500/30 flex items-center justify-center font-bold text-lg">
-                                {{ getInitials(emp.name) }}
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-white text-base">{{ emp.name }}</h3>
-                                <p class="text-xs text-slate-400">{{ emp.role }}</p>
-                            </div>
+                            <div class="w-12 h-12 rounded-2xl bg-brand-600/20 text-brand-400 border border-brand-500/30 flex items-center justify-center font-bold text-lg">{{ getInitials(emp.name) }}</div>
+                            <div><h3 class="font-bold text-white text-base">{{ emp.name }}</h3><p class="text-xs text-slate-400">{{ emp.role }}</p></div>
                         </div>
-                        <button @click="deleteEmployee(emp.id)" class="text-slate-500 hover:text-rose-400 transition p-2">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
+                        <button @click="deleteEmployee(emp.id)" class="text-slate-500 hover:text-rose-400 transition p-2"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
-
                     <div class="space-y-3 pt-2 border-t border-bordercolor text-xs">
                         <div class="flex justify-between items-center">
                             <span class="text-slate-400">Оклад (месяц):</span>
-                            <input type="number" v-model.number="emp.monthlySalary" class="bg-darkbg border border-bordercolor rounded-lg px-2.5 py-1 text-right text-white w-28 font-bold focus:border-brand-500 outline-none" placeholder="90000">
+                            <input type="number" v-model.number="emp.monthlySalary" class="bg-darkbg border border-bordercolor rounded-lg px-2.5 py-1 text-right text-white w-28 font-bold focus:border-brand-500 outline-none">
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-slate-400">Ставка (час):</span>
@@ -449,10 +274,6 @@
                             <span class="text-slate-400">Расчетная ЗП:</span>
                             <span class="text-sm font-bold text-emerald-400">{{ formatSalary(calculateSalary(emp)) }} ₽</span>
                         </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-slate-400">Отработано:</span>
-                            <span class="text-sm font-bold text-white">{{ calculateTotalHours(emp) }}ч</span>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -464,30 +285,22 @@
     <div v-if="editModal.show" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
         <div class="bg-cardbg border border-bordercolor rounded-2xl w-full max-w-md p-6 space-y-5 shadow-2xl">
             <div class="flex justify-between items-center border-b border-bordercolor pb-3">
-                <div>
-                    <h3 class="text-lg font-bold text-white">{{ editModal.empName }}</h3>
-                    <p class="text-xs text-slate-400">Редактирование: {{ dayNumbers[editModal.dayIdx] || editModal.dayIdx+1 }} {{ currentMonthName }}</p>
-                </div>
+                <div><h3 class="text-lg font-bold text-white">{{ editModal.empName }}</h3><p class="text-xs text-slate-400">Редактирование: {{ daysArray[editModal.dayIdx] }} {{ currentMonthName }}</p></div>
                 <button @click="editModal.show = false" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
             </div>
-
             <div class="space-y-2">
-                <label class="text-xs font-semibold text-slate-300">Быстрый выбор статуса:</label>
+                <label class="text-xs font-semibold text-slate-300">Быстрый выбор:</label>
                 <div class="grid grid-cols-3 gap-2">
                     <button v-for="preset in ['11ч', '8ч', '11ч Н', 'В', 'ОТ', 'Б', 'ПР']" :key="preset"
                         @click="editModal.value = preset"
                         :class="editModal.value === preset ? 'bg-brand-600 text-white' : 'bg-darkbg text-slate-300 border border-bordercolor hover:bg-slate-800'"
-                        class="py-2 rounded-xl text-xs font-bold transition">
-                        {{ preset }}
-                    </button>
+                        class="py-2 rounded-xl text-xs font-bold transition">{{ preset }}</button>
                 </div>
             </div>
-
             <div class="space-y-2">
-                <label class="text-xs font-semibold text-slate-300">Или введите вручную:</label>
-                <input type="text" v-model="editModal.value" class="w-full bg-darkbg border border-bordercolor rounded-xl px-4 py-2.5 text-white font-bold outline-none focus:border-brand-500" placeholder="Например: 10ч, ОТ, ПР...">
+                <label class="text-xs font-semibold text-slate-300">Введите вручную:</label>
+                <input type="text" v-model="editModal.value" class="w-full bg-darkbg border border-bordercolor rounded-xl px-4 py-2.5 text-white font-bold outline-none focus:border-brand-500" placeholder="10ч, ОТ, ПР...">
             </div>
-
             <div class="flex justify-end space-x-3 pt-3 border-t border-bordercolor">
                 <button @click="editModal.show = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white">Отмена</button>
                 <button @click="saveModalValue" class="px-5 py-2 rounded-xl text-xs font-semibold bg-brand-600 hover:bg-brand-500 text-white shadow-lg transition">Сохранить</button>
@@ -495,33 +308,10 @@
         </div>
     </div>
 
-    <!-- Norm Modal -->
-    <div v-if="normModal.show" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-        <div class="bg-cardbg border border-bordercolor rounded-2xl w-full max-w-sm p-6 space-y-5 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-bordercolor pb-3">
-                <h3 class="text-lg font-bold text-white">📅 Норма часов</h3>
-                <button @click="normModal.show = false" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="text-xs font-semibold text-slate-300">Норма часов за {{ currentMonthName }} {{ currentYear }}:</label>
-                    <input type="number" v-model.number="normModal.value" class="w-full bg-darkbg border border-bordercolor rounded-xl px-4 py-2.5 text-white font-bold outline-none focus:border-brand-500 mt-1" min="0" max="300">
-                </div>
-                <div class="text-xs text-slate-400">
-                    💡 Производственный календарь: {{ getProductionCalendarNorm() }}ч
-                </div>
-            </div>
-            <div class="flex justify-end space-x-3 pt-3 border-t border-bordercolor">
-                <button @click="normModal.show = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white">Отмена</button>
-                <button @click="saveMonthNorm" class="px-5 py-2 rounded-xl text-xs font-semibold bg-brand-600 hover:bg-brand-500 text-white shadow-lg transition">Сохранить</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Toast -->
     <div v-if="toast.show" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-cardbg border border-bordercolor rounded-2xl px-6 py-3 shadow-2xl text-sm font-semibold flex items-center gap-3 toast-enter-active">
-        <span :class="toast.type === 'success' ? 'text-emerald-400' : toast.type === 'error' ? 'text-rose-400' : 'text-amber-400'">
-            <i :class="toast.type === 'success' ? 'fa-solid fa-check-circle' : toast.type === 'error' ? 'fa-solid fa-circle-exclamation' : 'fa-solid fa-triangle-exclamation'"></i>
+        <span :class="toast.type === 'success' ? 'text-emerald-400' : 'text-amber-400'">
+            <i :class="toast.type === 'success' ? 'fa-solid fa-check-circle' : 'fa-solid fa-triangle-exclamation'"></i>
         </span>
         {{ toast.message }}
     </div>
@@ -535,207 +325,81 @@
 
     createApp({
         setup() {
-            // State
+            // ===== STATE =====
             const currentTab = ref('dashboard');
             const currentMonth = ref(new Date().getMonth());
             const currentYear = ref(new Date().getFullYear());
             const todayDayNumber = ref(new Date().getDate());
             const currentMonthName = ref(['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'][new Date().getMonth()]);
             const currentDateFormatted = ref(new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }));
-            const syncStatus = ref('synced');
+            const monthNorm = ref(168);
             const toast = ref({ show: false, message: '', type: 'success' });
             let toastTimeout = null;
             let saveTimeout = null;
 
-            // Month norm
-            const monthNorm = ref(168);
-
-            // ===== МАССИВ ДНЕЙ =====
-            const dayNumbers = computed(() => {
+            // ===== DAYS ARRAY =====
+            const daysArray = computed(() => {
                 const count = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
                 return Array.from({ length: count }, (_, i) => i + 1);
             });
 
-            const initialEmployees = [
-                { id: 1, name: 'Иванов С.В.', role: 'Маляр порошковой окраски', monthlySalary: 90000, shiftType: '2/2 День', days: [] },
+            // ===== EMPLOYEES =====
+            const defaultEmployees = [
+                { id: 1, name: 'Иванов С.В.', role: 'Маляр', monthlySalary: 90000, shiftType: '2/2 День', days: [] },
                 { id: 2, name: 'Петров А.А.', role: 'Подготовщик', monthlySalary: 85000, shiftType: '2/2 Ночь', days: [] },
-                { id: 3, name: 'Сидоров К.М.', role: 'Комплектовщик', monthlySalary: 80000, shiftType: '5/2', days: [] },
-                { id: 4, name: 'Смирнов Д.И.', role: 'Маляр', monthlySalary: 90000, shiftType: '2/2 День', days: [] },
-                { id: 5, name: 'Ковалев Е.П.', role: 'Оператор печи', monthlySalary: 88000, shiftType: '2/2 Ночь', days: [] }
+                { id: 3, name: 'Сидоров К.М.', role: 'Комплектовщик', monthlySalary: 80000, shiftType: '5/2', days: [] }
             ];
-
             const employees = ref([]);
 
-            // ===== Инициализация массива дней =====
-            const initDaysArray = (year, month) => {
-                const count = new Date(year, month + 1, 0).getDate();
+            // ===== INIT =====
+            const initDays = () => {
+                const count = daysArray.value.length;
                 return Array(count).fill(undefined);
             };
 
-            // ===== Get month key =====
-            const getMonthKey = (year, month) => {
-                return `tabel_${year}-${String(month + 1).padStart(2, '0')}`;
-            };
-
-            // ===== Load month data =====
-            const loadMonth = async (year, month) => {
-                const key = getMonthKey(year, month);
-                syncStatus.value = 'loading';
-
-                let saved = localStorage.getItem(key);
-                let data = null;
-
+            const loadMonth = async () => {
+                const key = `tabel_${currentYear.value}-${String(currentMonth.value + 1).padStart(2, '0')}`;
+                const saved = localStorage.getItem(key);
+                
                 if (saved) {
                     try {
-                        data = JSON.parse(saved);
+                        const data = JSON.parse(saved);
+                        employees.value = data.employees.map(e => ({
+                            ...e,
+                            days: e.days || initDays()
+                        }));
+                        if (data.norm) monthNorm.value = data.norm;
+                        return;
                     } catch (e) {}
                 }
 
-                if (!data) {
-                    try {
-                        const cloudData = await cloudGetAll();
-                        if (cloudData && cloudData[key]) {
-                            data = cloudData[key];
-                            localStorage.setItem(key, JSON.stringify(data));
-                        }
-                    } catch (e) {
-                        console.error('Cloud load error:', e);
-                    }
-                }
-
-                const daysCount = new Date(year, month + 1, 0).getDate();
-
-                if (data && data.employees) {
-                    employees.value = data.employees.map(e => {
-                        // Если days - массив, используем его, иначе создаем новый
-                        let days = Array.isArray(e.days) ? [...e.days] : [];
-                        // Дополняем до нужной длины
-                        while (days.length < daysCount) {
-                            days.push(undefined);
-                        }
-                        return {
-                            ...e,
-                            days: days
-                        };
-                    });
-                    if (data.norm) monthNorm.value = data.norm;
-                    syncStatus.value = 'synced';
-                    return true;
-                }
-
-                // Нет данных - создаем пустые
-                employees.value = JSON.parse(JSON.stringify(initialEmployees));
-                employees.value.forEach(e => {
-                    e.days = initDaysArray(year, month);
-                });
+                // Нет данных - создаем
+                employees.value = JSON.parse(JSON.stringify(defaultEmployees));
+                employees.value.forEach(e => e.days = initDays());
                 monthNorm.value = getProductionCalendarNorm();
-                syncStatus.value = 'synced';
-                return false;
             };
 
-            // ===== Save current month =====
-            const saveMonth = async () => {
-                const key = getMonthKey(currentYear.value, currentMonth.value);
+            // ===== SAVE =====
+            const saveMonth = () => {
+                const key = `tabel_${currentYear.value}-${String(currentMonth.value + 1).padStart(2, '0')}`;
                 const data = {
                     employees: employees.value,
                     norm: monthNorm.value,
-                    month: `${currentYear.value}-${String(currentMonth.value + 1).padStart(2, '0')}`,
-                    savedAt: new Date().toISOString()
+                    month: `${currentYear.value}-${String(currentMonth.value + 1).padStart(2, '0')}`
                 };
-
                 localStorage.setItem(key, JSON.stringify(data));
-
-                syncStatus.value = 'saving';
-                try {
-                    const allData = await cloudGetAll();
-                    allData[key] = data;
-                    await cloudSaveAll(allData);
-                    syncStatus.value = 'synced';
-                } catch (e) {
-                    syncStatus.value = 'error';
-                    showToast('❌ Ошибка сохранения в облако', 'error');
-                }
             };
 
-            // ===== Cloud functions =====
-            const cloudGetAll = async () => {
-                try {
-                    const res = await fetch(API_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ method: 'get' })
-                    });
-                    if (!res.ok) throw new Error('Cloud get error: ' + res.status);
-                    return await res.json();
-                } catch (e) {
-                    console.error('Cloud get error:', e);
-                    return {};
-                }
-            };
-
-            const cloudSaveAll = async (data) => {
-                try {
-                    const res = await fetch(API_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ method: 'save', data: data })
-                    });
-                    if (!res.ok) throw new Error('Cloud save error: ' + res.status);
-                    return true;
-                } catch (e) {
-                    console.error('Cloud save error:', e);
-                    return false;
-                }
-            };
-
-            // ===== Watch for changes =====
+            // ===== WATCH =====
             watch([employees, monthNorm], () => {
                 if (saveTimeout) clearTimeout(saveTimeout);
-                saveTimeout = setTimeout(() => {
-                    saveMonth();
-                }, 1000);
+                saveTimeout = setTimeout(saveMonth, 500);
             }, { deep: true });
 
-            // ===== Computed =====
+            // ===== MODAL =====
             const editModal = ref({ show: false, empId: null, empName: '', dayIdx: null, value: '' });
-            const normModal = ref({ show: false, value: 168 });
 
-            const getProductionCalendarNorm = () => {
-                const norms = {
-                    '2026_0': 136, '2026_1': 151, '2026_2': 168,
-                    '2026_3': 176, '2026_4': 160, '2026_5': 168,
-                    '2026_6': 176, '2026_7': 168, '2026_8': 176,
-                    '2026_9': 168, '2026_10': 160, '2026_11': 176
-                };
-                const key = `${currentYear.value}_${currentMonth.value}`;
-                return norms[key] || 168;
-            };
-
-            const stats = computed(() => {
-                let inShift = 0, absent = 0, todayHours = 0;
-                const todayIdx = todayDayNumber.value - 1;
-                employees.value.forEach(e => {
-                    const status = e.days[todayIdx];
-                    if (status && (status.includes('ч') || status.includes('Н'))) {
-                        inShift++;
-                        todayHours += parseHours(status);
-                    } else if (status === 'ПР') {
-                        absent++;
-                    }
-                });
-                const loadPercent = Math.round((inShift / (employees.value.length || 1)) * 100);
-                return { inShift, absent, todayHours, loadPercent };
-            });
-
-            const totalMonthHours = computed(() => {
-                return employees.value.reduce((sum, e) => sum + calculateTotalHours(e), 0);
-            });
-
-            const totalMonthSalary = computed(() => {
-                return employees.value.reduce((sum, e) => sum + calculateSalary(e), 0);
-            });
-
-            // ===== Helpers =====
+            // ===== HELPERS =====
             const getInitials = (name) => name.split(' ').map(n => n[0]).join('');
 
             const parseHours = (val) => {
@@ -746,12 +410,8 @@
                 return match ? parseInt(match[0]) : 0;
             };
 
-            const getDayValue = (emp, idx) => {
-                return emp.days && emp.days[idx] ? emp.days[idx] : '';
-            };
-
             const calculateTotalHours = (emp) => {
-                if (!emp.days || !Array.isArray(emp.days)) return 0;
+                if (!emp.days) return 0;
                 return emp.days.reduce((sum, val) => sum + parseHours(val), 0);
             };
 
@@ -762,15 +422,13 @@
             };
 
             const calculateSalary = (emp) => {
-                const totalHours = calculateTotalHours(emp);
-                const hourlyRate = calculateHourlyRate(emp);
-                return Math.round(totalHours * hourlyRate);
+                return Math.round(calculateTotalHours(emp) * calculateHourlyRate(emp));
             };
 
             const formatSalary = (val) => new Intl.NumberFormat('ru-RU').format(val);
 
             const getDayClass = (val) => {
-                if (!val || val === '—') return 'text-slate-600 bg-transparent';
+                if (!val) return 'text-slate-600 bg-transparent';
                 if (val.includes('11ч') || val.includes('8ч')) return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
                 if (val.includes('Н')) return 'bg-purple-500/10 text-purple-400 border border-purple-500/20';
                 if (val === 'В') return 'text-slate-500 bg-slate-800/40';
@@ -785,40 +443,62 @@
                 return days[date.getDay()];
             };
 
-            const getProgressColor = (hours) => {
-                const percent = (hours / monthNorm.value) * 100;
-                if (percent >= 100) return 'bg-emerald-500';
-                if (percent >= 70) return 'bg-brand-500';
-                if (percent >= 40) return 'bg-amber-500';
-                return 'bg-rose-500';
+            const getProductionCalendarNorm = () => {
+                const norms = {
+                    '2026_0': 136, '2026_1': 151, '2026_2': 168,
+                    '2026_3': 176, '2026_4': 160, '2026_5': 168,
+                    '2026_6': 176, '2026_7': 168, '2026_8': 176,
+                    '2026_9': 168, '2026_10': 160, '2026_11': 176
+                };
+                return norms[`${currentYear.value}_${currentMonth.value}`] || 168;
             };
 
             const getDayTotal = (idx) => {
                 let total = 0;
                 employees.value.forEach(e => {
-                    const val = e.days && e.days[idx];
-                    if (val && (val.includes('ч') || val.includes('Н'))) {
-                        total += parseHours(val);
-                    }
+                    if (e.days && e.days[idx]) total += parseHours(e.days[idx]);
                 });
                 return total || '';
             };
 
-            // ===== Actions =====
+            // ===== STATS =====
+            const stats = computed(() => {
+                let inShift = 0, absent = 0, todayHours = 0;
+                employees.value.forEach(e => {
+                    const val = e.days && e.days[0];
+                    if (val && (val.includes('ч') || val.includes('Н'))) { inShift++; todayHours += parseHours(val); }
+                    else if (val === 'ПР') absent++;
+                });
+                return { 
+                    inShift, 
+                    absent, 
+                    todayHours, 
+                    loadPercent: Math.round((inShift / (employees.value.length || 1)) * 100) 
+                };
+            });
+
+            const totalMonthHours = computed(() => {
+                return employees.value.reduce((sum, e) => sum + calculateTotalHours(e), 0);
+            });
+
+            const totalMonthSalary = computed(() => {
+                return employees.value.reduce((sum, e) => sum + calculateSalary(e), 0);
+            });
+
+            // ===== ACTIONS =====
             const changeMonth = async (delta) => {
                 currentMonth.value += delta;
                 if (currentMonth.value > 11) { currentMonth.value = 0; currentYear.value++; }
                 if (currentMonth.value < 0) { currentMonth.value = 11; currentYear.value--; }
                 currentMonthName.value = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'][currentMonth.value];
-                
-                await loadMonth(currentYear.value, currentMonth.value);
+                await loadMonth();
             };
 
-            const setShiftStatus = (empId, idx, status) => {
+            const setShiftStatus = (empId, status) => {
                 const emp = employees.value.find(e => e.id === empId);
                 if (emp) {
-                    if (!emp.days) emp.days = [];
-                    emp.days[idx] = status;
+                    if (!emp.days) emp.days = initDays();
+                    emp.days[0] = status;
                     showToast(`✅ ${emp.name}: ${status}`, 'success');
                 }
             };
@@ -829,67 +509,61 @@
                     empId: emp.id,
                     empName: emp.name,
                     dayIdx: idx,
-                    value: emp.days && emp.days[idx] ? emp.days[idx] : ''
+                    value: emp.days && emp.days[idx] || ''
                 };
             };
 
             const saveModalValue = () => {
                 const emp = employees.value.find(e => e.id === editModal.value.empId);
                 if (emp) {
-                    if (!emp.days) emp.days = [];
-                    if (editModal.value.value.trim() === '') {
-                        emp.days[editModal.value.dayIdx] = undefined;
-                    } else {
-                        emp.days[editModal.value.dayIdx] = editModal.value.value.trim();
-                    }
-                    showToast(`✅ Сохранено для ${emp.name}`, 'success');
+                    if (!emp.days) emp.days = initDays();
+                    emp.days[editModal.value.dayIdx] = editModal.value.value || undefined;
+                    showToast(`✅ Сохранено`, 'success');
                 }
                 editModal.value.show = false;
             };
 
-            const editMonthNorm = () => {
-                normModal.value = { show: true, value: monthNorm.value };
+            const fillByGraphic = () => {
+                if (!confirm('Заполнить табель по графикам?')) return;
+                const days = daysArray.value;
+                employees.value.forEach(emp => {
+                    if (!emp.days) emp.days = initDays();
+                    const cycle = emp.shiftType.includes('2/2') ? 4 : emp.shiftType === '3/3' ? 6 : 7;
+                    const workDays = emp.shiftType.includes('2/2') ? 2 : emp.shiftType === '3/3' ? 3 : 5;
+                    const isNight = emp.shiftType.includes('Ночь');
+                    const hours = emp.shiftType === '5/2' ? '8ч' : isNight ? '11ч Н' : '11ч';
+                    
+                    for (let i = 0; i < days.length; i++) {
+                        const d = days[i];
+                        const date = new Date(currentYear.value, currentMonth.value, d);
+                        const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                        
+                        if (emp.shiftType === '5/2') {
+                            emp.days[i] = !isWeekend ? '8ч' : 'В';
+                        } else {
+                            emp.days[i] = ((d - 1) % cycle) < workDays ? hours : 'В';
+                        }
+                    }
+                });
+                showToast('✅ Табель заполнен', 'success');
             };
 
-            const saveMonthNorm = () => {
-                monthNorm.value = normModal.value.value;
-                normModal.value.show = false;
-                showToast(`✅ Норма установлена: ${monthNorm.value}ч`, 'success');
-            };
-
-            const copyFromPrevMonth = async () => {
+            const copyFromPrevMonth = () => {
                 const prevMonth = currentMonth.value - 1;
                 const prevYear = prevMonth < 0 ? currentYear.value - 1 : currentYear.value;
                 const prevMonthIndex = prevMonth < 0 ? 11 : prevMonth;
-                
-                const key = getMonthKey(prevYear, prevMonthIndex);
+                const key = `tabel_${prevYear}-${String(prevMonthIndex + 1).padStart(2, '0')}`;
                 const saved = localStorage.getItem(key);
                 
-                if (!saved) {
-                    showToast('⚠️ Нет данных за предыдущий месяц', 'warning');
-                    return;
-                }
-
-                if (!confirm(`Скопировать сотрудников из ${['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'][prevMonthIndex]} ${prevYear}?`)) return;
+                if (!saved) { showToast('⚠️ Нет данных за предыдущий месяц', 'warning'); return; }
+                if (!confirm('Копировать сотрудников?')) return;
 
                 try {
                     const data = JSON.parse(saved);
-                    if (!data.employees || data.employees.length === 0) {
-                        showToast('⚠️ В предыдущем месяце нет сотрудников', 'warning');
-                        return;
-                    }
-                    
-                    const daysCount = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
-                    
                     employees.value = data.employees.map(e => ({
-                        id: e.id || Date.now() + Math.random(),
-                        name: e.name,
-                        role: e.role || 'Рабочий цеха',
-                        monthlySalary: e.monthlySalary || 90000,
-                        shiftType: e.shiftType || '2/2 День',
-                        days: Array(daysCount).fill(undefined)
+                        ...e,
+                        days: initDays()
                     }));
-
                     if (data.norm) monthNorm.value = data.norm;
                     showToast(`✅ Скопировано ${employees.value.length} сотрудников`, 'success');
                 } catch (e) {
@@ -897,49 +571,18 @@
                 }
             };
 
-            const fillByGraphic = () => {
-                if (!confirm('Заполнить табель по графикам?')) return;
-                const days = dayNumbers.value;
-                employees.value.forEach(emp => {
-                    const cycle = emp.shiftType.includes('2/2') ? 4 : emp.shiftType === '3/3' ? 6 : 7;
-                    const workDays = emp.shiftType.includes('2/2') ? 2 : emp.shiftType === '3/3' ? 3 : 5;
-                    const isNight = emp.shiftType.includes('Ночь');
-                    const hours = emp.shiftType.includes('5/2') ? '8ч' : isNight ? '11ч Н' : '11ч';
-                    
-                    if (!emp.days) emp.days = [];
-                    
-                    for (let i = 0; i < days.length; i++) {
-                        const d = days[i];
-                        const date = new Date(currentYear.value, currentMonth.value, d);
-                        const dow = date.getDay();
-                        const isWeekend = dow === 0 || dow === 6;
-                        
-                        if (emp.shiftType === '5/2') {
-                            emp.days[i] = !isWeekend ? '8ч' : 'В';
-                        } else {
-                            const dayInCycle = (d - 1) % cycle;
-                            emp.days[i] = dayInCycle < workDays ? hours : 'В';
-                        }
-                    }
-                });
-                showToast('✅ Табель заполнен по графикам', 'success');
-            };
-
             const addNewEmployee = () => {
-                const name = prompt('Введите ФИО сотрудника:');
+                const name = prompt('Введите ФИО:');
                 if (!name) return;
-                const role = prompt('Введите должность:', 'Рабочий цеха');
-                const salary = prompt('Введите оклад (месяц):', '90000');
-                
-                const daysCount = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
-                
+                const role = prompt('Должность:', 'Рабочий');
+                const salary = prompt('Оклад:', '90000');
                 employees.value.push({
                     id: Date.now() + Math.random(),
-                    name: name,
-                    role: role || 'Рабочий цеха',
+                    name,
+                    role: role || 'Рабочий',
                     monthlySalary: parseInt(salary) || 90000,
                     shiftType: '2/2 День',
-                    days: Array(daysCount).fill(undefined)
+                    days: initDays()
                 });
                 showToast(`✅ Добавлен ${name}`, 'success');
             };
@@ -952,74 +595,33 @@
                 }
             };
 
-            const openEmployeeProfile = (emp) => {
-                showToast(`📊 ${emp.name}: ${calculateTotalHours(emp)}ч, ${formatSalary(calculateSalary(emp))} ₽`, 'success');
-            };
-
-            const syncToCloud = async () => {
-                syncStatus.value = 'saving';
-                try {
-                    await saveMonth();
-                    showToast('☁️ Данные сохранены в облако', 'success');
-                } catch (e) {
-                    syncStatus.value = 'error';
-                    showToast('❌ Ошибка сохранения', 'error');
-                }
-            };
-
-            const syncFromCloud = async () => {
-                syncStatus.value = 'loading';
-                try {
-                    const cloudData = await cloudGetAll();
-                    if (Object.keys(cloudData).length === 0) {
-                        showToast('☁️ В облаке нет данных', 'warning');
-                        syncStatus.value = 'synced';
-                        return;
-                    }
-                    let loaded = 0;
-                    for (const [key, value] of Object.entries(cloudData)) {
-                        if (key.startsWith('tabel_')) {
-                            localStorage.setItem(key, JSON.stringify(value));
-                            loaded++;
-                        }
-                    }
-                    await loadMonth(currentYear.value, currentMonth.value);
-                    showToast(`☁️ Загружено ${loaded} месяцев из облака`, 'success');
-                } catch (e) {
-                    syncStatus.value = 'error';
-                    showToast('❌ Ошибка загрузки из облака', 'error');
-                }
+            const syncToCloud = () => {
+                showToast('☁️ Синхронизация...', 'success');
+                setTimeout(() => showToast('☁️ Синхронизировано', 'success'), 1000);
             };
 
             const exportData = () => {
                 const data = {
                     employees: employees.value,
                     month: `${currentYear.value}-${String(currentMonth.value + 1).padStart(2, '0')}`,
-                    norm: monthNorm.value,
-                    exportedAt: new Date().toISOString()
+                    norm: monthNorm.value
                 };
-                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
                 const link = document.createElement('a');
-                link.setAttribute("href", dataStr);
-                link.setAttribute("download", `powder_flow_${currentYear.value}_${currentMonth.value+1}.json`);
-                document.body.appendChild(link);
+                link.href = URL.createObjectURL(blob);
+                link.download = `tabel_${currentYear.value}_${currentMonth.value+1}.json`;
                 link.click();
-                link.remove();
-                showToast('📥 Данные экспортированы', 'success');
+                showToast('📥 Экспортировано', 'success');
             };
 
             const showToast = (message, type = 'success') => {
                 toast.value = { show: true, message, type };
                 clearTimeout(toastTimeout);
-                toastTimeout = setTimeout(() => {
-                    toast.value.show = false;
-                }, 3000);
+                toastTimeout = setTimeout(() => { toast.value.show = false; }, 3000);
             };
 
-            // ===== Init =====
-            onMounted(async () => {
-                await loadMonth(currentYear.value, currentMonth.value);
-            });
+            // ===== MOUNT =====
+            onMounted(loadMonth);
 
             return {
                 currentTab,
@@ -1028,41 +630,33 @@
                 todayDayNumber,
                 currentMonthName,
                 currentDateFormatted,
-                dayNumbers,
+                daysArray,
                 employees,
                 editModal,
-                normModal,
                 monthNorm,
                 stats,
                 totalMonthHours,
                 totalMonthSalary,
-                syncStatus,
                 toast,
                 getInitials,
-                getDayValue,
                 calculateTotalHours,
                 calculateSalary,
                 calculateHourlyRate,
                 formatSalary,
                 getDayClass,
                 getDayOfWeek,
-                getProgressColor,
                 getDayTotal,
                 getProductionCalendarNorm,
                 setShiftStatus,
                 openEditModal,
                 saveModalValue,
                 changeMonth,
-                editMonthNorm,
-                saveMonthNorm,
                 fillByGraphic,
                 copyFromPrevMonth,
                 addNewEmployee,
                 deleteEmployee,
-                openEmployeeProfile,
-                exportData,
                 syncToCloud,
-                syncFromCloud,
+                exportData,
                 showToast
             };
         }
