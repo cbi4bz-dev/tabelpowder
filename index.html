@@ -800,7 +800,7 @@
         </div>
     </div>
 
-    <!-- ===== ТАБЕЛЬ (с редактированием нормы) ===== -->
+    <!-- ===== ТАБЕЛЬ ===== -->
     <div class="table-view" :class="{active: currentView==='table'}">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
@@ -811,7 +811,6 @@
                 <span v-else style="font-size:11px;color:#8a9bb0;background:#1a1a1a;padding:2px 10px;border-radius:12px;">📅 Новый месяц</span>
                 <button class="btn btn-outline" @click="copyEmployeesFromPrevMonth" style="font-size:10px;padding:4px 10px;">📋 Копировать сотрудников</button>
             </div>
-            <!-- НОВОЕ: редактирование нормы в табеле -->
             <div style="display:flex;align-items:center;gap:6px;background:#1a2130;padding:4px 12px;border-radius:20px;">
                 <span style="font-size:11px;color:#8a9bb0;">📅 Норма:</span>
                 <input type="number" v-model.number="normHours" step="0.5" min="0" max="300" 
@@ -1243,6 +1242,7 @@
                     const m = now.getMonth() + this.calendarMonthOffset;
                     return now.getFullYear() + Math.floor(m / 12);
                 },
+                // ===== ИСПРАВЛЕННЫЙ КАЛЕНДАРЬ =====
                 calendarDays() {
                     const now = new Date();
                     const m = now.getMonth() + this.calendarMonthOffset;
@@ -1379,7 +1379,6 @@
                     return days > 0 ? Math.round(total / days * 10) / 10 : 0;
                 },
 
-                // ===== НАВИГАЦИЯ ПО МЕСЯЦАМ =====
                 changeMonth(delta) {
                     const parts = this.currentMonth.split('-');
                     let year = parseInt(parts[0]);
@@ -1391,7 +1390,6 @@
                     this.loadMonth(this.currentMonth);
                 },
 
-                // ===== СОХРАНЕНИЕ ТЕКУЩЕГО МЕСЯЦА =====
                 saveCurrentMonth() {
                     const key = getMonthKey(this.currentMonth, this.selectedGraphic);
                     const data = {
@@ -1409,7 +1407,6 @@
                     return true;
                 },
 
-                // ===== РЕДАКТИРОВАНИЕ НОРМЫ =====
                 saveMonthNorm() {
                     if (this.normHours !== null && this.normHours >= 0) {
                         this.saveCurrentMonth();
@@ -1423,7 +1420,6 @@
                     this.showToast(`🔄 Норма восстановлена: ${this.normHours}ч`, 'success');
                 },
 
-                // ===== СИНХРОНИЗАЦИЯ С ОБЛАКОМ =====
                 async syncCloud() {
                     try {
                         const allData = {};
@@ -1447,7 +1443,6 @@
                     }
                 },
 
-                // ===== ЗАГРУЗКА МЕСЯЦА =====
                 async loadMonth(month) {
                     this.syncStatus = 'loading';
                     const key = getMonthKey(month, this.selectedGraphic);
@@ -1531,7 +1526,6 @@
                     return false;
                 },
 
-                // ===== ЗАГРУЗКА ИЗ ОБЛАКА (кнопка) =====
                 async loadFromCloud() {
                     this.syncStatus = 'loading';
                     try {
@@ -1557,7 +1551,6 @@
                     }
                 },
 
-                // ===== КОПИРОВАНИЕ СОТРУДНИКОВ =====
                 copyEmployeesFromPrevMonth() {
                     const prevMonth = getPrevMonth(this.currentMonth);
                     const prevKey = getMonthKey(prevMonth, this.selectedGraphic);
@@ -1593,7 +1586,6 @@
                     }
                 },
 
-                // ===== ОТМЕТКИ =====
                 getTodayDate() {
                     const now = new Date();
                     return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
@@ -1713,7 +1705,6 @@
                     }
                 },
 
-                // ===== СБРОС МЕСЯЦА =====
                 resetMonth() {
                     const monthName = this.currentMonthName;
                     if (!confirm(`⚠️ Вы уверены? Это удалит все часы за ${monthName}!`)) return;
@@ -1728,7 +1719,6 @@
                     this.showToast(`🔄 Часы за ${monthName} сброшены`, 'success');
                 },
 
-                // ===== УДАЛЕНИЕ МЕСЯЦА =====
                 async deleteMonth() {
                     const monthName = this.currentMonthName;
                     if (!confirm(`⚠️ Удалить все данные за ${monthName}? Это действие НЕЛЬЗЯ отменить!`)) return;
