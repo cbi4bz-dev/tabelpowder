@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ПАИНТ АГЕНТ — Табель</title>
     <style>
-        /* ===== ВСЕ СТИЛИ ИЗ ПРЕДЫДУЩЕЙ ВЕРСИИ ===== */
+        /* ===== ВСЕ СТИЛИ ИЗ ПРЕДЫДУЩЕЙ ВЕРСИИ (без изменений) ===== */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         :root {
@@ -555,19 +555,19 @@
         .footer .brand span { color: var(--accent-gold); }
 
         /* ================================================================ */
-        /* ===== СТИЛИ ДЛЯ ПЕЧАТИ ПУСТОГО ТАБЕЛЯ ===== */
+        /* ===== ОБНОВЛЕННЫЕ СТИЛИ ДЛЯ ПЕЧАТИ ПУСТОГО ТАБЕЛЯ ===== */
         /* ================================================================ */
         
-        /* Скрываем всё лишнее при печати */
         @media print {
             body { 
                 background: white !important; 
-                padding: 15px !important;
+                padding: 8px 12px !important;
                 margin: 0 !important;
                 color: black !important;
+                font-size: 9px !important;
             }
             
-            /* Скрываем все элементы управления */
+            /* Скрываем всё лишнее */
             .header, .tabs, .toolbar, .nav, .header-right, .footer, 
             .cloud-btn, .sync-status, .norm-control, .remove-btn,
             .stats-grid, .employee-grid, .attendance-view,
@@ -591,7 +591,7 @@
             }
             
             table {
-                font-size: 9px !important;
+                font-size: 7px !important;
                 min-width: auto !important;
                 width: 100% !important;
                 color: black !important;
@@ -603,16 +603,40 @@
                 background: #f0f0f0 !important;
                 color: black !important;
                 border: 1px solid #999 !important;
-                font-size: 8px !important;
-                padding: 4px 3px !important;
+                font-size: 6px !important;
+                padding: 3px 2px !important;
                 font-weight: 700 !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.5px !important;
             }
             
             td {
-                border: 1px solid #ccc !important;
-                padding: 4px 3px !important;
+                border: 1px solid #bbb !important;
+                padding: 6px 2px !important;
                 color: black !important;
-                height: 22px !important;
+                height: 28px !important;
+                vertical-align: middle !important;
+            }
+            
+            /* Скрываем колонки Оклад и График */
+            th:nth-child(3), th:nth-child(4),
+            td:nth-child(3), td:nth-child(4) {
+                display: none !important;
+            }
+            
+            /* Увеличиваем ширину колонки "Сотрудник" */
+            th:first-child, td:first-child {
+                min-width: 90px !important;
+                width: 90px !important;
+                text-align: left !important;
+                padding-left: 6px !important;
+            }
+            
+            /* Колонка "Роль" */
+            th:nth-child(2), td:nth-child(2) {
+                min-width: 60px !important;
+                width: 60px !important;
+                font-size: 6px !important;
             }
             
             /* Пустые ячейки для ручного заполнения */
@@ -621,6 +645,10 @@
                 min-width: auto !important;
                 padding: 0 !important;
                 border: none !important;
+                height: 100% !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
             }
             
             .day-cell .day-input {
@@ -628,11 +656,14 @@
                 background: transparent !important;
                 color: black !important;
                 font-size: 9px !important;
+                font-weight: 600 !important;
                 padding: 2px !important;
-                width: 28px !important;
-                min-height: 20px !important;
+                width: 26px !important;
+                min-height: 24px !important;
                 cursor: default !important;
                 pointer-events: none !important;
+                text-align: center !important;
+                font-family: 'Courier New', monospace !important;
             }
             
             .day-cell.norm, .day-cell.below, .day-cell.zero, .day-cell.weekend-cell {
@@ -640,105 +671,65 @@
                 border: none !important;
             }
             
-            .total-cell, .salary-cell {
-                background: transparent !important;
-                color: black !important;
-                font-weight: 700 !important;
+            /* Скрываем итоговые колонки */
+            .total-cell, .salary-cell,
+            th:last-child, td:last-child,
+            th:nth-last-child(2), td:nth-last-child(2) {
+                display: none !important;
             }
             
+            /* Итоговая строка */
             .stats-row { 
-                background: #f5f5f5 !important; 
-                border-top: 2px solid #999 !important;
-            }
-            
-            .stats-row td {
-                font-weight: 700 !important;
-            }
-            
-            .emp-name input {
-                border: none !important;
-                border-bottom: 1px solid #999 !important;
-                color: black !important;
-                background: transparent !important;
-                font-size: 9px !important;
-                padding: 2px 0 !important;
-                pointer-events: none !important;
-            }
-            
-            .emp-role-input {
-                border: none !important;
-                border-bottom: 1px solid #999 !important;
-                color: black !important;
-                background: transparent !important;
-                font-size: 9px !important;
-                pointer-events: none !important;
-            }
-            
-            .salary-input {
-                border: 1px solid #ccc !important;
-                background: transparent !important;
-                color: black !important;
-                font-size: 9px !important;
-                pointer-events: none !important;
-            }
-            
-            .shift-select {
-                border: 1px solid #ccc !important;
-                background: transparent !important;
-                color: black !important;
-                font-size: 9px !important;
-                pointer-events: none !important;
-                -webkit-appearance: none !important;
-                appearance: none !important;
+                display: none !important;
             }
             
             /* Заголовок печати */
             .print-header {
                 display: block !important;
                 text-align: center;
-                margin-bottom: 12px;
+                margin-bottom: 8px;
                 color: black !important;
             }
             .print-header h1 { 
-                font-size: 16px; 
-                margin: 0; 
-                font-weight: 700;
-                letter-spacing: 1px;
+                font-size: 14px !important; 
+                margin: 0 !important; 
+                font-weight: 700 !important;
+                letter-spacing: 2px !important;
             }
             .print-header .sub { 
-                font-size: 11px; 
-                color: #555;
-                margin-top: 2px;
+                font-size: 10px !important; 
+                color: #444 !important;
+                margin-top: 2px !important;
             }
             .print-header .info {
-                font-size: 10px;
-                color: #777;
-                margin-top: 4px;
-                display: flex;
-                justify-content: center;
-                gap: 20px;
-                flex-wrap: wrap;
+                font-size: 8px !important;
+                color: #666 !important;
+                margin-top: 3px !important;
+                display: flex !important;
+                justify-content: center !important;
+                gap: 16px !important;
+                flex-wrap: wrap !important;
             }
             
             /* Подвал печати */
             .print-footer {
                 display: flex !important;
-                justify-content: space-between;
-                margin-top: 20px;
-                font-size: 10px;
-                color: #555;
-                padding-top: 10px;
-                border-top: 1px solid #ccc;
+                justify-content: space-between !important;
+                margin-top: 14px !important;
+                font-size: 9px !important;
+                color: #444 !important;
+                padding-top: 8px !important;
+                border-top: 1px solid #ccc !important;
             }
             .print-footer .line {
-                border-bottom: 1px solid #999;
-                min-width: 120px;
-                display: inline-block;
-                margin-left: 4px;
+                border-bottom: 1px solid #999 !important;
+                min-width: 100px !important;
+                display: inline-block !important;
+                margin-left: 4px !important;
             }
             .print-footer .sign-block {
-                display: inline-block;
-                margin-right: 20px;
+                display: inline-block !important;
+                margin-right: 16px !important;
             }
             
             /* Скрываем стрелки в инпутах */
@@ -752,13 +743,13 @@
             }
             
             /* Чтобы таблица не разрывалась */
-            tr { page-break-inside: avoid; }
-            thead { display: table-header-group; }
+            tr { page-break-inside: avoid !important; }
+            thead { display: table-header-group !important; }
             
-            /* Альбомная ориентация для больших месяцев */
+            /* Альбомная ориентация */
             @page {
-                size: landscape;
-                margin: 12mm 10mm;
+                size: landscape !important;
+                margin: 8mm 8mm !important;
             }
         }
 
@@ -930,7 +921,6 @@
                 <button class="btn btn-outline" @click="fillByGraphic">📋 Заполнить</button>
                 <button class="btn btn-outline" @click="copyFromPrevMonth">📋 Копировать</button>
                 <button class="btn btn-excel" @click="exportExcel">📊 Excel</button>
-                <!-- НОВАЯ КНОПКА ПЕЧАТИ ПУСТОГО ТАБЕЛЯ -->
                 <button class="btn btn-print" @click="printEmptyTabel">🖨️ Пустой</button>
             </div>
         </div>
