@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Powder Flow OS — Табель</title>
+    <title>К7 Порошковая покраска — Табель</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
@@ -29,6 +29,7 @@
         }
         .logo { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; color: #f0b90b; }
         .logo span { color: #e8edf4; font-weight: 400; }
+        .logo .sub { font-size: 11px; color: #8a9bb0; font-weight: 400; }
         .nav { display: flex; gap: 6px; flex-wrap: wrap; }
         .nav .btn {
             padding: 6px 14px;
@@ -47,9 +48,41 @@
         .header-right {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
         }
+
+        .sync-status {
+            font-size: 10px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+        .sync-status.synced { background: #1a2a1a; color: #4ade80; border: 1px solid #2a4a2a; }
+        .sync-status.syncing { background: #2a2a1a; color: #fbbf24; border: 1px solid #4a4a2a; animation: pulse 1s infinite; }
+        .sync-status.error { background: #2a1a1a; color: #f87171; border: 1px solid #4a2a2a; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        .cloud-btn {
+            padding: 4px 10px;
+            border: 1px solid #1e2738;
+            border-radius: 8px;
+            background: #131926;
+            color: #e8edf4;
+            cursor: pointer;
+            font-size: 11px;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+        .cloud-btn:hover { background: #1e2738; border-color: #f0b90b; }
+        .cloud-btn.primary { background: #1a2a3a; border-color: #2a4a5a; color: #60a5fa; }
+        .cloud-btn.primary:hover { background: #2a3a4a; }
 
         .tabs {
             display: flex;
@@ -381,23 +414,41 @@
         }
         .toast.success { border-color: #4ade80; color: #4ade80; }
         .toast.error { border-color: #f87171; color: #f87171; }
+        .toast.warning { border-color: #fbbf24; color: #fbbf24; }
 
         .norm-info {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
             background: #1a2130;
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 12px;
+            white-space: nowrap;
         }
         .norm-info .label { color: #8a9bb0; }
         .norm-info .value { color: #f0b90b; font-weight: 700; font-size: 14px; }
+
+        .sync-footer {
+            margin-top: 20px;
+            padding: 8px 16px;
+            background: #131926;
+            border-radius: 12px;
+            border: 1px solid #1e2738;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 11px;
+            color: #5a6a80;
+        }
 
         @media (max-width: 768px) {
             body { padding: 8px; }
             .header { padding: 10px 12px; flex-direction: column; align-items: stretch; }
             .nav { justify-content: center; }
+            .header-right { justify-content: center; }
             .employee-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
             table { font-size: 11px; min-width: 500px; }
@@ -405,6 +456,15 @@
             .emp-name { font-size: 10px; min-width: 60px; padding-left: 4px; }
             .salary-input { width: 45px; font-size: 10px; padding: 2px 2px; }
             .shift-select { width: 55px; font-size: 9px; padding: 2px 4px; }
+            .cloud-btn { font-size: 10px; padding: 3px 8px; }
+            .sync-status { font-size: 9px; padding: 3px 8px; }
+            .norm-info { font-size: 10px; padding: 3px 8px; }
+            .norm-info .value { font-size: 12px; }
+        }
+        @media (max-width: 480px) {
+            .employee-grid { grid-template-columns: 1fr; }
+            .header-right { flex-wrap: wrap; gap: 4px; }
+            .cloud-btn { font-size: 9px; padding: 2px 6px; }
         }
     </style>
 </head>
@@ -412,18 +472,32 @@
 <div class="app" id="app">
     <!-- ХЕДЕР -->
     <div class="header">
-        <div class="logo">🧑‍🏭 <span>Powder Flow OS</span></div>
+        <div class="logo">
+            🏭 <span>К7 <span class="sub">Порошковая покраска</span></span>
+        </div>
         <div class="nav">
             <button class="btn active" @click="switchView('dashboard')">📊 Дашборд</button>
             <button class="btn" @click="switchView('attendance')">📋 Отметки</button>
             <button class="btn" @click="switchView('table')">📋 Табель</button>
         </div>
         <div class="header-right">
+            <button class="cloud-btn primary" @click="syncToCloud" title="Сохранить в облако">
+                <i class="fa-solid fa-cloud-arrow-up"></i> <span class="hide-mobile">Сохранить</span>
+            </button>
+            <button class="cloud-btn" @click="syncFromCloud" title="Загрузить из облака">
+                <i class="fa-solid fa-cloud-arrow-down"></i> <span class="hide-mobile">Загрузить</span>
+            </button>
+            <span class="sync-status" :class="syncStatus">
+                <span v-if="syncStatus === 'synced'">✅</span>
+                <span v-else-if="syncStatus === 'syncing'">⏳</span>
+                <span v-else-if="syncStatus === 'error'">❌</span>
+                <span v-else>💾</span>
+                <span class="hide-mobile">{{ syncStatusText }}</span>
+            </span>
             <div class="norm-info">
-                <span class="label">📅 Норма:</span>
+                <span class="label">📅</span>
                 <span class="value">{{ monthNorm }}ч</span>
             </div>
-            <span class="cloud-status">☁️ Синхронизировано</span>
         </div>
     </div>
 
@@ -438,9 +512,8 @@
     <div class="dashboard" :class="{hidden: currentView!=='dashboard'}">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
             <div style="font-size:20px;font-weight:600;">Сегодня, {{ currentDate }}</div>
-            <div style="display:flex;align-items:center;gap:8px;">
-                <span style="font-size:12px;color:#8a9bb0;">Общая норма:</span>
-                <span style="font-size:16px;font-weight:700;color:#f0b90b;">{{ monthNorm }}ч</span>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#8a9bb0;">
+                <span>К7 Порошковая покраска</span>
             </div>
         </div>
         <div class="employee-grid">
@@ -541,7 +614,6 @@
                         <td><input class="emp-role-input" v-model="emp.role" placeholder="Должность" /></td>
                         <td><input type="number" class="salary-input" v-model.number="emp.monthlySalary" step="1000" @change="saveMonth" /></td>
                         <td>
-                            <!-- ВЫБОР ГРАФИКА - ЯРКО ВЫДЕЛЕН -->
                             <select class="shift-select" v-model="emp.shiftType" @change="saveMonth" style="border-color:#60a5fa;background:#1a2a3a;">
                                 <option value="2/2">2/2 (11ч)</option>
                                 <option value="3/3">3/3 (11ч)</option>
@@ -604,7 +676,7 @@
         </div>
     </div>
 
-    <!-- ===== ПРОФИЛЬ С ВОЗМОЖНОСТЬЮ СМЕНЫ ГРАФИКА ===== -->
+    <!-- ===== ПРОФИЛЬ ===== -->
     <div class="modal-overlay" :class="{active: profileModalVisible}" @click.self="closeProfile">
         <div class="modal">
             <button class="modal-close" @click="closeProfile">✕</button>
@@ -624,14 +696,20 @@
                 <div class="field-group"><label>📅 Норма за месяц</label><div style="font-size:16px;font-weight:500;color:#f0b90b;">{{ getEmployeeNorm(profileData) }}ч</div></div>
                 <div class="field-group"><label>⏱️ Отработано</label><div style="font-size:16px;font-weight:500;">{{ totalHours(profileData.hours) }}ч</div></div>
                 <div class="field-group"><label>💰 Зарплата</label><div style="font-size:18px;font-weight:700;color:#4ade80;">{{ formatSalary(calcSalary(profileData)) }} ₽</div></div>
-                <div class="field-group" style="background:#1a2130;padding:8px 12px;border-radius:8px;margin-top:4px;">
-                    <label style="color:#8a9bb0;font-size:11px;">💡 График влияет на норму часов и расчет зарплаты</label>
-                </div>
                 <div class="modal-actions">
                     <button class="btn btn-primary" @click="closeProfile">✅ Готово</button>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- ФУТЕР С СИНХРОНИЗАЦИЕЙ -->
+    <div class="sync-footer">
+        <span>🏭 К7 Порошковая покраска</span>
+        <span v-if="lastSync">🔄 Последняя синхронизация: {{ lastSync }}</span>
+        <button class="cloud-btn" @click="clearCache" style="color:#f87171;border-color:#4a2a2a;">
+            🔄 Сбросить кеш
+        </button>
     </div>
 
     <!-- TOAST -->
@@ -644,6 +722,9 @@
         const MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
         const WEEKDAYS = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
 
+        // Yandex Cloud API
+        const API_URL = 'https://functions.yandexcloud.net/d4e18nbmmgli5kcghqrs';
+
         const DEFAULT_EMPLOYEES = [
             { name: 'Иванов С.В.', role: 'Маляр', monthlySalary: 90000, shiftType: '2/2', hours: [] },
             { name: 'Петров А.А.', role: 'Подготовщик', monthlySalary: 85000, shiftType: '2/2', hours: [] },
@@ -654,7 +735,6 @@
         function getDayOfWeek(year, month, day) { return new Date(year, month - 1, day).getDay(); }
         function getMonthName(m) { return MONTHS[m - 1] || ''; }
 
-        // РАСЧЕТ НОРМЫ В ЗАВИСИМОСТИ ОТ ГРАФИКА
         function calculateNorm(days, shiftType, year, month) {
             if (!shiftType) shiftType = '2/2';
             
@@ -713,7 +793,11 @@
                 editModalIdx: null,
                 currentView: 'dashboard',
                 profileModalVisible: false,
-                profileData: null
+                profileData: null,
+                syncStatus: 'synced',
+                lastSync: null,
+                isSyncing: false,
+                autoSyncTimeout: null
             },
             computed: {
                 currentMonthName() {
@@ -724,6 +808,12 @@
                 currentDate() {
                     const now = new Date();
                     return `${now.getDate()} ${getMonthName(now.getMonth()+1)}`;
+                },
+                syncStatusText() {
+                    if (this.syncStatus === 'synced') return 'Синхр.';
+                    if (this.syncStatus === 'syncing') return 'Синхр...';
+                    if (this.syncStatus === 'error') return 'Ошибка';
+                    return 'Локально';
                 },
                 totalMonthHours() {
                     let total = 0;
@@ -833,7 +923,6 @@
                     this.days = Array.from({ length: cnt }, (_, i) => i + 1);
                     this.dayOfWeek = this.days.map(d => getDayOfWeek(year, month, d));
                     
-                    // Общая норма для отображения (средняя)
                     const norms = this.employees.map(e => calculateNorm(cnt, e.shiftType, year, month));
                     this.monthNorm = norms.length ? Math.round(norms.reduce((a,b) => a+b, 0) / norms.length) : 168;
 
@@ -851,7 +940,6 @@
                         } catch (e) {}
                     }
 
-                    // Нет данных - создаем новых
                     this.employees = JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES));
                     this.employees.forEach(e => {
                         e.hours = Array(cnt).fill('');
@@ -869,6 +957,7 @@
                         month: this.currentMonth
                     };
                     localStorage.setItem(key, JSON.stringify(data));
+                    this.autoSync();
                 },
 
                 setTodayStatus(emp, status) {
@@ -1015,10 +1104,120 @@
                     this.profileData = null;
                 },
 
+                // ==== ОБЛАЧНАЯ СИНХРОНИЗАЦИЯ ====
+                async syncToCloud() {
+                    if (this.isSyncing) return;
+                    this.isSyncing = true;
+                    this.syncStatus = 'syncing';
+                    
+                    try {
+                        const allData = {};
+                        for (let i = 0; i < localStorage.length; i++) {
+                            const key = localStorage.key(i);
+                            if (key && key.startsWith('tabel_')) {
+                                const raw = localStorage.getItem(key);
+                                try {
+                                    allData[key] = JSON.parse(raw);
+                                } catch (e) {}
+                            }
+                        }
+                        
+                        const parts = this.currentMonth.split('-');
+                        const key = `tabel_${parts[0]}-${String(parseInt(parts[1])).padStart(2, '0')}`;
+                        allData[key] = {
+                            employees: this.employees,
+                            month: this.currentMonth
+                        };
+                        
+                        const response = await fetch(API_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ method: 'save', data: allData })
+                        });
+                        
+                        if (!response.ok) throw new Error('Ошибка сохранения');
+                        
+                        this.syncStatus = 'synced';
+                        this.lastSync = new Date().toLocaleTimeString();
+                        this.showToast('☁️ Данные сохранены в облако', 'success');
+                    } catch (e) {
+                        this.syncStatus = 'error';
+                        this.showToast('❌ Ошибка сохранения: ' + e.message, 'error');
+                    }
+                    
+                    this.isSyncing = false;
+                },
+
+                async syncFromCloud() {
+                    if (this.isSyncing) return;
+                    this.isSyncing = true;
+                    this.syncStatus = 'syncing';
+                    
+                    try {
+                        const response = await fetch(API_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ method: 'get' })
+                        });
+                        
+                        if (!response.ok) throw new Error('Ошибка загрузки');
+                        
+                        const cloudData = await response.json();
+                        
+                        if (Object.keys(cloudData).length === 0) {
+                            this.showToast('☁️ В облаке нет данных', 'warning');
+                            this.syncStatus = 'synced';
+                            this.isSyncing = false;
+                            return;
+                        }
+                        
+                        let loaded = 0;
+                        for (const [key, value] of Object.entries(cloudData)) {
+                            if (key.startsWith('tabel_')) {
+                                localStorage.setItem(key, JSON.stringify(value));
+                                loaded++;
+                            }
+                        }
+                        
+                        this.loadMonth();
+                        
+                        this.syncStatus = 'synced';
+                        this.lastSync = new Date().toLocaleTimeString();
+                        this.showToast(`☁️ Загружено ${loaded} месяцев из облака`, 'success');
+                    } catch (e) {
+                        this.syncStatus = 'error';
+                        this.showToast('❌ Ошибка загрузки: ' + e.message, 'error');
+                    }
+                    
+                    this.isSyncing = false;
+                },
+
+                clearCache() {
+                    if (confirm('Сбросить локальный кеш и загрузить данные из облака?')) {
+                        this.syncFromCloud();
+                    }
+                },
+
+                autoSync() {
+                    if (this.autoSyncTimeout) clearTimeout(this.autoSyncTimeout);
+                    this.autoSyncTimeout = setTimeout(() => {
+                        this.syncToCloud();
+                    }, 5000);
+                },
+
                 showToast(msg, type = 'success') {
                     if (this.toastTimeout) clearTimeout(this.toastTimeout);
                     this.toast = { show: true, message: msg, type };
                     this.toastTimeout = setTimeout(() => { this.toast.show = false; }, 3000);
+                }
+            },
+
+            watch: {
+                employees: {
+                    handler() {
+                        this.autoSync();
+                    },
+                    deep: true
                 }
             },
 
@@ -1027,7 +1226,9 @@
                 const y = now.getFullYear();
                 const m = String(now.getMonth() + 1).padStart(2, '0');
                 this.currentMonth = `${y}-${m}`;
-                this.loadMonth();
+                
+                // При загрузке пробуем загрузить из облака
+                this.syncFromCloud();
             }
         });
     })();
