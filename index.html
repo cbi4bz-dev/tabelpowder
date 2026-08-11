@@ -212,6 +212,18 @@
         }
         .salary-input:focus { outline: 2px solid #f0b90b; border-color: transparent; }
 
+        .shift-select {
+            background: #0b0f1a;
+            border: 1px solid #1e2738;
+            border-radius: 4px;
+            color: #e8edf4;
+            padding: 4px;
+            font-size: 11px;
+            width: 80px;
+            cursor: pointer;
+        }
+        .shift-select:focus { outline: 2px solid #f0b90b; border-color: transparent; }
+
         .day-cell {
             display: flex;
             flex-direction: column;
@@ -356,6 +368,18 @@
         .toast.success { border-color: #4ade80; color: #4ade80; }
         .toast.error { border-color: #f87171; color: #f87171; }
 
+        .norm-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #1a2130;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        .norm-info .label { color: #8a9bb0; }
+        .norm-info .value { color: #f0b90b; font-weight: 700; font-size: 14px; }
+
         @media (max-width: 768px) {
             body { padding: 8px; }
             .header { padding: 10px 12px; flex-direction: column; align-items: stretch; }
@@ -366,6 +390,7 @@
             .day-cell .day-input { width: 28px; font-size: 9px; padding: 2px 0; }
             .emp-name { font-size: 10px; min-width: 60px; padding-left: 4px; }
             .salary-input { width: 45px; font-size: 10px; padding: 2px 2px; }
+            .shift-select { width: 60px; font-size: 9px; }
         }
     </style>
 </head>
@@ -380,6 +405,10 @@
             <button class="btn" @click="switchView('table')">📋 Табель</button>
         </div>
         <div class="header-right">
+            <div class="norm-info">
+                <span class="label">📅 Норма:</span>
+                <span class="value">{{ monthNorm }}ч</span>
+            </div>
             <span class="cloud-status">☁️ Синхронизировано</span>
         </div>
     </div>
@@ -395,12 +424,9 @@
     <div class="dashboard" :class="{hidden: currentView!=='dashboard'}">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
             <div style="font-size:20px;font-weight:600;">Сегодня, {{ currentDate }}</div>
-            <div style="display:flex;align-items:center;gap:8px;background:#1a2130;padding:4px 12px;border-radius:20px;">
-                <span style="font-size:12px;color:#8a9bb0;">📅 Норма:</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:12px;color:#8a9bb0;">Общая норма:</span>
                 <span style="font-size:16px;font-weight:700;color:#f0b90b;">{{ monthNorm }}ч</span>
-                <input type="number" v-model.number="monthNorm" step="0.5" min="0" max="300" 
-                       style="width:55px;padding:2px 4px;border:1px solid #2a3a4a;border-radius:4px;background:#0b0f1a;color:#f0b90b;font-size:13px;font-weight:600;text-align:center;" 
-                       @change="saveMonth" />
             </div>
         </div>
         <div class="employee-grid">
@@ -409,6 +435,7 @@
                     <div>
                         <div class="name">{{ emp.name }}</div>
                         <div class="role">{{ emp.role || 'Сотрудник' }}</div>
+                        <div style="font-size:10px;color:#8a9bb0;margin-top:2px;">{{ emp.shiftType || '2/2' }}</div>
                     </div>
                     <span class="badge">{{ getTodayHours(emp) }}ч</span>
                 </div>
@@ -417,7 +444,7 @@
                 </div>
                 <div class="bottom">
                     <span>{{ getMonthProgress(emp) }}% от нормы</span>
-                    <span class="hours">{{ totalHours(emp.hours) }}ч / {{ monthNorm }}ч</span>
+                    <span class="hours">{{ totalHours(emp.hours) }}ч / {{ getEmployeeNorm(emp) }}ч</span>
                 </div>
             </div>
         </div>
@@ -480,9 +507,11 @@
                         <th style="min-width:100px;">Сотрудник</th>
                         <th style="min-width:55px;">Роль</th>
                         <th style="min-width:55px;">Оклад</th>
+                        <th style="min-width:70px;">График</th>
                         <th v-for="(day, i) in days" :key="'day-'+i" style="min-width:45px;">
                             {{ day }}<br><span style="font-weight:400;font-size:8px;color:#5a6a80;">{{ weekDays[dayOfWeek[i]] }}</span>
                         </th>
+                        <th>Норма</th>
                         <th>Итого</th>
                         <th>Зарплата</th>
                     </tr>
@@ -495,6 +524,13 @@
                         </td>
                         <td><input class="emp-role-input" v-model="emp.role" placeholder="Должность" /></td>
                         <td><input type="number" class="salary-input" v-model.number="emp.monthlySalary" step="1000" @change="saveMonth" /></td>
+                        <td>
+                            <select class="shift-select" v-model="emp.shiftType" @change="saveMonth">
+                                <option value="2/2">2/2</option>
+                                <option value="3/3">3/3</option>
+                                <option value="5/2">5/2</option>
+                            </select>
+                        </td>
                         <td v-for="(day, dayIdx) in days" :key="dayIdx">
                             <div class="day-cell" :class="getDayCellClass(dayIdx, emp)">
                                 <input type="text" class="day-input" 
@@ -503,12 +539,14 @@
                                        @focus="openEditModal(emp, dayIdx)" />
                             </div>
                         </td>
+                        <td class="total-cell" style="font-size:10px;color:#8a9bb0;">{{ getEmployeeNorm(emp) }}</td>
                         <td class="total-cell">{{ totalHours(emp.hours) }}</td>
                         <td class="salary-cell">{{ formatSalary(calcSalary(emp)) }}</td>
                     </tr>
                     <tr class="stats-row">
-                        <td class="stats-label" colspan="3">📊 Итого за месяц</td>
+                        <td class="stats-label" colspan="4">📊 Итого за месяц</td>
                         <td v-for="(day, i) in days" :key="'stat-'+i">{{ dayStats[i] || '' }}</td>
+                        <td class="total-cell">{{ monthNorm }}</td>
                         <td class="total-cell">{{ totalMonthHours }}</td>
                         <td class="salary-cell">{{ formatSalary(totalMonthSalary) }}</td>
                     </tr>
@@ -557,7 +595,9 @@
             <div v-if="profileData">
                 <div class="field-group"><label>👤 Имя</label><div style="font-size:16px;font-weight:500;">{{ profileData.name }}</div></div>
                 <div class="field-group"><label>📋 Роль</label><div style="font-size:16px;font-weight:500;">{{ profileData.role || 'Сотрудник' }}</div></div>
+                <div class="field-group"><label>📅 График</label><div style="font-size:16px;font-weight:500;">{{ profileData.shiftType || '2/2' }}</div></div>
                 <div class="field-group"><label>💰 Оклад</label><div style="font-size:16px;font-weight:500;color:#4ade80;">{{ formatSalary(profileData.monthlySalary) }} ₽</div></div>
+                <div class="field-group"><label>📅 Норма за месяц</label><div style="font-size:16px;font-weight:500;color:#f0b90b;">{{ getEmployeeNorm(profileData) }}ч</div></div>
                 <div class="field-group"><label>⏱️ Отработано</label><div style="font-size:16px;font-weight:500;">{{ totalHours(profileData.hours) }}ч</div></div>
                 <div class="field-group"><label>💰 Зарплата</label><div style="font-size:18px;font-weight:700;color:#4ade80;">{{ formatSalary(calcSalary(profileData)) }} ₽</div></div>
             </div>
@@ -575,23 +615,41 @@
         const WEEKDAYS = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
 
         const DEFAULT_EMPLOYEES = [
-            { name: 'Иванов С.В.', role: 'Маляр', monthlySalary: 90000, hours: [] },
-            { name: 'Петров А.А.', role: 'Подготовщик', monthlySalary: 85000, hours: [] },
-            { name: 'Сидоров К.М.', role: 'Комплектовщик', monthlySalary: 80000, hours: [] }
+            { name: 'Иванов С.В.', role: 'Маляр', monthlySalary: 90000, shiftType: '2/2', hours: [] },
+            { name: 'Петров А.А.', role: 'Подготовщик', monthlySalary: 85000, shiftType: '2/2', hours: [] },
+            { name: 'Сидоров К.М.', role: 'Комплектовщик', monthlySalary: 80000, shiftType: '5/2', hours: [] }
         ];
 
         function getDaysInMonth(year, month) { return new Date(year, month, 0).getDate(); }
         function getDayOfWeek(year, month, day) { return new Date(year, month - 1, day).getDay(); }
         function getMonthName(m) { return MONTHS[m - 1] || ''; }
 
-        function getProductionCalendarNorm(year, month) {
-            const norms = {
-                '2026_1': 136, '2026_2': 151, '2026_3': 168,
-                '2026_4': 176, '2026_5': 160, '2026_6': 168,
-                '2026_7': 176, '2026_8': 168, '2026_9': 176,
-                '2026_10': 168, '2026_11': 160, '2026_12': 176
-            };
-            return norms[`${year}_${month}`] || 168;
+        // РАСЧЕТ НОРМЫ В ЗАВИСИМОСТИ ОТ ГРАФИКА
+        function calculateNorm(days, shiftType) {
+            if (!shiftType) shiftType = '2/2';
+            
+            if (shiftType === '5/2') {
+                // 5/2: 8 часов в день, только рабочие дни (пн-пт)
+                let workDays = 0;
+                for (let d = 1; d <= days; d++) {
+                    const dow = getDayOfWeek(2026, 8, d); // используем текущий год и месяц
+                    if (dow !== 0 && dow !== 6) workDays++;
+                }
+                return workDays * 8;
+            } else if (shiftType === '2/2') {
+                // 2/2: 11 часов, 2 дня работы, 2 дня отдыха
+                const fullCycles = Math.floor(days / 4);
+                const remainder = days % 4;
+                let workDays = fullCycles * 2 + Math.min(remainder, 2);
+                return workDays * 11;
+            } else if (shiftType === '3/3') {
+                // 3/3: 11 часов, 3 дня работы, 3 дня отдыха
+                const fullCycles = Math.floor(days / 6);
+                const remainder = days % 6;
+                let workDays = fullCycles * 3 + Math.min(remainder, 3);
+                return workDays * 11;
+            }
+            return 168; // fallback
         }
 
         function getMonthKey(year, month) {
@@ -674,11 +732,18 @@
 
                 totalHours(arr) { return totalHours(arr); },
 
+                // Получить норму для сотрудника в зависимости от графика
+                getEmployeeNorm(emp) {
+                    const daysCount = this.days.length;
+                    return calculateNorm(daysCount, emp.shiftType);
+                },
+
                 calcSalary(emp) {
                     const total = totalHours(emp.hours);
                     const base = emp.monthlySalary || 0;
-                    if (base === 0 || this.monthNorm === 0) return 0;
-                    const hourlyRate = base / this.monthNorm;
+                    const norm = this.getEmployeeNorm(emp);
+                    if (base === 0 || norm === 0) return 0;
+                    const hourlyRate = base / norm;
                     return Math.round(total * hourlyRate);
                 },
 
@@ -686,7 +751,7 @@
 
                 getMonthProgress(emp) {
                     const total = totalHours(emp.hours);
-                    const norm = this.monthNorm || 1;
+                    const norm = this.getEmployeeNorm(emp) || 1;
                     return Math.round((total / norm) * 100);
                 },
 
@@ -738,7 +803,10 @@
                     
                     this.days = Array.from({ length: cnt }, (_, i) => i + 1);
                     this.dayOfWeek = this.days.map(d => getDayOfWeek(year, month, d));
-                    this.monthNorm = getProductionCalendarNorm(year, month);
+                    
+                    // Общая норма для отображения (средняя)
+                    const norms = this.employees.map(e => calculateNorm(cnt, e.shiftType));
+                    this.monthNorm = norms.length ? Math.round(norms.reduce((a,b) => a+b, 0) / norms.length) : 168;
 
                     const key = getMonthKey(year, month);
                     const saved = localStorage.getItem(key);
@@ -750,7 +818,6 @@
                                 ...e,
                                 hours: e.hours || Array(cnt).fill('')
                             }));
-                            if (data.norm) this.monthNorm = data.norm;
                             return;
                         } catch (e) {}
                     }
@@ -770,7 +837,6 @@
                     const key = getMonthKey(year, month);
                     const data = {
                         employees: this.employees,
-                        norm: this.monthNorm,
                         month: this.currentMonth
                     };
                     localStorage.setItem(key, JSON.stringify(data));
@@ -817,23 +883,26 @@
                 },
 
                 fillByGraphic() {
-                    if (!confirm('Заполнить табель по графику 2/2?')) return;
-                    const cycle = 4;
-                    const workDays = 2;
+                    if (!confirm('Заполнить табель по графикам?')) return;
                     this.employees.forEach(e => {
                         if (!e.hours) e.hours = [];
+                        const shiftType = e.shiftType || '2/2';
+                        const cycle = shiftType === '2/2' ? 4 : shiftType === '3/3' ? 6 : 7;
+                        const workDays = shiftType === '2/2' ? 2 : shiftType === '3/3' ? 3 : 5;
+                        const hours = shiftType === '5/2' ? '8ч' : '11ч';
+                        
                         for (let i = 0; i < this.days.length; i++) {
                             const isWeekend = this.dayOfWeek[i] === 0 || this.dayOfWeek[i] === 6;
-                            if (isWeekend) {
-                                e.hours[i] = 'В';
+                            if (shiftType === '5/2') {
+                                e.hours[i] = isWeekend ? 'В' : '8ч';
                             } else {
                                 const dayInCycle = i % cycle;
-                                e.hours[i] = dayInCycle < workDays ? '11ч' : 'В';
+                                e.hours[i] = dayInCycle < workDays ? hours : 'В';
                             }
                         }
                     });
                     this.saveMonth();
-                    this.showToast('✅ Табель заполнен', 'success');
+                    this.showToast('✅ Табель заполнен по графикам', 'success');
                 },
 
                 copyFromPrevMonth() {
@@ -859,9 +928,9 @@
                             name: e.name,
                             role: e.role || 'Сотрудник',
                             monthlySalary: e.monthlySalary || 90000,
+                            shiftType: e.shiftType || '2/2',
                             hours: Array(cnt).fill('')
                         }));
-                        if (data.norm) this.monthNorm = data.norm;
                         this.saveMonth();
                         this.showToast(`✅ Скопировано ${this.employees.length} сотрудников`, 'success');
                     } catch (e) {
@@ -875,10 +944,12 @@
                     if (!name) return;
                     const role = prompt('Введите должность:', 'Рабочий');
                     const salary = prompt('Введите оклад:', '90000');
+                    const shiftType = prompt('Введите график (2/2, 3/3, 5/2):', '2/2') || '2/2';
                     this.employees.push({
                         name: name,
                         role: role || 'Рабочий',
                         monthlySalary: parseInt(salary) || 90000,
+                        shiftType: shiftType,
                         hours: Array(cnt).fill('')
                     });
                     this.saveMonth();
