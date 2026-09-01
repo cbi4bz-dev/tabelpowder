@@ -303,7 +303,52 @@
     .remove-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; padding: 0 4px; }
     .remove-btn:hover { color: var(--accent-red); }
 
-    /* ===== СТИЛИ ДЛЯ КАЛЬКУЛЯТОРА И ЦЕХА ===== */
+    /* ===== СТИЛИ ДЛЯ ШАПКИ ЗАКАЗА (РЕДИЗАЙН) ===== */
+    .order-info-bar-styled {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 10px 16px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+    .order-field-styled {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 4px 10px;
+    }
+    .order-field-styled.flex-grow {
+      flex: 1;
+      min-width: 240px;
+    }
+    .order-field-styled label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .order-field-styled input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 600;
+      width: 100%;
+    }
+    .order-field-styled input:focus {
+      color: var(--accent-gold);
+    }
+
+    /* ===== СТИЛИ ДЛЯ ПАНЕЛИ ТАРИФОВ ===== */
     .top-panel-calc {
       background: var(--bg-secondary);
       border: 1px solid var(--border-color);
@@ -530,11 +575,11 @@
     .footer .brand { color: var(--text-secondary); }
     .footer .brand span { color: var(--accent-gold); }
 
-    /* СТИЛИ ДЛЯ ПЕЧАТИ ТАБЕЛЯ А4 */
+    /* СТИЛИ ДЛЯ ПЕЧАТИ ТАБЕЛЯ И ТЗ НА А4 */
     .print-header, .print-footer { display: none; }
     @media print {
       body { background: white !important; padding: 8px 12px !important; margin: 0 !important; color: black !important; font-size: 9px !important; }
-      .header, .nav, .header-right, .footer, .no-print, .modal-overlay, .toast, .calc-grid, .top-panel-calc, .order-info-bar { display: none !important; }
+      .header, .nav, .header-right, .footer, .no-print, .modal-overlay, .toast, .calc-grid, .top-panel-calc, .order-info-bar-styled { display: none !important; }
       .table-view { display: block !important; margin: 0 !important; padding: 0 !important; }
       .table-wrap { border: none !important; background: white !important; overflow: visible !important; }
       table { font-size: 7px !important; width: 100% !important; color: black !important; border-collapse: collapse !important; }
@@ -599,19 +644,19 @@
   <!-- РАЗДЕЛ 1: КАЛЬКУЛЯТОР ПОКРАСКИ + ТЗ + ТЕРМОПЕЧАТЬ 40X25  -->
   <!-- ========================================================= -->
   <div v-show="currentMainTab==='calculator'">
-    <!-- РЕКВИЗИТЫ ЗАКАЗА -->
-    <div class="order-info-bar no-print">
-      <div class="group">
+    <!-- РЕКВИЗИТЫ ЗАКАЗА (СТИЛЬНЫЙ РЕДИЗАЙН) -->
+    <div class="order-info-bar-styled no-print">
+      <div class="order-field-styled">
         <label>Заказ №:</label>
-        <input type="text" v-model="calcSettings.orderNumber" style="width: 80px;" @input="saveCalcState">
+        <input type="text" v-model="calcSettings.orderNumber" style="width: 70px;" @input="saveCalcState">
       </div>
-      <div class="group">
+      <div class="order-field-styled">
         <label>Дата:</label>
-        <input type="text" v-model="calcSettings.orderDate" style="width: 100px;" @input="saveCalcState">
+        <input type="text" v-model="calcSettings.orderDate" style="width: 95px;" @input="saveCalcState">
       </div>
-      <div class="group" style="flex: 1;">
+      <div class="order-field-styled flex-grow">
         <label>Клиент:</label>
-        <input type="text" v-model="calcSettings.orderClient" style="width: 100%; min-width: 180px;" @input="saveCalcState">
+        <input type="text" v-model="calcSettings.orderClient" placeholder="ООО «МеталлСтрой»..." @input="saveCalcState">
       </div>
     </div>
 
@@ -856,10 +901,19 @@
 
       <!-- ВЫВОД РАСЧЕТОВ / ТЗ / БИРОК -->
       <div class="card">
-        <div class="sub-view-toggle no-print">
-          <button :class="{active: calcSubView==='quote'}" @click="calcSubView='quote'">Смета заказа (КП)</button>
-          <button :class="{active: calcSubView==='job'}" @click="calcSubView='job'">ТЗ для мастера (Цех)</button>
-          <button :class="{active: calcSubView==='labels'}" @click="calcSubView='labels'">🏷️ Бирки (40×25 мм)</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+          <div class="sub-view-toggle no-print" style="margin-bottom:0; flex:1;">
+            <button :class="{active: calcSubView==='quote'}" @click="calcSubView='quote'">Смета заказа (КП)</button>
+            <button :class="{active: calcSubView==='job'}" @click="calcSubView='job'">ТЗ для мастера (Цех)</button>
+            <button :class="{active: calcSubView==='labels'}" @click="calcSubView='labels'">🏷️ Бирки (40×25 мм)</button>
+          </div>
+
+          <!-- КНОПКИ ПЕЧАТИ ДОКУМЕНТОВ А4 -->
+          <div class="no-print" style="display:flex; gap:6px;" v-show="calcSubView==='quote' || calcSubView==='job'">
+            <button class="btn btn-print" @click="printOrderA4(calcSubView)">
+              🖨️ {{ calcSubView==='job' ? 'Печать ТЗ (Цех)' : 'Печать Сметы (КП)' }}
+            </button>
+          </div>
         </div>
 
         <!-- СМЕТА / ТЗ -->
@@ -1268,13 +1322,13 @@
         orderNumber: '1042',
         orderDate: '01.09.2026',
         orderClient: 'ООО «МеталлСтрой»',
-        rateM2: 450,
-        rateMp: 120,
+        rateM2: 750,
+        rateMp: 200,
         powderNorm: 150,
         urgency: 1.0,
-        ovenL: 6.0,
+        ovenL: 4.0,
         ovenW: 1.5,
-        ovenH: 2.0
+        ovenH: 1.5
       },
 
       formItem: {
@@ -1302,25 +1356,25 @@
 
       calcItems: [
         {
-          name: 'Решетка',
-          type: 'sheet',
-          desc: '1000×2000 мм (2ст)',
-          qty: 1,
-          totalLinearM: 2.0,
-          totalAreaM2: 4.0,
-          singleWeightKg: 31.4,
-          totalWeightKg: 31.4,
+          name: 'Стойка каркаса',
+          type: 'pipe_rect',
+          desc: '40×20 мм, L=2500 мм',
+          qty: 10,
+          totalLinearM: 25.0,
+          totalAreaM2: 3.0,
+          singleWeightKg: 4.4,
+          totalWeightKg: 44.0,
           pricingModel: 'm2',
           color: 'RAL 7016',
           finish: 'Муар',
           zincPrimer: true,
           degrease: true,
           sandblast: false,
-          masking: false,
+          masking: true,
           packStretch: true,
           packIsolon: false,
-          prepNotes: 'Пескоструйная очистка',
-          lossCoeff: 1.15
+          prepNotes: 'Обезжир., Маскировка, Стрейч',
+          lossCoeff: 1.30
         }
       ],
 
@@ -1633,17 +1687,165 @@
       },
 
       saveCalcState() {
-        localStorage.setItem('paint_calc_settings', JSON.stringify(this.calcSettings));
-        localStorage.setItem('paint_calc_items', JSON.stringify(this.calcItems));
+        localStorage.setItem('paint_calc_settings_v4', JSON.stringify(this.calcSettings));
+        localStorage.setItem('paint_calc_items_v4', JSON.stringify(this.calcItems));
       },
 
       loadCalcState() {
-        const s = localStorage.getItem('paint_calc_settings');
+        const s = localStorage.getItem('paint_calc_settings_v4');
         if (s) { try { this.calcSettings = Object.assign(this.calcSettings, JSON.parse(s)); } catch(e){} }
-        const it = localStorage.getItem('paint_calc_items');
+        const it = localStorage.getItem('paint_calc_items_v4');
         if (it) { try { this.calcItems = JSON.parse(it); } catch(e){} }
       },
 
+      /* ===== ПЕЧАТЬ ОФИЦИАЛЬНОГО ТЗ / СМЕТЫ НА А4 ===== */
+      printOrderA4(mode) {
+        const isJob = mode === 'job';
+        const title = isJob ? 'ТЕХНОЛОГИЧЕСКОЕ ЗАДАНИЕ НА ПОКРАСКУ (ЦЕХ)' : 'КОММЕРЧЕСКИЙ РАСЧЕТ СТОИМОСТИ (КП)';
+        const orderNo = this.calcSettings.orderNumber || 'б/н';
+        const orderDate = this.calcSettings.orderDate || '—';
+        const client = this.calcSettings.orderClient || 'Частный заказчик';
+
+        let tableRows = '';
+        this.calcItems.forEach((it, idx) => {
+          if (isJob) {
+            let tech = [];
+            if (it.degrease) tech.push('Обезжиривание');
+            if (it.sandblast) tech.push('Пескоструй');
+            if (it.masking) tech.push('Защита резьб');
+            if (it.packStretch) tech.push('Стрейч 3 слоя');
+            if (it.packIsolon) tech.push('Изолон');
+            if (it.prepNotes && it.prepNotes !== '—') tech.push(it.prepNotes);
+
+            tableRows += `
+              <tr>
+                <td style="text-align:center;">${idx+1}</td>
+                <td><strong>${it.name}</strong> ${it.singleWeightKg >= 50 ? '(>50кг)' : ''}</td>
+                <td>${it.desc}</td>
+                <td style="text-align:center;"><strong>${it.qty} шт</strong></td>
+                <td>${it.zincPrimer ? '2 слоя (Грунт+Финиш)' : '1 слой'}</td>
+                <td>${it.color} (${it.finish})</td>
+                <td>${tech.join('; ') || 'Без подготовки'}</td>
+                <td style="text-align:center;"><strong>${this.calcItemPowder(it)} кг</strong></td>
+              </tr>
+            `;
+          } else {
+            tableRows += `
+              <tr>
+                <td style="text-align:center;">${idx+1}</td>
+                <td><strong>${it.name}</strong> ${it.zincPrimer ? '(+Цинкогрунт)' : ''}</td>
+                <td>${it.desc}</td>
+                <td style="text-align:center;"><strong>${it.qty} шт</strong></td>
+                <td style="text-align:center;">${it.totalAreaM2} м²</td>
+                <td>${it.color} (${it.finish})</td>
+                <td>${this.getOptSummary(it)}</td>
+                <td style="text-align:right;"><strong>${this.formatSalary(this.calcItemCost(it))} ₽</strong></td>
+              </tr>
+            `;
+          }
+        });
+
+        let powderSummaryHtml = '';
+        if (isJob) {
+          powderSummaryHtml = `
+            <div style="margin-top: 15px; padding: 10px; border: 1px solid #000; background: #f9f9f9; font-size: 11px;">
+              <strong>ВЫДАЧА СО СКЛАДА:</strong><br>
+              ${this.calcTotalZincPrimerKg > 0 ? `• Цинконаполненный грунт: <strong>${this.calcTotalZincPrimerKg} кг</strong><br>` : ''}
+              ${Object.entries(this.calcPowderByColor).map(([col, kg]) => `• ${col}: <strong>${kg} кг</strong>`).join('<br>')}
+              <br>• Стрейч-пленка: <strong>${this.calcTotalPackaging.stretchM2} м² (~${this.calcTotalPackaging.stretchRolls} рул.)</strong>
+              ${this.calcTotalPackaging.isolonM2 > 0 ? `<br>• Изолон: <strong>${this.calcTotalPackaging.isolonM2} м²</strong>` : ''}
+            </div>
+          `;
+        }
+
+        const win = window.open('', '_blank', 'width=900,height=700');
+        win.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <title>${title}</title>
+            <style>
+              @page { size: A4 landscape; margin: 10mm; }
+              * { box-sizing: border-box; margin: 0; padding: 0; }
+              body { font-family: Arial, sans-serif; font-size: 10px; color: #000; padding: 10px; background: #fff; }
+              .header { border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-end; }
+              .header h1 { font-size: 15px; font-weight: 800; margin: 0; text-transform: uppercase; }
+              .header .meta { font-size: 11px; font-weight: 700; text-align: right; }
+              table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10px; }
+              th { background: #eee; font-weight: 700; border: 1px solid #000; padding: 6px 4px; text-align: center; }
+              td { border: 1px solid #000; padding: 6px 4px; }
+              .footer { margin-top: 25px; display: flex; justify-content: space-between; font-size: 11px; }
+              .sign-line { border-bottom: 1px solid #000; display: inline-block; width: 140px; margin-left: 5px; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <div>
+                <h1>ПАИНТ АГЕНТ · ${title}</h1>
+                <div style="font-size: 11px; margin-top: 4px;">Заказчик: <strong>${client}</strong></div>
+              </div>
+              <div class="meta">
+                ЗАКАЗ № ${orderNo}<br>
+                Дата: ${orderDate}
+              </div>
+            </div>
+
+            <table>
+              <thead>
+                ${isJob ? `
+                  <tr>
+                    <th style="width:25px;">№</th>
+                    <th>Наименование детали</th>
+                    <th>Размеры / Сечение</th>
+                    <th>Кол-во</th>
+                    <th>Схема покраски</th>
+                    <th>Цвет RAL / Эффект</th>
+                    <th>Тех. указания / Подготовка</th>
+                    <th>Расход краски</th>
+                  </tr>
+                ` : `
+                  <tr>
+                    <th style="width:25px;">№</th>
+                    <th>Наименование</th>
+                    <th>Размеры</th>
+                    <th>Кол-во</th>
+                    <th>Площадь</th>
+                    <th>Цвет и покрытие</th>
+                    <th>Услуги</th>
+                    <th>Сумма</th>
+                  </tr>
+                `}
+              </thead>
+              <tbody>
+                ${tableRows}
+              </tbody>
+            </table>
+
+            ${powderSummaryHtml}
+
+            <div style="margin-top: 15px; text-align: right; font-size: 12px;">
+              Общая площадь: <strong>${this.calcSummary.totalM2} м²</strong> &nbsp;|&nbsp; 
+              Общий вес садки: <strong>${this.calcSummary.totalWeight} кг</strong> &nbsp;|&nbsp; 
+              ${isJob ? `Загрузок печи: <strong>${this.calcSummary.bakesNeeded} цикла</strong>` : `ИТОГО К ОПЛАТЕ: <strong style="font-size:14px;">${this.formatSalary(this.calcSummary.totalPrice)} ₽</strong>`}
+            </div>
+
+            <div class="footer">
+              <div>Мастер смены: <span class="sign-line"></span> / <span class="sign-line"></span> /</div>
+              <div>ОТК / Принято: <span class="sign-line"></span></div>
+              <div>Дата: <strong>${orderDate}</strong></div>
+            </div>
+
+            <script>
+              window.onload = function() { window.focus(); window.print(); };
+            <\/script>
+          </body>
+          </html>
+        `);
+        win.document.close();
+      },
+
+      /* ===== ТЕРМОПЕЧАТЬ 40X25 ===== */
       printThermalLabels() {
         const orderNo = this.calcSettings.orderNumber || 'б/н';
         const orderDate = this.calcSettings.orderDate || '—';
